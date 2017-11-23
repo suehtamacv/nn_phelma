@@ -140,7 +140,7 @@ void writePNG(const char* file_name)
 }
 
 
-void flattenPNG(int *I)
+void flattenPNG(uint8 *I)
 {
     for (unsigned int y = 0; y < HEIGHT; ++y)
         {
@@ -154,7 +154,7 @@ void flattenPNG(int *I)
         }
 }
 
-void unflattenPNG(int *I)
+void unflattenPNG(uint8 *I)
 {
     for (unsigned int y = 0; y < HEIGHT; ++y)
         {

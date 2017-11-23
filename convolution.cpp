@@ -13,11 +13,11 @@ Convolution::Convolution(const int *K,
 
 }
 
-int *Convolution::apply(int *I, unsigned int sizeX, unsigned int sizeY)
+uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
 {
     int G[tileSize * tileSize];
     int D[tileSize * tileSize];
-    int* Y = new int[sizeY * sizeX * kernelSizeL]();
+    uint8* Y = new uint8[sizeY * sizeX * kernelSizeL]();
 
     // X coordinate
     for (unsigned int xI = 0; xI < sizeX; xI += overlap)
@@ -102,7 +102,7 @@ void Convolution::calculateG(int *G, const unsigned int offsetG)
 
 }
 
-void Convolution::calculateD(int *I, int*D, const unsigned int xI,
+void Convolution::calculateD(uint8 *I, int *D, const unsigned int xI,
                              const unsigned int yI, const unsigned int cI,
                              const unsigned int sizeX, const unsigned int sizeY,
                              const unsigned int sizeC)

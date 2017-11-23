@@ -10,7 +10,7 @@ public:
                 unsigned int kernelSizeC,
                 unsigned int kernelSizeL);
 
-    int* apply(int *I, unsigned int sizeX, unsigned int sizeY);
+    uint8* apply(uint8 *I, unsigned int sizeX, unsigned int sizeY);
 
 private:
     ///
@@ -22,7 +22,7 @@ private:
     unsigned int kernelSizeC, kernelSizeL;
 
     void calculateG(int *, const unsigned int);
-    void calculateD(int *I, int *D, const unsigned int xI,
+    void calculateD(uint8 *I, int *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI,
                     const unsigned int sizeX, const unsigned int sizeY,
                     const unsigned int sizeC);

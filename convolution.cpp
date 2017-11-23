@@ -48,7 +48,7 @@ int *Convolution::apply(int *I, unsigned int sizeX, unsigned int sizeY)
                 // Transform to image space
                     {
                     int temp[2][4] = {0};
-                    for (unsigned int i = 0; i < 2; ++i)
+                    for (unsigned int i = 0; i < 4; ++i)
                         {
                         temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                         temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
@@ -56,9 +56,9 @@ int *Convolution::apply(int *I, unsigned int sizeX, unsigned int sizeY)
 
                     for (unsigned int j = 0; j < 2; ++j)
                         {
-                        Y[(yI + j) * sizeX * kernelSizeL + xI * kernelSizeL + l] +=
+                        Y[yI * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
                             temp[j][0] + temp[j][1] + temp[j][2];
-                        Y[(yI + j) * sizeX * kernelSizeL + (xI + 1) * kernelSizeL + l] +=
+                        Y[(yI + 1) * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
                             temp[j][1] - temp[j][2] - temp[j][3];
                         }
                     } // End transformation
@@ -108,7 +108,7 @@ void Convolution::calculateD(int *I, int*D, const unsigned int xI,
                              const unsigned int sizeC)
 {
 #define T(a, b) \
-    I[((yI + (a)) * sizeX * sizeC + (xI + (b)) * sizeC + cI) % (sizeY * sizeX * sizeC)]
+    I[((yI + a) * sizeX * sizeC + (xI + b) * sizeC + cI) % (sizeY * sizeX * sizeC)]
 
     D[0] = T(0, 0) - T(0, 2) - T(2, 0) + T(2, 2);
     D[1] = T(0, 1) + T(0, 2) - T(2, 1) - T(2, 2);

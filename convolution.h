@@ -22,7 +22,7 @@ private:
     unsigned int kernelSizeC, kernelSizeL;
 
     void calculateG(int *, const unsigned int);
-    void calculateD(int *, int*D, const unsigned int xI,
+    void calculateD(int *I, int *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI,
                     const unsigned int sizeX, const unsigned int sizeY,
                     const unsigned int sizeC);

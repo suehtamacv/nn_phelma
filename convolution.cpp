@@ -3,7 +3,7 @@
 #define tileSize 4
 #define overlap  2
 
-Convolution::Convolution(const int *K,
+Convolution::Convolution(const k_int *K,
                          unsigned int kernelSizeC,
                          unsigned int kernelSizeL) :
     K(K),
@@ -15,9 +15,13 @@ Convolution::Convolution(const int *K,
 
 uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
 {
-    int G[tileSize * tileSize];
-    int D[tileSize * tileSize];
+    k_int G[tileSize * tileSize];
+    int11 D[tileSize * tileSize];
+    uint12 R[sizeY * sizeX * kernelSizeL];
     uint8* Y = new uint8[sizeY * sizeX * kernelSizeL]();
+
+    // Initialize R
+    std::fill(R, R + sizeY * sizeX * kernelSizeL, 0);
 
     // X coordinate
     for (unsigned int xI = 0; xI < sizeX; xI += overlap)
@@ -30,7 +34,8 @@ uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
             for (unsigned int l = 0; l < kernelSizeL; l++)
                 {
                 // Convolution result in transform space
-                int M[tileSize * tileSize] = {0};
+                int11 M[tileSize * tileSize] = {0};
+                std::fill(M, M + tileSize * tileSize, 0);
 
                 // Input channels
                 for (unsigned int c = 0; c < kernelSizeC; c++)
@@ -38,16 +43,15 @@ uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
                     calculateG(G, (l * kernelSizeC + c) * 9);
                     calculateD(I, D, xI, yI, c, sizeX, sizeY, kernelSizeC);
 
-                    // Accumulate on M
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
-                        M[i] += D[i] * G[i];
+                        M[i] += (D[i] * G[i]).slc<11>(8);
                         }
                     }
 
                 // Transform to image space
                     {
-                    int temp[2][4] = {0};
+                    int12 temp[2][4] = {0};
                     for (unsigned int i = 0; i < 4; ++i)
                         {
                         temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
@@ -56,9 +60,9 @@ uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
 
                     for (unsigned int j = 0; j < 2; ++j)
                         {
-                        Y[yI * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
+                        R[yI * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
                             temp[j][0] + temp[j][1] + temp[j][2];
-                        Y[(yI + 1) * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
+                        R[(yI + 1) * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
                             temp[j][1] - temp[j][2] - temp[j][3];
                         }
                     } // End transformation
@@ -67,10 +71,15 @@ uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
             }
         }
 
+    // Extracting MSBs
+    for (unsigned int i = 0; i < sizeY * sizeX * kernelSizeL; ++i)
+        {
+        Y[i] = R[i] >> 2;
+        }
     return Y;
 }
 
-void Convolution::calculateG(int *G, const unsigned int offsetG)
+void Convolution::calculateG(k_int *G, const unsigned int offsetG)
 {
     G[0] = K[offsetG + 0];
     G[1] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]) >> 1;
@@ -99,36 +108,112 @@ void Convolution::calculateG(int *G, const unsigned int offsetG)
     G[13] = (K[offsetG + 6] + K[offsetG + 7] + K[offsetG + 8]) >> 1;
     G[14] = (K[offsetG + 6] - K[offsetG + 7] + K[offsetG + 8]) >> 1;
     G[15] = K[offsetG + 8];
-
 }
 
-void Convolution::calculateD(uint8 *I, int *D, const unsigned int xI,
+void Convolution::calculateD(uint8 *I, int11 *D, const unsigned int xI,
                              const unsigned int yI, const unsigned int cI,
                              const unsigned int sizeX, const unsigned int sizeY,
                              const unsigned int sizeC)
 {
-#define T(a, b) \
-    I[((yI + a) * sizeX * sizeC + (xI + b) * sizeC + cI) % (sizeY * sizeX * sizeC)]
+#define T(y, x) \
+    I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]
 
-    D[0] = T(0, 0) - T(0, 2) - T(2, 0) + T(2, 2);
-    D[1] = T(0, 1) + T(0, 2) - T(2, 1) - T(2, 2);
-    D[2] = -T(0, 1) + T(0, 2) + T(2, 1) - T(2, 2);
-    D[3] = T(0, 1) - T(0, 3) - T(2, 1) + T(2, 3);
+    bool xNotBorder = xI < sizeX - overlap;
+    bool yNotBorder = yI < sizeY - overlap;
 
-    D[4] = T(1, 0) - T(1, 2) + T(2, 0) - T(2, 2);
-    D[5] = T(1, 1) + T(1, 2) + T(2, 1) + T(2, 2);
-    D[6] = -T(1, 1) + T(1, 2) - T(2, 1) + T(2, 2);
-    D[7] = T(1, 1) - T(1, 3) + T(2, 1) - T(2, 3);
+    if (xNotBorder && yNotBorder)
+        {
+        D[0] = T(0, 0) - T(0, 2) - T(2, 0) + T(2, 2);
+        D[1] = T(0, 1) + T(0, 2) - T(2, 1) - T(2, 2);
+        D[2] = -T(0, 1) + T(0, 2) + T(2, 1) - T(2, 2);
+        D[3] = T(0, 1) - T(0, 3) - T(2, 1) + T(2, 3);
 
-    D[8] = -T(1, 0) + T(1, 2) + T(2, 0) - T(2, 2);
-    D[9] = -T(1, 1) - T(1, 2) + T(2, 1) + T(2, 2);
-    D[10] = T(1, 1) - T(1, 2) - T(2, 1) + T(2, 2);
-    D[11] = -T(1, 1) + T(1, 3) + T(2, 1) - T(2, 3);
+        D[4] = T(1, 0) - T(1, 2) + T(2, 0) - T(2, 2);
+        D[5] = T(1, 1) + T(1, 2) + T(2, 1) + T(2, 2);
+        D[6] = -T(1, 1) + T(1, 2) - T(2, 1) + T(2, 2);
+        D[7] = T(1, 1) - T(1, 3) + T(2, 1) - T(2, 3);
 
-    D[12] = T(1, 0) - T(1, 2) - T(3, 0) + T(3, 2);
-    D[13] = T(1, 1) + T(1, 2) - T(3, 1) - T(3, 2);
-    D[14] = -T(1, 1) + T(1, 2) + T(3, 1) - T(3, 2);
-    D[15] = T(1, 1) - T(1, 3) - T(3, 1) + T(3, 3);
+        D[8] = -T(1, 0) + T(1, 2) + T(2, 0) - T(2, 2);
+        D[9] = -T(1, 1) - T(1, 2) + T(2, 1) + T(2, 2);
+        D[10] = T(1, 1) - T(1, 2) - T(2, 1) + T(2, 2);
+        D[11] = -T(1, 1) + T(1, 3) + T(2, 1) - T(2, 3);
+
+        D[12] = T(1, 0) - T(1, 2) - T(3, 0) + T(3, 2);
+        D[13] = T(1, 1) + T(1, 2) - T(3, 1) - T(3, 2);
+        D[14] = -T(1, 1) + T(1, 2) + T(3, 1) - T(3, 2);
+        D[15] = T(1, 1) - T(1, 3) - T(3, 1) + T(3, 3);
+        }
+    else
+        {
+        std::fill(D, D + 16, 0);
+        }
+    /*
+    else if (xNotBorder && ! yNotBorder)
+        {
+        D[0] = T(0, 0) - T(0, 2);
+        D[1] = T(0, 1) + T(0, 2);
+        D[2] = -T(0, 1) + T(0, 2);
+        D[3] = T(0, 1) - T(0, 3);
+
+        D[4] = T(1, 0) - T(1, 2);
+        D[5] = T(1, 1) + T(1, 2);
+        D[6] = -T(1, 1) + T(1, 2);
+        D[7] = T(1, 1) - T(1, 3);
+
+        D[8] = -T(1, 0) + T(1, 2);
+        D[9] = -T(1, 1) - T(1, 2);
+        D[10] = T(1, 1) - T(1, 2);
+        D[11] = -T(1, 1) + T(1, 3);
+
+        D[12] = T(1, 0) - T(1, 2);
+        D[13] = T(1, 1) + T(1, 2);
+        D[14] = -T(1, 1) + T(1, 2);
+        D[15] = T(1, 1) - T(1, 3);
+        }
+    else if (!xNotBorder && yNotBorder)
+        {
+        D[0] = T(0, 0) - T(2, 0);
+        D[1] = T(0, 1) - T(2, 1);
+        D[2] = -T(0, 1) + T(2, 1);
+        D[3] = T(0, 1) - T(2, 1);
+
+        D[4] = T(1, 0) + T(2, 0);
+        D[5] = T(1, 1) + T(2, 1);
+        D[6] = -T(1, 1) - T(2, 1);
+        D[7] = T(1, 1) + T(2, 1);
+
+        D[8] = -T(1, 0) + T(2, 0);
+        D[9] = -T(1, 1) + T(2, 1);
+        D[10] = T(1, 1) - T(2, 1);
+        D[11] = -T(1, 1) + T(2, 1);
+
+        D[12] = T(1, 0) - T(3, 0);
+        D[13] = T(1, 1) - T(3, 1);
+        D[14] = -T(1, 1) + T(3, 1);
+        D[15] = T(1, 1) - T(3, 1);
+        }
+    else
+        {
+        D[0] = T(0, 0);
+        D[1] = T(0, 1);
+        D[2] = -T(0, 1);
+        D[3] = T(0, 1);
+
+        D[4] = T(1, 0);
+        D[5] = T(1, 1);
+        D[6] = -T(1, 1);
+        D[7] = T(1, 1);
+
+        D[8] = -T(1, 0);
+        D[9] = -T(1, 1);
+        D[10] = T(1, 1);
+        D[11] = -T(1, 1);
+
+        D[12] = T(1, 0);
+        D[13] = T(1, 1);
+        D[14] = -T(1, 1);
+        D[15] = T(1, 1);
+        }*/
 
 #undef T
 }

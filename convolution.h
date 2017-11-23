@@ -3,14 +3,16 @@
 
 #include <ac_fixed.h>
 
+typedef ac_fixed<12, 2, true> k_int;
+
 class Convolution
 {
 public:
-    Convolution(const int *K,
+    Convolution(const k_int *K,
                 unsigned int kernelSizeC,
                 unsigned int kernelSizeL);
 
-    uint8* apply(uint8 *I, unsigned int sizeX, unsigned int sizeY);
+    uint8 *apply(uint8 *I, unsigned int sizeX, unsigned int sizeY);
 
 private:
     ///
@@ -18,11 +20,11 @@ private:
     ///
     /// It has size kernelSizeC x kernelSizeL x 3 x 3.
     ///
-    const int *K;
+    const k_int *K;
     unsigned int kernelSizeC, kernelSizeL;
 
-    void calculateG(int *, const unsigned int);
-    void calculateD(uint8 *I, int *D, const unsigned int xI,
+    void calculateG(k_int *, const unsigned int);
+    void calculateD(uint8 *I, int11 *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI,
                     const unsigned int sizeX, const unsigned int sizeY,
                     const unsigned int sizeC);

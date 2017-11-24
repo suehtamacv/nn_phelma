@@ -3,29 +3,30 @@
 
 #include <fixedpointvariables.h>
 
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 class Convolution
 {
 public:
-    Convolution(const kernel_t *K,
-                unsigned int kernelSizeC,
-                unsigned int kernelSizeL);
+    Convolution(const kernel_t K[sizeC * sizeL * 3 * 3]);
 
-    layerOut_t *apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY);
+    void apply(layerOut_t *I);
+
+    ///
+    /// \brief Y is the output matrix.
+    ///
+    layerOut_t Y[sizeY * sizeX * sizeL];
 
 private:
     ///
     /// \brief K is the convolution kernel.
     ///
-    /// It has size kernelSizeC x kernelSizeL x 3 x 3.
-    ///
-    const kernel_t *K;
-    unsigned int kernelSizeC, kernelSizeL;
+    kernel_t K[sizeC * sizeL * 3 * 3];
 
     void calculateG(kernel_t *, const unsigned int);
     void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
-                    const unsigned int yI, const unsigned int cI,
-                    const unsigned int sizeX, const unsigned int sizeY,
-                    const unsigned int sizeC);
+                    const unsigned int yI, const unsigned int cI);
 };
+
+#include "convolution.tpp"
 
 #endif // CONVOLUTION_H

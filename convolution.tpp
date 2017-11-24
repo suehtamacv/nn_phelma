@@ -1,26 +1,25 @@
-#include "convolution.h"
-
 #define tileSize 4
 #define overlap  2
 
-Convolution::Convolution(const kernel_t *K,
-                         unsigned int kernelSizeC,
-                         unsigned int kernelSizeL) :
-    K(K),
-    kernelSizeC(kernelSizeC),
-    kernelSizeL(kernelSizeL)
-{
+#include <algorithm>
 
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
+Convolution<sizeX, sizeY, sizeC, sizeL>::
+Convolution(const kernel_t K[sizeC * sizeL * 3 * 3])
+{
+    std::fill(Y, Y + sizeY * sizeX * sizeL, 0);
+    for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
+        {
+        (this->K)[i] = K[i];
+        }
 }
 
-layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY)
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
+void Convolution<sizeX, sizeY, sizeC, sizeL>::
+apply(layerOut_t *I)
 {
     kernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
-    layerOut_t* Y = new layerOut_t[sizeY * sizeX * kernelSizeL];
-
-    // Initialize R
-    std::fill(Y, Y + sizeY * sizeX * kernelSizeL, 0);
 
     // X coordinate
     for (unsigned int xI = 0; xI < sizeX; xI += overlap)
@@ -30,17 +29,17 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
             {
 
             // Output channels
-            for (unsigned int l = 0; l < kernelSizeL; l++)
+            for (unsigned int l = 0; l < sizeL; l++)
                 {
                 // Convolution result in transform space
                 convM_t M[tileSize * tileSize] = {0};
                 std::fill(M, M + tileSize * tileSize, 0);
 
                 // Input channels
-                for (unsigned int c = 0; c < kernelSizeC; c++)
+                for (unsigned int c = 0; c < sizeC; c++)
                     {
-                    calculateG(G, (l * kernelSizeC + c) * 9);
-                    calculateD(I, D, xI, yI, c, sizeX, sizeY, kernelSizeC);
+                    calculateG(G, (l * sizeC + c) * 9);
+                    calculateD(I, D, xI, yI, c);
 
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
@@ -59,9 +58,9 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
 
                     for (unsigned int j = 0; j < 2; ++j)
                         {
-                        Y[yI * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
+                        Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
                             temp[j][0] + temp[j][1] + temp[j][2];
-                        Y[(yI + 1) * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
+                        Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] +=
                             temp[j][1] - temp[j][2] - temp[j][3];
                         }
                     } // End transformation
@@ -69,11 +68,11 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
                 }
             }
         }
-
-    return Y;
 }
 
-void Convolution::calculateG(kernel_t *G, const unsigned int offsetG)
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
+void Convolution<sizeX, sizeY, sizeC, sizeL>::
+calculateG(kernel_t *G, const unsigned int offsetG)
 {
     G[0] = K[offsetG + 0];
     G[1] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]) >> 1;
@@ -104,10 +103,10 @@ void Convolution::calculateG(kernel_t *G, const unsigned int offsetG)
     G[15] = K[offsetG + 8];
 }
 
-void Convolution::calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
-                             const unsigned int yI, const unsigned int cI,
-                             const unsigned int sizeX, const unsigned int sizeY,
-                             const unsigned int sizeC)
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
+void Convolution<sizeX, sizeY, sizeC, sizeL>::
+calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
+           const unsigned int yI, const unsigned int cI)
 {
 #define T(y, x) \
     I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]

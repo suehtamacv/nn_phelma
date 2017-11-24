@@ -3,6 +3,7 @@
 
 #include <convolution.h>
 #include <maxpooling.h>
+#include <softmax.h>
 #include <png_utils.h>
 
 #define WIDTH 256
@@ -38,13 +39,7 @@ int main()
     readPNG("lena.png");
     flattenPNG(Image);
 
-    Convolution C(KernelImp, 3, 3);
-    uint8* Y = C.apply(Image, WIDTH, HEIGHT);
-
-    MaxPooling M(2);
-    uint8* Z = M.apply(Image, WIDTH, HEIGHT, 3);
-
-    unflattenPNG(Z);
+    unflattenPNG(Image);
     writePNG("lena2.png");
 
     return 0;

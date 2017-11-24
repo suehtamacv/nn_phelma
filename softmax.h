@@ -3,14 +3,20 @@
 
 #include <fixedpointvariables.h>
 
+template<unsigned int size>
 class Softmax
 {
 public:
     Softmax();
-    layerOut_t* apply(layerOut_t *I, const unsigned int sizeX);
+
+    void apply(layerOut_t *I);
+
+    layerOut_t Y[size];
 
 private:
     inline softE_t expFP(const layerOut_t &x) const;
 };
+
+#include "softmax.tpp"
 
 #endif // SOFTMAX_H

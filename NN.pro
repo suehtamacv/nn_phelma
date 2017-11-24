@@ -10,11 +10,11 @@ INCLUDEPATH += include/
 
 SOURCES += main.cpp \
     png_utils.cpp \
-    softmax.cpp \
     matrixmultiply.cpp \
     convolution.tpp \
     relu.tpp \
-    maxpooling.tpp
+    maxpooling.tpp \
+    softmax.tpp
 
 HEADERS += \
     convolution.h \

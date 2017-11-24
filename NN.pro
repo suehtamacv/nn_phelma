@@ -3,8 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CFLAGS += -Og
-QMAKE_CXXFLAGS += -Og
+QMAKE_CFLAGS += -Og -D__SIMULATION__
+QMAKE_CXXFLAGS += -Og -D__SIMULATION__
 
 INCLUDEPATH += include/
 
@@ -20,6 +20,7 @@ HEADERS += \
     png_utils.h \
     maxpooling.h \
     softmax.h \
-    matrixmultiply.h
+    matrixmultiply.h \
+    fixedpointvariables.h
 
 LIBS += -lpng

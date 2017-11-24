@@ -3,7 +3,7 @@
 #define tileSize 4
 #define overlap  2
 
-Convolution::Convolution(const k_int *K,
+Convolution::Convolution(const kernel_t *K,
                          unsigned int kernelSizeC,
                          unsigned int kernelSizeL) :
     K(K),
@@ -13,12 +13,12 @@ Convolution::Convolution(const k_int *K,
 
 }
 
-uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
+layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY)
 {
-    k_int G[tileSize * tileSize];
-    int11 D[tileSize * tileSize];
+    kernel_t G[tileSize * tileSize];
+    convD_t D[tileSize * tileSize];
     uint12 R[sizeY * sizeX * kernelSizeL];
-    uint8* Y = new uint8[sizeY * sizeX * kernelSizeL]();
+    layerOut_t* Y = new layerOut_t[sizeY * sizeX * kernelSizeL]();
 
     // Initialize R
     std::fill(R, R + sizeY * sizeX * kernelSizeL, 0);
@@ -79,7 +79,7 @@ uint8 *Convolution::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY)
     return Y;
 }
 
-void Convolution::calculateG(k_int *G, const unsigned int offsetG)
+void Convolution::calculateG(kernel_t *G, const unsigned int offsetG)
 {
     G[0] = K[offsetG + 0];
     G[1] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]) >> 1;
@@ -110,7 +110,7 @@ void Convolution::calculateG(k_int *G, const unsigned int offsetG)
     G[15] = K[offsetG + 8];
 }
 
-void Convolution::calculateD(uint8 *I, int11 *D, const unsigned int xI,
+void Convolution::calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
                              const unsigned int yI, const unsigned int cI,
                              const unsigned int sizeX, const unsigned int sizeY,
                              const unsigned int sizeC)

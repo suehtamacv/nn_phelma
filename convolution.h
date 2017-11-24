@@ -1,18 +1,16 @@
 #ifndef CONVOLUTION_H
 #define CONVOLUTION_H
 
-#include <ac_fixed.h>
-
-typedef ac_fixed<12, 2, true> k_int;
+#include <fixedpointvariables.h>
 
 class Convolution
 {
 public:
-    Convolution(const k_int *K,
+    Convolution(const kernel_t *K,
                 unsigned int kernelSizeC,
                 unsigned int kernelSizeL);
 
-    uint8 *apply(uint8 *I, unsigned int sizeX, unsigned int sizeY);
+    layerOut_t *apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY);
 
 private:
     ///
@@ -20,11 +18,11 @@ private:
     ///
     /// It has size kernelSizeC x kernelSizeL x 3 x 3.
     ///
-    const k_int *K;
+    const kernel_t *K;
     unsigned int kernelSizeC, kernelSizeL;
 
-    void calculateG(k_int *, const unsigned int);
-    void calculateD(uint8 *I, int11 *D, const unsigned int xI,
+    void calculateG(kernel_t *, const unsigned int);
+    void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI,
                     const unsigned int sizeX, const unsigned int sizeY,
                     const unsigned int sizeC);

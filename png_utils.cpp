@@ -2,17 +2,6 @@
 #include <stdlib.h>
 #include <iostream>
 
-#define WIDTH 256
-#define HEIGHT 256
-
-png_structp png_ptr;
-png_infop info_ptr;
-int number_of_passes;
-png_bytep *row_pointers;
-
-png_byte color_type;
-png_byte bit_depth;
-
 void readPNG(const char* filename)
 {
     char header[8];
@@ -140,7 +129,7 @@ void writePNG(const char* file_name)
 }
 
 
-void flattenPNG(uint8 *I)
+void flattenPNG(layerOut_t *I)
 {
     for (unsigned int y = 0; y < HEIGHT; ++y)
         {
@@ -154,16 +143,3 @@ void flattenPNG(uint8 *I)
         }
 }
 
-void unflattenPNG(uint8 *I)
-{
-    for (unsigned int y = 0; y < HEIGHT; ++y)
-        {
-        for (unsigned int x = 0; x < WIDTH; ++x)
-            {
-            for (unsigned int c = 0; c < 3; ++c)
-                {
-                row_pointers[y][x * 3 + c] = I[y * WIDTH * 3 + x * 3 + c];
-                }
-            }
-        }
-}

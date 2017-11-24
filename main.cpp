@@ -11,7 +11,7 @@
 #define WIDTH 256
 #define HEIGHT 256
 
-img_t Image[HEIGHT * WIDTH * 3] = {0};
+layerOut_t Image[HEIGHT * WIDTH * 3] = {0};
 const kernel_t KernelImp[3 * 3 * 3 * 3] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
                                            0, 0, 0, 0, 0, 0, 0, 0, 0,
                                            0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -40,6 +40,12 @@ int main()
     // Reads PNG
     readPNG("lena.png");
     flattenPNG(Image);
+
+    Convolution C(KernelImp, 3, 3);
+    layerOut_t* Y = C.apply(Image, HEIGHT, WIDTH);
+    unflattenPNG(Y);
+
+    writePNG("lena2.png");
 
     return 0;
 }

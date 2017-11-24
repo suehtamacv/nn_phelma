@@ -2,6 +2,7 @@
 #include <ac_fixed.h>
 
 #include <convolution.h>
+#include <maxpooling.h>
 #include <png_utils.h>
 
 #define WIDTH 256
@@ -40,7 +41,10 @@ int main()
     Convolution C(KernelImp, 3, 3);
     uint8* Y = C.apply(Image, WIDTH, HEIGHT);
 
-    unflattenPNG(Y);
+    MaxPooling M(2);
+    uint8* Z = M.apply(Image, WIDTH, HEIGHT, 3);
+
+    unflattenPNG(Z);
     writePNG("lena2.png");
 
     return 0;

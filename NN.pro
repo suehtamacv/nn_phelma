@@ -10,10 +10,12 @@ INCLUDEPATH += include/
 
 SOURCES += main.cpp \
     convolution.cpp \
-    png_utils.cpp
+    png_utils.cpp \
+    maxpooling.cpp
 
 HEADERS += \
     convolution.h \
-    png_utils.h
+    png_utils.h \
+    maxpooling.h
 
 LIBS += -lpng

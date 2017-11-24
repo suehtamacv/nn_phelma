@@ -44,7 +44,6 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
 
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
-                        // TODO Determiner ces valeurs
                         M[i] += D[i] * G[i];
                         }
                     }
@@ -142,73 +141,6 @@ void Convolution::calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
         {
         std::fill(D, D + 16, 0);
         }
-    /*
-    else if (xNotBorder && ! yNotBorder)
-        {
-        D[0] = T(0, 0) - T(0, 2);
-        D[1] = T(0, 1) + T(0, 2);
-        D[2] = -T(0, 1) + T(0, 2);
-        D[3] = T(0, 1) - T(0, 3);
-
-        D[4] = T(1, 0) - T(1, 2);
-        D[5] = T(1, 1) + T(1, 2);
-        D[6] = -T(1, 1) + T(1, 2);
-        D[7] = T(1, 1) - T(1, 3);
-
-        D[8] = -T(1, 0) + T(1, 2);
-        D[9] = -T(1, 1) - T(1, 2);
-        D[10] = T(1, 1) - T(1, 2);
-        D[11] = -T(1, 1) + T(1, 3);
-
-        D[12] = T(1, 0) - T(1, 2);
-        D[13] = T(1, 1) + T(1, 2);
-        D[14] = -T(1, 1) + T(1, 2);
-        D[15] = T(1, 1) - T(1, 3);
-        }
-    else if (!xNotBorder && yNotBorder)
-        {
-        D[0] = T(0, 0) - T(2, 0);
-        D[1] = T(0, 1) - T(2, 1);
-        D[2] = -T(0, 1) + T(2, 1);
-        D[3] = T(0, 1) - T(2, 1);
-
-        D[4] = T(1, 0) + T(2, 0);
-        D[5] = T(1, 1) + T(2, 1);
-        D[6] = -T(1, 1) - T(2, 1);
-        D[7] = T(1, 1) + T(2, 1);
-
-        D[8] = -T(1, 0) + T(2, 0);
-        D[9] = -T(1, 1) + T(2, 1);
-        D[10] = T(1, 1) - T(2, 1);
-        D[11] = -T(1, 1) + T(2, 1);
-
-        D[12] = T(1, 0) - T(3, 0);
-        D[13] = T(1, 1) - T(3, 1);
-        D[14] = -T(1, 1) + T(3, 1);
-        D[15] = T(1, 1) - T(3, 1);
-        }
-    else
-        {
-        D[0] = T(0, 0);
-        D[1] = T(0, 1);
-        D[2] = -T(0, 1);
-        D[3] = T(0, 1);
-
-        D[4] = T(1, 0);
-        D[5] = T(1, 1);
-        D[6] = -T(1, 1);
-        D[7] = T(1, 1);
-
-        D[8] = -T(1, 0);
-        D[9] = -T(1, 1);
-        D[10] = T(1, 1);
-        D[11] = -T(1, 1);
-
-        D[12] = T(1, 0);
-        D[13] = T(1, 1);
-        D[14] = -T(1, 1);
-        D[15] = T(1, 1);
-        }*/
 
 #undef T
 }

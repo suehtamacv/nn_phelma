@@ -12,12 +12,14 @@ SOURCES += main.cpp \
     convolution.cpp \
     png_utils.cpp \
     maxpooling.cpp \
-    softmax.cpp
+    softmax.cpp \
+    matrixmultiply.cpp
 
 HEADERS += \
     convolution.h \
     png_utils.h \
     maxpooling.h \
-    softmax.h
+    softmax.h \
+    matrixmultiply.h
 
 LIBS += -lpng

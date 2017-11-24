@@ -15,10 +15,8 @@ class ReLU
 {
 public:
     ReLU();
-    uint8 *apply(int8 *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC);
 
-private:
-    inline uint8 max(int8 x);
+    layerOut_t *apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC);
 };
 
 #endif // RELU_H

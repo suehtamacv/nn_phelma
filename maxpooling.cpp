@@ -5,14 +5,14 @@ MaxPooling::MaxPooling(unsigned int stride) : stride(stride)
 
 }
 
-uint8* MaxPooling::apply(uint8 *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC)
+layerOut_t *MaxPooling::apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC)
 {
     const unsigned int newSizeX = sizeX / stride;
     const unsigned int newSizeY = sizeY / stride;
 
     unsigned int nxI = 0, nyI = 0;
 
-    uint8* Y = new uint8[newSizeY * newSizeX * sizeC];
+    layerOut_t* Y = new layerOut_t[newSizeY * newSizeX * sizeC];
 
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
         {

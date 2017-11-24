@@ -143,3 +143,18 @@ void flattenPNG(layerOut_t *I)
         }
 }
 
+void unflattenPNG(layerOut_t *I)
+{
+    for (unsigned int y = 0; y < HEIGHT; ++y)
+        {
+        for (unsigned int x = 0; x < WIDTH; ++x)
+            {
+            for (unsigned int c = 0; c < 3; ++c)
+                {
+                row_pointers[y][x * 3 + c] = (I[y * WIDTH * 3 + x * 3 + c]).slc<INPUT_BITS_PER_PIXEL>
+                                             (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL);
+                }
+            }
+        }
+
+}

@@ -8,7 +8,7 @@
 #define INPUT_BITS_PER_PIXEL 8
 
 #define LAYER_OUTPUT_DYN   9 // -255 to 255
-#define LAYER_OUTPUT_PREC  3
+#define LAYER_OUTPUT_PREC  7
 
 #define KERNEL_DYN   8 // -127 to 127
 #define KERNEL_PREC  4

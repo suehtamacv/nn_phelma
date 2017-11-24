@@ -44,6 +44,8 @@ int main()
     Convolution C(KernelImp, 3, 3);
     layerOut_t* Y = C.apply(Image, HEIGHT, WIDTH);
 
+    Softmax S;
+
     unflattenPNG(Y);
     writePNG("lena2.png");
 

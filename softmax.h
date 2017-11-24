@@ -10,7 +10,7 @@ public:
     layerOut_t* apply(layerOut_t *I, const unsigned int sizeX);
 
 private:
-    softE_t expFP(const layerOut_t &x);
+    inline softE_t expFP(const layerOut_t &x) const;
 };
 
 #endif // SOFTMAX_H

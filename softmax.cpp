@@ -1,5 +1,7 @@
 #include "softmax.h"
 
+static const softE_t log_2 = 0.6931471805599453;
+
 Softmax::Softmax()
 {
 
@@ -35,9 +37,8 @@ layerOut_t *Softmax::apply(layerOut_t *I, const unsigned int sizeX)
     return Y;
 }
 
-softE_t Softmax::expFP(const layerOut_t &x)
+softE_t Softmax::expFP(const layerOut_t &x) const
 {
-
-    //TODO Write exponential
-
+    //TODO Write exponential in fixed point
+    return exp(x.to_double());
 }

@@ -1,15 +1,7 @@
-//
-//  relu.h
-//
-//
-//  Created by BOUTOUR Azza on 24/11/2017.
-//
-//
-
 #ifndef RELU_H
 #define RELU_H
 
-#include "fixedpointvariables.h"
+#include <fixedpointvariables.h>
 
 class ReLU
 {

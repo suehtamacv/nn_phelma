@@ -1,16 +1,16 @@
 #ifndef SOFTMAX_H
 #define SOFTMAX_H
 
-#include <ac_fixed.h>
+#include <fixedpointvariables.h>
 
 class Softmax
 {
 public:
     Softmax();
-    uint8* apply(int8 *I, const unsigned int sizeX);
+    layerOut_t* apply(layerOut_t *I, const unsigned int sizeX);
 
 private:
-    int8 expFP(const int8 &x);
+    softE_t expFP(const layerOut_t &x);
 };
 
 #endif // SOFTMAX_H

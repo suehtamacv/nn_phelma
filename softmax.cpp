@@ -5,12 +5,12 @@ Softmax::Softmax()
 
 }
 
-uint8* Softmax::apply(int8 *I, const unsigned int sizeX)
+layerOut_t *Softmax::apply(layerOut_t *I, const unsigned int sizeX)
 {
-    uint8* Y = new uint8[sizeX];
+    layerOut_t* Y = new layerOut_t[sizeX];
 
     // Finds max element
-    int8 maxElement = I[0];
+    layerOut_t maxElement = I[0];
     for (unsigned int i = 1; i < sizeX; ++i)
         {
         if (maxElement < I[i])
@@ -20,7 +20,7 @@ uint8* Softmax::apply(int8 *I, const unsigned int sizeX)
         }
 
     // Exponential
-    uint16 sumExp = 0;
+    softSE_t sumExp = 0;
     for (unsigned int i = 0; i < sizeX; ++i)
         {
         Y[i] = expFP(I[i] - maxElement);
@@ -35,8 +35,9 @@ uint8* Softmax::apply(int8 *I, const unsigned int sizeX)
     return Y;
 }
 
-int8 Softmax::expFP(const int8 &x)
+softE_t Softmax::expFP(const layerOut_t &x)
 {
-    std::cout << "EXP " << x.to_int() << " = " << exp(x.to_int()) << std::endl;
-    return (int8) exp(x.to_int());
+
+    //TODO Write exponential
+
 }

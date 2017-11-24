@@ -6,6 +6,7 @@
 #include <maxpooling.h>
 #include <softmax.h>
 #include <png_utils.h>
+#include <relu.h>
 
 #define WIDTH 256
 #define HEIGHT 256
@@ -39,9 +40,6 @@ int main()
     // Reads PNG
     readPNG("lena.png");
     flattenPNG(Image);
-
-    unflattenPNG(Image);
-    writePNG("lena2.png");
 
     return 0;
 }

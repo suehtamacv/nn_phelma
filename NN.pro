@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     png_utils.cpp \
     maxpooling.cpp \
     softmax.cpp \
-    matrixmultiply.cpp
+    matrixmultiply.cpp \
+    relu.cpp
 
 HEADERS += \
     convolution.h \
@@ -21,6 +22,7 @@ HEADERS += \
     maxpooling.h \
     softmax.h \
     matrixmultiply.h \
-    fixedpointvariables.h
+    fixedpointvariables.h \
+    relu.h
 
 LIBS += -lpng

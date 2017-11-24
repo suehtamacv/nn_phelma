@@ -1,36 +1,24 @@
-#include "relu.h"
-#include<iostream>
-#include<fstream>
-
-
-
 //
 //  relu.h
-//  
+//
 //
 //  Created by BOUTOUR Azza on 24/11/2017.
 //
 //
 
-#ifndef relu_h
-#define relu_h
-
-// Include any system framework and library headers here that should be included in all compilation units.
-// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
-
-#endif /* relu_h */
-
 #ifndef RELU_H
 #define RELU_H
 
+#include "fixedpointvariables.h"
 
-typedef ac_fixed<12, 2, true>;
-uint8 *max(unsigned int *x);
-class relu
+class ReLU
 {
- public:
-  uint8 *relu(uint8 *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC)
-    
+public:
+    ReLU();
+    uint8 *apply(int8 *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC);
+
+private:
+    inline uint8 max(int8 x);
 };
 
 #endif // RELU_H

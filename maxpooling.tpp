@@ -1,18 +1,17 @@
-#include "maxpooling.h"
-
-MaxPooling::MaxPooling(unsigned int stride) : stride(stride)
+template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
+MaxPooling<stride, sizeX, sizeY, sizeC>::
+MaxPooling() :
+    newSizeX(sizeX / stride),
+    newSizeY(sizeY / stride)
 {
 
 }
 
-layerOut_t *MaxPooling::apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC)
+template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
+void MaxPooling<stride, sizeX, sizeY, sizeC>::
+apply(layerOut_t *I)
 {
-    const unsigned int newSizeX = sizeX / stride;
-    const unsigned int newSizeY = sizeY / stride;
-
     unsigned int nxI = 0, nyI = 0;
-
-    layerOut_t* Y = new layerOut_t[newSizeY * newSizeX * sizeC];
 
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
         {
@@ -40,6 +39,4 @@ layerOut_t *MaxPooling::apply(layerOut_t *I, unsigned int sizeX, unsigned int si
 
             }
         }
-
-    return Y;
 }

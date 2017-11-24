@@ -3,13 +3,18 @@
 
 #include <fixedpointvariables.h>
 
+template<unsigned int size>
 class ReLU
 {
 public:
     ReLU();
 
-    layerOut_t *apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC);
+    void apply(layerOut_t *I);
+
+    layerOut_t Y[size];
 };
+
+#include "relu.tpp"
 
 #endif // RELU_H
 

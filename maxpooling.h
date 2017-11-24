@@ -3,15 +3,21 @@
 
 #include <fixedpointvariables.h>
 
+template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 class MaxPooling
 {
 public:
-    MaxPooling(unsigned int);
+    MaxPooling();
 
-    layerOut_t *apply(layerOut_t *I, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC);
+    void apply(layerOut_t *I);
+
+    layerOut_t Y[(sizeX / stride) * (sizeY / stride) * sizeC];
 
 private:
-    const unsigned int stride;
+    const unsigned int newSizeX;
+    const unsigned int newSizeY;
 };
+
+#include "maxpooling.tpp"
 
 #endif // MAXPOOLING_H

@@ -44,6 +44,11 @@ int main()
     Convolution<HEIGHT, WIDTH, 3, 3> C(KernelImp);
     C.apply(Image);
 
+    ReLU<HEIGHT * WIDTH * 3> R;
+    R.apply(C.Y);
+
+    MaxPooling<4, HEIGHT, WIDTH, 3> MP;
+
     unflattenPNG(C.Y);
     writePNG("lena2.png");
 

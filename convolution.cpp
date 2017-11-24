@@ -17,11 +17,10 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
 {
     kernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
-    uint12 R[sizeY * sizeX * kernelSizeL];
-    layerOut_t* Y = new layerOut_t[sizeY * sizeX * kernelSizeL]();
+    layerOut_t* Y = new layerOut_t[sizeY * sizeX * kernelSizeL];
 
     // Initialize R
-    std::fill(R, R + sizeY * sizeX * kernelSizeL, 0);
+    std::fill(Y, Y + sizeY * sizeX * kernelSizeL, 0);
 
     // X coordinate
     for (unsigned int xI = 0; xI < sizeX; xI += overlap)
@@ -34,7 +33,7 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
             for (unsigned int l = 0; l < kernelSizeL; l++)
                 {
                 // Convolution result in transform space
-                int11 M[tileSize * tileSize] = {0};
+                convM_t M[tileSize * tileSize] = {0};
                 std::fill(M, M + tileSize * tileSize, 0);
 
                 // Input channels
@@ -45,13 +44,14 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
 
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
-                        M[i] += (D[i] * G[i]).slc<11>(8);
+                        // TODO Determiner ces valeurs
+                        M[i] += D[i] * G[i];
                         }
                     }
 
                 // Transform to image space
                     {
-                    int12 temp[2][4] = {0};
+                    convTemp_t temp[2][4] = {0};
                     for (unsigned int i = 0; i < 4; ++i)
                         {
                         temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
@@ -60,9 +60,9 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
 
                     for (unsigned int j = 0; j < 2; ++j)
                         {
-                        R[yI * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
+                        Y[yI * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
                             temp[j][0] + temp[j][1] + temp[j][2];
-                        R[(yI + 1) * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
+                        Y[(yI + 1) * sizeX * kernelSizeL + (xI + j) * kernelSizeL + l] +=
                             temp[j][1] - temp[j][2] - temp[j][3];
                         }
                     } // End transformation
@@ -71,11 +71,6 @@ layerOut_t *Convolution::apply(layerOut_t *I, unsigned int sizeX, unsigned int s
             }
         }
 
-    // Extracting MSBs
-    for (unsigned int i = 0; i < sizeY * sizeX * kernelSizeL; ++i)
-        {
-        Y[i] = R[i] >> 2;
-        }
     return Y;
 }
 

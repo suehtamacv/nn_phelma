@@ -9,12 +9,7 @@ QMAKE_CXXFLAGS += -O3 -D__SIMULATION__
 INCLUDEPATH += include/
 
 SOURCES += main.cpp \
-    png_utils.cpp \
-    relu.tpp \
-    maxpooling.tpp \
-    softmax.tpp \
-    convolution.tpp \
-    matrixmultiply.tpp
+    png_utils.cpp
 
 HEADERS += \
     convolution.h \

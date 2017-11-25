@@ -7,7 +7,7 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 class Convolution
 {
 public:
-    Convolution(const kernel_t K[sizeC * sizeL * 3 * 3]);
+    Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3]);
 
     void apply(layerOut_t *I);
 
@@ -20,9 +20,9 @@ private:
     ///
     /// \brief K is the convolution kernel.
     ///
-    kernel_t K[sizeC * sizeL * 3 * 3];
+    convKernel_t K[sizeC * sizeL * 3 * 3];
 
-    void calculateG(kernel_t *, const unsigned int);
+    void calculateG(convKernel_t *, const unsigned int);
     void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI);
 };

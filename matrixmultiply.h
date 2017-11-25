@@ -1,22 +1,22 @@
 #ifndef MATRIXMULTIPLY_H
 #define MATRIXMULTIPLY_H
 
-#include <ac_fixed.h>
+#include <fixedpointvariables.h>
 
+template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
 class MatrixMultiply
 {
 public:
-    MatrixMultiply(const uint8 *K,
-                   const unsigned int sizeKx,
-                   const unsigned int sizeKy);
+    MatrixMultiply(const matrixProdKernel_t K[sizeKx * sizeKy]);
 
-    uint8* apply(uint8*, const unsigned int sizeY);
+    void apply(layerOut_t*);
+
+    layerOut_t Y[sizeKx * sizeY];
 
 private:
-    const uint8 *K;
-    const unsigned int sizeKx;
-    const unsigned int sizeKy;
-
+    const matrixProdKernel_t K[sizeKx * sizeKy];
 };
+
+#include "matrixmultiply.tpp"
 
 #endif // MATRIXMULTIPLY_H

@@ -5,7 +5,7 @@
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 Convolution<sizeX, sizeY, sizeC, sizeL>::
-Convolution(const kernel_t K[sizeC * sizeL * 3 * 3])
+Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3])
 {
     std::fill(Y, Y + sizeY * sizeX * sizeL, 0);
     for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
@@ -18,7 +18,7 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 void Convolution<sizeX, sizeY, sizeC, sizeL>::
 apply(layerOut_t *I)
 {
-    kernel_t G[tileSize * tileSize];
+    convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
 
     // X coordinate
@@ -72,7 +72,7 @@ apply(layerOut_t *I)
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void Convolution<sizeX, sizeY, sizeC, sizeL>::
-calculateG(kernel_t *G, const unsigned int offsetG)
+calculateG(convKernel_t *G, const unsigned int offsetG)
 {
     G[0] = K[offsetG + 0];
     G[1] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]) >> 1;
@@ -111,8 +111,8 @@ calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
 #define T(y, x) \
     I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]
 
-    bool xNotBorder = xI < sizeX - overlap;
-    bool yNotBorder = yI < sizeY - overlap;
+    const bool xNotBorder = xI < sizeX - overlap;
+    const bool yNotBorder = yI < sizeY - overlap;
 
     if (xNotBorder && yNotBorder)
         {

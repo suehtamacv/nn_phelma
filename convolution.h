@@ -10,14 +10,15 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 class Convolution
 {
 public:
-    Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3]);
+    Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], layerOut_t* pY);
 
     layerOut_t* apply(layerOut_t *I);
 
     ///
     /// \brief Y is the output matrix.
+    /// Size : sizeY * sizeX * sizeL
     ///
-    layerOut_t Y[sizeY * sizeX * sizeL];
+    layerOut_t* Y;
 
 private:
     ///
@@ -36,14 +37,8 @@ private:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 Convolution<sizeX, sizeY, sizeC, sizeL>::
-Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3])
+Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], layerOut_t *pY) : Y(pY)
 {
-loopInitializationY:
-    for (unsigned int i = 0; i < sizeY * sizeX * sizeC; ++i)
-        {
-        Y[i] = 0;
-        }
-
 loopInitializationK:
     for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
         {
@@ -72,7 +67,6 @@ loopConvOutChannel:
                 {
                 // Convolution result in transform space
                 convM_t M[tileSize * tileSize] = {0};
-                std::fill(M, M + tileSize * tileSize, 0);
 
                 // Input channels
 loopConvInChannel:
@@ -84,7 +78,15 @@ loopConvInChannel:
 loopTile:
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
-                        M[i] += D[i] * G[i];
+                        // If it is the first iteration, initialization of M
+                        if (c == 0)
+                            {
+                            M[i] = D[i] * G[i];
+                            }
+                        else
+                            {
+                            M[i] += D[i] * G[i];
+                            }
                         }
                     }
 
@@ -102,10 +104,21 @@ loopInverseTransform:
 loopInverseTransform2:
                     for (unsigned int j = 0; j < 2; ++j)
                         {
-                        Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
-                            temp[j][0] + temp[j][1] + temp[j][2];
-                        Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] +=
-                            temp[j][1] - temp[j][2] - temp[j][3];
+                        // If is the first iteration, initialization of Y
+                        if (l == 0)
+                            {
+                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] =
+                                temp[j][0] + temp[j][1] + temp[j][2];
+                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] =
+                                temp[j][1] - temp[j][2] - temp[j][3];
+                            }
+                        else
+                            {
+                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
+                                temp[j][0] + temp[j][1] + temp[j][2];
+                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] +=
+                                temp[j][1] - temp[j][2] - temp[j][3];
+                            }
                         }
                     } // End transformation
 

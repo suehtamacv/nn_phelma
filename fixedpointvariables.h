@@ -19,6 +19,22 @@
 #define MATRIX_PROD_DYN  KERNEL_DYN
 #define MATRIX_PROD_PREC KERNEL_PREC
 
+#else
+
+#define INPUT_BITS_PER_PIXEL 8
+
+#define LAYER_OUTPUT_DYN   9 // -255 to 255
+#define LAYER_OUTPUT_PREC  7
+
+#define KERNEL_DYN   8 // -127 to 127
+#define KERNEL_PREC  4
+
+#define SOFTMAX_DYN  8  // 0 to 255
+#define SOFTMAX_PREC 8
+
+#define MATRIX_PROD_DYN  KERNEL_DYN
+#define MATRIX_PROD_PREC KERNEL_PREC
+
 #endif
 
 // Layer output

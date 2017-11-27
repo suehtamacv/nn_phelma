@@ -1,7 +1,10 @@
 #ifndef CONVOLUTION_H
 #define CONVOLUTION_H
 
-#include <fixedpointvariables.h>
+#include "fixedpointvariables.h"
+
+#define overlap  2
+#define tileSize 4
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 class Convolution
@@ -9,7 +12,7 @@ class Convolution
 public:
     Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3]);
 
-    void apply(layerOut_t *I);
+    layerOut_t* apply(layerOut_t *I);
 
     ///
     /// \brief Y is the output matrix.
@@ -25,9 +28,6 @@ private:
     void calculateG(convKernel_t *, const unsigned int);
     void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI);
-
-    static constexpr unsigned int overlap = 2;
-    static constexpr unsigned int tileSize = 4;
 };
 
 ///
@@ -46,8 +46,7 @@ Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3])
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void Convolution<sizeX, sizeY, sizeC, sizeL>::
-apply(layerOut_t *I)
+layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
 {
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -99,6 +98,8 @@ apply(layerOut_t *I)
                 }
             }
         }
+
+    return Y;
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>

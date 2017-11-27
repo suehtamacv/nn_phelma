@@ -16,8 +16,11 @@
 #define WIDTH 256
 #define HEIGHT 256
 
-static layerOut_t ImageIn[HEIGHT * WIDTH * 3] = {0};
-static layerOut_t ImageOut[HEIGHT * WIDTH * 3] = {0};
+#define INPUT_SIZE    HEIGHT * WIDTH * 3
+#define OUTPUT_SIZE   HEIGHT * WIDTH * 3
+
+static layerOut_t ImageIn[INPUT_SIZE] = {0};
+static layerOut_t ImageOut[OUTPUT_SIZE] = {0};
 
 static const convKernel_t KernelImp[3 * 3 * 3 * 3] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
                                                       0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -42,9 +45,15 @@ static const convKernel_t Gaussian[3 * 3 * 3 * 3] = {1.0 / 16, 2.0 / 16, 1.0 / 1
 static Convolution<HEIGHT, WIDTH, 3, 3> C(KernelImp);
 
 #pragma design top
-void apply(layerOut_t* In, layerOut_t* Out)
+void apply(layerOut_t In[INPUT_SIZE], layerOut_t Out[OUTPUT_SIZE])
 {
-    Out = C.apply(In);
+    C.apply(In);
+
+topOutputLoop:
+    for (unsigned i = 0; i < OUTPUT_SIZE; ++i)
+        {
+        Out[i] = (C.Y)[i];
+        }
 }
 
 #ifdef __SIMULATION__

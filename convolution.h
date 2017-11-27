@@ -38,7 +38,13 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 Convolution<sizeX, sizeY, sizeC, sizeL>::
 Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3])
 {
-    std::fill(Y, Y + sizeY * sizeX * sizeL, 0);
+loopInitializationY:
+    for (unsigned int i = 0; i < sizeY * sizeX * sizeC; ++i)
+        {
+        Y[i] = 0;
+        }
+
+loopInitializationK:
     for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
         {
         (this->K)[i] = K[i];
@@ -52,13 +58,16 @@ layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
     convD_t D[tileSize * tileSize];
 
     // X coordinate
+loopConvXi:
     for (unsigned int xI = 0; xI < sizeX; xI += overlap)
         {
         // Y coordinate
+loopConvYi:
         for (unsigned int yI = 0; yI < sizeY; yI += overlap)
             {
 
             // Output channels
+loopConvOutChannel:
             for (unsigned int l = 0; l < sizeL; l++)
                 {
                 // Convolution result in transform space
@@ -66,11 +75,13 @@ layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
                 std::fill(M, M + tileSize * tileSize, 0);
 
                 // Input channels
+loopConvInChannel:
                 for (unsigned int c = 0; c < sizeC; c++)
                     {
                     calculateG(G, (l * sizeC + c) * 9);
                     calculateD(I, D, xI, yI, c);
 
+loopTile:
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
                         M[i] += D[i] * G[i];
@@ -80,12 +91,15 @@ layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
                 // Transform to image space
                     {
                     convTemp_t temp[2][4] = {0};
+
+loopInverseTransform:
                     for (unsigned int i = 0; i < 4; ++i)
                         {
                         temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                         temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                         }
 
+loopInverseTransform2:
                     for (unsigned int j = 0; j < 2; ++j)
                         {
                         Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
@@ -170,7 +184,10 @@ calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
         }
     else
         {
-        std::fill(D, D + 16, 0);
+        for (unsigned int i = 0; i < 16; ++i)
+            {
+            D[i] = 0;
+            }
         }
 
 #undef T

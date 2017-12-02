@@ -10,7 +10,7 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 class Convolution
 {
 public:
-    Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], layerOut_t* pY);
+    Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t* pY);
 
     layerOut_t* apply(layerOut_t *I);
 
@@ -27,7 +27,13 @@ private:
     ///
     const convKernel_t *K;
 
-    void calculateG(convKernel_t *, const unsigned int);
+    ///
+    /// \brief B are the biases.
+    /// Size : sizeL
+    ///
+    const convBias_t *B;
+
+    void calculateG(convKernel_t *, const convKernel_t *);
     void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
                     const unsigned int yI, const unsigned int cI);
 };
@@ -38,7 +44,8 @@ private:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 Convolution<sizeX, sizeY, sizeC, sizeL>::
-Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], layerOut_t *pY) : Y(pY), K(K)
+Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t *pY) :
+    Y(pY), B(B), K(K)
 {
 
 }
@@ -48,6 +55,8 @@ layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
 {
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
+    convM_t M[tileSize * tileSize];
+    convTemp_t temp[2][4];
 
     // X coordinate
 loopConvXi:
@@ -63,13 +72,13 @@ loopConvOutChannel:
             for (unsigned int l = 0; l < sizeL; l++)
                 {
                 // Convolution result in transform space
-                convM_t M[tileSize * tileSize] = {0};
 
                 // Input channels
 loopConvInChannel:
                 for (unsigned int c = 0; c < sizeC; c++)
                     {
-                    calculateG(G, (l * sizeC + c) * 9);
+                    // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
+                    calculateG(G, K + ((l * sizeC + c) * 9));
                     calculateD(I, D, xI, yI, c);
 
 loopTile:
@@ -89,8 +98,6 @@ loopTile:
 
                 // Transform to image space
                     {
-                    convTemp_t temp[2][4] = {0};
-
 loopInverseTransform:
                     for (unsigned int i = 0; i < 4; ++i)
                         {
@@ -102,12 +109,13 @@ loopInverseTransform2:
                     for (unsigned int j = 0; j < 2; ++j)
                         {
                         // If is the first iteration, initialization of Y
+                        //
                         if (l == 0)
                             {
                             Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] =
-                                temp[j][0] + temp[j][1] + temp[j][2];
+                                temp[j][0] + temp[j][1] + temp[j][2] + B[l];
                             Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] =
-                                temp[j][1] - temp[j][2] - temp[j][3];
+                                temp[j][1] - temp[j][2] - temp[j][3] + B[l];
                             }
                         else
                             {
@@ -128,35 +136,27 @@ loopInverseTransform2:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void Convolution<sizeX, sizeY, sizeC, sizeL>::
-calculateG(convKernel_t *G, const unsigned int offsetG)
+calculateG(convKernel_t *G, const convKernel_t *K)
 {
-    G[0] = K[offsetG + 0];
-    G[1] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]) >> 1;
-    G[2] = (K[offsetG + 0] - K[offsetG + 1] + K[offsetG + 2]) >> 1;
-    G[3] = K[offsetG + 2];
+    G[0]  = K[0];
+    G[1]  = (K[0] + K[1] + K[2]) >> 1;
+    G[2]  = (K[0] - K[1] + K[2]) >> 1;
+    G[3]  = K[2];
 
-    G[4] = (K[offsetG + 0] + K[offsetG + 3] + K[offsetG + 6]) >> 1;
-    G[5] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]
-            + K[offsetG + 3] + K[offsetG + 4] + K[offsetG + 5]
-            + K[offsetG + 6] + K[offsetG + 7] + K[offsetG + 8]) >> 2;
-    G[6] = (K[offsetG + 0] - K[offsetG + 1] + K[offsetG + 2]
-            + K[offsetG + 3] - K[offsetG + 4] + K[offsetG + 5]
-            + K[offsetG + 6] - K[offsetG + 7] + K[offsetG + 8]) >> 2;
-    G[7] = (K[offsetG + 2] + K[offsetG + 5] + K[offsetG + 8]) >> 1;
+    G[4]  = (K[0] + K[3] + K[6]) >> 1;
+    G[5]  = (K[0] + K[1] + K[2] + K[3] + K[4] + K[5] + K[6] + K[7] + K[8]) >> 2;
+    G[6]  = (K[0] - K[1] + K[2] + K[3] - K[4] + K[5] + K[6] - K[7] + K[8]) >> 2;
+    G[7]  = (K[2] + K[5] + K[8]) >> 1;
 
-    G[8] = (K[offsetG + 0] - K[offsetG + 3] + K[offsetG + 6]) >> 1;
-    G[9] = (K[offsetG + 0] + K[offsetG + 1] + K[offsetG + 2]
-            - K[offsetG + 3] - K[offsetG + 4] - K[offsetG + 5]
-            + K[offsetG + 6] + K[offsetG + 7] + K[offsetG + 8]) >> 2;
-    G[10] = (K[offsetG + 0] - K[offsetG + 1] + K[offsetG + 2]
-             - K[offsetG + 3] + K[offsetG + 4] - K[offsetG + 5]
-             + K[offsetG + 6] - K[offsetG + 7] + K[offsetG + 8]) >> 2;
-    G[11] = (K[offsetG + 2] - K[offsetG + 5] + K[offsetG + 8]) >> 1;
+    G[8]  = (K[0] - K[3] + K[6]) >> 1;
+    G[9]  = (K[0] + K[1] + K[2] - K[3] - K[4] - K[5] + K[6] + K[7] + K[8]) >> 2;
+    G[10] = (K[0] - K[1] + K[2] - K[3] + K[4] - K[5] + K[6] - K[7] + K[8]) >> 2;
+    G[11] = (K[2] - K[5] + K[8]) >> 1;
 
-    G[12] = K[offsetG + 6];
-    G[13] = (K[offsetG + 6] + K[offsetG + 7] + K[offsetG + 8]) >> 1;
-    G[14] = (K[offsetG + 6] - K[offsetG + 7] + K[offsetG + 8]) >> 1;
-    G[15] = K[offsetG + 8];
+    G[12] = K[6];
+    G[13] = (K[6] + K[7] + K[8]) >> 1;
+    G[14] = (K[6] - K[7] + K[8]) >> 1;
+    G[15] = K[8];
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>

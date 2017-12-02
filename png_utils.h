@@ -4,7 +4,7 @@
 #include <png.h>
 #include <fixedpointvariables.h>
 
-#define WIDTH 256
+#define WIDTH  256
 #define HEIGHT 256
 
 static png_structp png_ptr;

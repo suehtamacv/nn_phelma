@@ -18,6 +18,7 @@ HEADERS += \
     softmax.h \
     matrixmultiply.h \
     fixedpointvariables.h \
-    relu.h
+    relu.h \
+    nnarrays.h
 
 LIBS += -lpng

@@ -23,8 +23,9 @@ public:
 private:
     ///
     /// \brief K is the convolution kernel.
+    /// Size : sizeC * sizeL * 3 * 3
     ///
-    convKernel_t K[sizeC * sizeL * 3 * 3];
+    const convKernel_t *K;
 
     void calculateG(convKernel_t *, const unsigned int);
     void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
@@ -37,13 +38,9 @@ private:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 Convolution<sizeX, sizeY, sizeC, sizeL>::
-Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], layerOut_t *pY) : Y(pY)
+Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], layerOut_t *pY) : Y(pY), K(K)
 {
-loopInitializationK:
-    for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
-        {
-        (this->K)[i] = K[i];
-        }
+
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>

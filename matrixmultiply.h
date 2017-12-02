@@ -1,7 +1,7 @@
 #ifndef MATRIXMULTIPLY_H
 #define MATRIXMULTIPLY_H
 
-#include <fixedpointvariables.h>
+#include "fixedpointvariables.h"
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
 class MatrixMultiply

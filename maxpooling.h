@@ -1,7 +1,7 @@
 #ifndef MAXPOOLING_H
 #define MAXPOOLING_H
 
-#include <fixedpointvariables.h>
+#include "fixedpointvariables.h"
 
 template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 class MaxPooling

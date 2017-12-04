@@ -63,13 +63,13 @@ apply(layerOut_t *I)
                 const bool xBorder = xI + poolSize >= sizeX;
                 const bool yBorder = yI + poolSize >= sizeY;
 
-                const unsigned int xLim = xBorder ? sizeX - xI + 1 : poolSize;
-                const unsigned int yLim = yBorder ? sizeY - yI + 1 : poolSize;
+                const unsigned int xLim = xBorder ? sizeX - xI : poolSize;
+                const unsigned int yLim = yBorder ? sizeY - yI : poolSize;
 
                 Y[offsetY] = T(0, 0);
-                for (unsigned int yO = 0; yO < xLim; ++yO)
+                for (unsigned int yO = 0; yO < yLim; ++yO)
                     {
-                    for (unsigned int xO = 0; xO < yLim; ++xO)
+                    for (unsigned int xO = 0; xO < xLim; ++xO)
                         {
                         if (Y[offsetY] < T(xO, yO))
                             {

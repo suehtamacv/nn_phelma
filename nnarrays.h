@@ -29,6 +29,7 @@ static layerOut_t ImageOut[OUTPUT_SIZE] = {0};
 
 #endif
 
-
+#include "biases.h"
+#include "kernels.h"
 
 #endif // NNARRAYS_H

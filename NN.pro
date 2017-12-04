@@ -3,8 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CFLAGS += -Og -D__HWC__
-QMAKE_CXXFLAGS += -Og -D__HWC__
+QMAKE_CFLAGS += -O0 -D__HWC__
+QMAKE_CXXFLAGS += -O0 -D__HWC__
 
 INCLUDEPATH += include/
 
@@ -19,6 +19,8 @@ HEADERS += \
     nnarrays.h \
     image1.h \
     convolutionrelu.h \
-    perceptron.h
+    perceptron.h \
+    biases.h \
+    kernels.h
 
 LIBS += -lpng

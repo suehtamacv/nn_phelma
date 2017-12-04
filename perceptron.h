@@ -3,7 +3,7 @@
 
 #include "fixedpointvariables.h"
 
-template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
+template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 class Perceptron
 {
 public:
@@ -13,7 +13,7 @@ public:
 
     ///
     /// \brief Y
-    /// Size : sizeKx * sizeY
+    /// Size : sizeX * sizeKy
     ///
     layerOut_t *Y;
 
@@ -29,31 +29,33 @@ private:
 /// IMPLEMENTATION
 ///
 
-template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
-Perceptron<sizeKx, sizeKy, sizeY>::
-Perceptron(const matrixProdKernel_t K[], layerOut_t *pY) : Y(pY), K(K)
+template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
+Perceptron<sizeKx, sizeKy, sizeX>::
+Perceptron(const matrixProdKernel_t *K, layerOut_t *pY) : Y(pY), K(K)
 {
 loopInitOutput:
-    for (unsigned int i = 0; i < sizeKx * sizeY; ++i)
+    for (unsigned int i = 0; i < sizeKx * sizeX; ++i)
         {
         Y[i] = 0;
         }
 }
 
-template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
-void Perceptron<sizeKx, sizeKy, sizeY>::
+template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
+void Perceptron<sizeKx, sizeKy, sizeX>::
 apply(layerOut_t *I)
 {
-    for (unsigned int iX = 0; iX < sizeKx; ++iX)
+
+    for (unsigned int kY = 0; kY < sizeKy; ++kY)
         {
-        for (unsigned int iY = 0; iY < sizeY; ++iY)
+        for (unsigned int kX = 0; kX < sizeKx; ++kX)
             {
-            for (unsigned int iZ = 0; iZ < sizeKy; iZ++)
+            for (unsigned iX = 0; iX < sizeX; ++iX)
                 {
-                Y[iX * sizeY + iY] += I[iX * sizeY + iZ] * K[iZ * sizeKy + iY];
+                Y[kX * sizeX + iX] += K[kY * sizeKx + kX] * I[kY * sizeX + iX];
                 }
             }
         }
+
 }
 
 #endif // PERCEPTRON_H

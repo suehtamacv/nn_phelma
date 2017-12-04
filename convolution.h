@@ -165,7 +165,7 @@ calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
            const unsigned int yI, const unsigned int cI)
 {
 #define T(y, x) \
-    I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]
+    I[cI * sizeY * sizeX + (yI + y) * sizeX + (xI + x)]
 
     const bool xNotBorder = xI < sizeX - overlap;
     const bool yNotBorder = yI < sizeY - overlap;

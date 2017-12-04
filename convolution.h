@@ -33,9 +33,12 @@ private:
     ///
     const convBias_t *B;
 
+    unsigned int lastYi;
+
     void calculateG(convKernel_t *, const convKernel_t *);
-    void calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
-                    const unsigned int yI, const unsigned int cI);
+    void calculateD(layerOut_t *I, convD_t *D);
+    void getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+                       const unsigned int cI);
 };
 
 ///
@@ -45,7 +48,7 @@ private:
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 Convolution<sizeX, sizeY, sizeC, sizeL>::
 Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t *pY) :
-    Y(pY), K(K), B(B)
+    Y(pY), K(K), B(B), lastYi(sizeY)
 {
 
 }
@@ -57,7 +60,7 @@ layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
-    layerOut_t tempResult[2][2];
+    layerOut_t Block[tileSize * tileSize];
 
     // X coordinate
 loopConvXi:
@@ -70,23 +73,24 @@ loopConvYi:
 
             // Output channels
 loopConvOutChannel:
-            for (unsigned int l = 0; l < sizeL; l++)
+            for (unsigned int lI = 0; lI < sizeL; lI++)
                 {
-                // Convolution result in transform space
 
                 // Input channels
 loopConvInChannel:
-                for (unsigned int c = 0; c < sizeC; c++)
+                for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
+                    getImageBlock(I, Block, xI, yI, cI);
+
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, K + ((l * sizeC + c) * 9));
-                    calculateD(I, D, xI, yI, c);
+                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateD(Block, D);
 
 loopTile:
                     for (unsigned i = 0; i < tileSize * tileSize; ++i)
                         {
                         // If it is the first iteration, initialization of M
-                        if (c == 0)
+                        if (cI == 0)
                             {
                             M[i] = D[i] * G[i];
                             }
@@ -105,20 +109,22 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
-loopInverseTransform2:
+loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
 #ifdef __HWC__
-                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] = temp[j][0] + temp[j][1] + temp[j][2] + B[l];
-                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] = temp[j][1] - temp[j][2] - temp[j][3] + B[l];
+                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
 #else
-                    Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] = temp[j][0] + temp[j][1] + temp[j][2] + B[l];
-                    Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = temp[j][1] - temp[j][2] - temp[j][3] + B[l];
+                    Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
 #endif
                     }
                 // End transformation
 
                 }
+
+            lastYi = yI;
             }
         }
 
@@ -152,51 +158,88 @@ calculateG(convKernel_t *G, const convKernel_t *K)
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void Convolution<sizeX, sizeY, sizeC, sizeL>::
-calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
-           const unsigned int yI, const unsigned int cI)
+calculateD(layerOut_t *Block, convD_t *D)
 {
+#define B(y, x) \
+    Block[y * tileSize + x]
+
+    D[0] = B(0, 0) - B(0, 2) - B(2, 0) + B(2, 2);
+    D[1] = B(0, 1) + B(0, 2) - B(2, 1) - B(2, 2);
+    D[2] = -B(0, 1) + B(0, 2) + B(2, 1) - B(2, 2);
+    D[3] = B(0, 1) - B(0, 3) - B(2, 1) + B(2, 3);
+
+    D[4] = B(1, 0) - B(1, 2) + B(2, 0) - B(2, 2);
+    D[5] = B(1, 1) + B(1, 2) + B(2, 1) + B(2, 2);
+    D[6] = -B(1, 1) + B(1, 2) - B(2, 1) + B(2, 2);
+    D[7] = B(1, 1) - B(1, 3) + B(2, 1) - B(2, 3);
+
+    D[8] = -B(1, 0) + B(1, 2) + B(2, 0) - B(2, 2);
+    D[9] = -B(1, 1) - B(1, 2) + B(2, 1) + B(2, 2);
+    D[10] = B(1, 1) - B(1, 2) - B(2, 1) + B(2, 2);
+    D[11] = -B(1, 1) + B(1, 3) + B(2, 1) - B(2, 3);
+
+    D[12] = B(1, 0) - B(1, 2) - B(3, 0) + B(3, 2);
+    D[13] = B(1, 1) + B(1, 2) - B(3, 1) - B(3, 2);
+    D[14] = -B(1, 1) + B(1, 2) + B(3, 1) - B(3, 2);
+    D[15] = B(1, 1) - B(1, 3) - B(3, 1) + B(3, 3);
+
+#undef B
+}
+
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
+void Convolution<sizeX, sizeY, sizeC, sizeL>::
+getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+              const unsigned int cI)
+{
+#define B(x, y) \
+    Block[(y) * tileSize + (x)]
+
 #ifdef __HWC__
-#define T(y, x) \
+#define T(x, y) \
     I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]
 #else
-#define T(y, x) \
+#define T(x, y) \
     I[cI * sizeY * sizeX + (yI + y) * sizeX + (xI + x)]
 #endif
 
-    const bool xNotBorder = xI < sizeX - overlap;
-    const bool yNotBorder = yI < sizeY - overlap;
+    const unsigned int yLimit = (yI + overlap < sizeY) ? 4 : 2;
 
-    if (xNotBorder && yNotBorder)
+    if (yI == lastYi) // Same line !
         {
-        D[0] = T(0, 0) - T(0, 2) - T(2, 0) + T(2, 2);
-        D[1] = T(0, 1) + T(0, 2) - T(2, 1) - T(2, 2);
-        D[2] = -T(0, 1) + T(0, 2) + T(2, 1) - T(2, 2);
-        D[3] = T(0, 1) - T(0, 3) - T(2, 1) + T(2, 3);
+        const bool xNotBorder = xI + overlap < sizeX;
 
-        D[4] = T(1, 0) - T(1, 2) + T(2, 0) - T(2, 2);
-        D[5] = T(1, 1) + T(1, 2) + T(2, 1) + T(2, 2);
-        D[6] = -T(1, 1) + T(1, 2) - T(2, 1) + T(2, 2);
-        D[7] = T(1, 1) - T(1, 3) + T(2, 1) - T(2, 3);
+loopTranspose:
+        for (unsigned int i = 0; i < yLimit; ++i)
+            {
+            B(0, i) = B(2, i);
+            B(1, i) = B(3, i);
 
-        D[8] = -T(1, 0) + T(1, 2) + T(2, 0) - T(2, 2);
-        D[9] = -T(1, 1) - T(1, 2) + T(2, 1) + T(2, 2);
-        D[10] = T(1, 1) - T(1, 2) - T(2, 1) + T(2, 2);
-        D[11] = -T(1, 1) + T(1, 3) + T(2, 1) - T(2, 3);
+            if (xNotBorder)
+                {
+                B(2, i) = T(2, i);
+                B(3, i) = T(3, i);
+                }
+            else
+                {
+                B(2, i) = B(3, i) = 0;
+                }
 
-        D[12] = T(1, 0) - T(1, 2) - T(3, 0) + T(3, 2);
-        D[13] = T(1, 1) + T(1, 2) - T(3, 1) - T(3, 2);
-        D[14] = -T(1, 1) + T(1, 2) + T(3, 1) - T(3, 2);
-        D[15] = T(1, 1) - T(1, 3) - T(3, 1) + T(3, 3);
+            }
         }
     else
         {
-        for (unsigned int i = 0; i < 16; ++i)
+loopGetAllBlock:
+        for (unsigned int i = 0; i < yLimit; ++i)
             {
-            D[i] = 0;
+            B(0, i) = T(0, i);
+            B(1, i) = T(1, i);
+            B(2, i) = T(2, i);
+            B(3, i) = T(3, i);
             }
         }
 
 #undef T
+#undef B
 }
 
 #endif // CONVOLUTION_H

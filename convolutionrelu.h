@@ -7,10 +7,10 @@
 #define tileSize 4
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-class Convolution
+class ConvolutionReLU
 {
 public:
-    Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t* pY);
+    ConvolutionReLU(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t* pY);
 
     layerOut_t* apply(layerOut_t *I);
 
@@ -33,8 +33,6 @@ private:
     ///
     const convBias_t *B;
 
-    unsigned int lastYi;
-
     void calculateG(convKernel_t *, const convKernel_t *);
     void calculateD(layerOut_t *I, convD_t *D);
     void getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
@@ -46,15 +44,15 @@ private:
 ///
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-Convolution<sizeX, sizeY, sizeC, sizeL>::
-Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t *pY) :
-    Y(pY), K(K), B(B), lastYi(sizeY)
+ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
+ConvolutionReLU(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t *pY) :
+    Y(pY), K(K), B(B)
 {
 
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
+layerOut_t *ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
 {
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -110,21 +108,23 @@ loopInverseTransform:
                     }
 
 loopOutputBlock:
+                // Applies ReLU
                 for (unsigned int j = 0; j < 2; ++j)
                     {
+                    layerOut_t tempOutput1 = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    layerOut_t tempOutput2 = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+
 #ifdef __HWC__
-                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = tempOutput1 >= 0 ? tempOutput1 : 0;
+                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = tempOutput2 >= 0 ? tempOutput2 : 0;
 #else
-                    Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = tempOutput1 >= 0 ? tempOutput1 : 0;
+                    Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = tempOutput2 >= 0 ? tempOutput2 : 0;
 #endif
                     }
                 // End transformation
 
                 }
-
-            lastYi = yI;
             }
         }
 
@@ -132,7 +132,7 @@ loopOutputBlock:
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void Convolution<sizeX, sizeY, sizeC, sizeL>::
+void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 calculateG(convKernel_t *G, const convKernel_t *K)
 {
     G[0]  = K[0];
@@ -157,7 +157,7 @@ calculateG(convKernel_t *G, const convKernel_t *K)
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void Convolution<sizeX, sizeY, sizeC, sizeL>::
+void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 calculateD(layerOut_t *Block, convD_t *D)
 {
 #define B(y, x) \
@@ -187,7 +187,7 @@ calculateD(layerOut_t *Block, convD_t *D)
 }
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void Convolution<sizeX, sizeY, sizeC, sizeL>::
+void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
               const unsigned int cI)
 {
@@ -209,8 +209,8 @@ getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const uns
 
     const unsigned int yLimInf = yBorderT ? 1 : 0;
     const unsigned int yLimSup = yBorderB ? 2 : 3;
-    const int xLimInf = xBorderL ? 1 : 0;
-    const int xLimSup = xBorderR ? 2 : 3;
+    const unsigned int xLimInf = xBorderL ? 1 : 0;
+    const unsigned int xLimSup = xBorderR ? 2 : 3;
 
 loopImageBlockY:
     for (unsigned int j = yLimInf; j <= yLimSup; ++j)

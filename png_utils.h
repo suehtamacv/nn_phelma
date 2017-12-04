@@ -11,8 +11,8 @@
 
 #else
 
-#define WIDTH  32
-#define HEIGHT 32
+#define WIDTH  24
+#define HEIGHT 24
 
 #endif
 

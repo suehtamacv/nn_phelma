@@ -10,7 +10,7 @@
 
 #endif
 
-#include "convolution.h"
+#include "convolutionrelu.h"
 #include "fixedpointvariables.h"
 #include "nnarrays.h"
 
@@ -39,24 +39,30 @@ static const convBias_t Biases[3] = {0, 0, 0};
 #pragma hls_design top
 void apply(layerOut_t In[INPUT_SIZE], layerOut_t Out[OUTPUT_SIZE])
 {
-    Convolution<HEIGHT, WIDTH, 3, 3> Conv1(KernelImp, Biases, Out);
+    ConvolutionReLU<HEIGHT, WIDTH, 3, 64> Conv1(KernelImp, Biases, Out);
     Conv1.apply(In);
 }
-
-#ifdef __SIMULATION__
 
 int main()
 {
     // Reads PNG
+#ifdef __SIMULATION__
     readPNG("lena.png");
     flattenPNG(ImageIn);
+#endif
 
     apply(ImageIn, ImageOut);
 
+#ifdef __SIMULATION__
     unflattenPNG(ImageOut);
-    writePNG("lena2.png");
+    writePNG("out.png");
+#else
+    for (unsigned int i = 0; i < OUTPUT_SIZE; ++i)
+        {
+        std::cout << "(" << i << ")\t" << (int8) (ImageOut[i]).slc<INPUT_BITS_PER_PIXEL>
+                  (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL) << std::endl;
+        }
+#endif
 
     return 0;
 }
-
-#endif

@@ -18,11 +18,11 @@ static layerOut_t ImageOut[OUTPUT_SIZE] = {0};
 
 #else
 
-#define WIDTH  32
-#define HEIGHT 32
+#define WIDTH  24
+#define HEIGHT 24
 
 #define INPUT_SIZE    HEIGHT * WIDTH * 3
-#define OUTPUT_SIZE   HEIGHT * WIDTH * 3
+#define OUTPUT_SIZE   HEIGHT * WIDTH * 64
 
 static layerOut_t *ImageIn = (layerOut_t*) Image1;
 static layerOut_t ImageOut[OUTPUT_SIZE] = {0};

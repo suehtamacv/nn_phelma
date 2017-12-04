@@ -15,10 +15,10 @@ HEADERS += \
     png_utils.h \
     maxpooling.h \
     softmax.h \
-    matrixmultiply.h \
     fixedpointvariables.h \
     nnarrays.h \
     image1.h \
-    convolutionrelu.h
+    convolutionrelu.h \
+    perceptron.h
 
 LIBS += -lpng

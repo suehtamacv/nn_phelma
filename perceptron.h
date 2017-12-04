@@ -1,20 +1,28 @@
-#ifndef MATRIXMULTIPLY_H
-#define MATRIXMULTIPLY_H
+#ifndef PERCEPTRON_H
+#define PERCEPTRON_H
 
 #include "fixedpointvariables.h"
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
-class MatrixMultiply
+class Perceptron
 {
 public:
-    MatrixMultiply(const matrixProdKernel_t K[sizeKx * sizeKy]);
+    Perceptron(const matrixProdKernel_t K[sizeKx * sizeKy], layerOut_t *pY);
 
     void apply(layerOut_t*);
 
-    layerOut_t Y[sizeKx * sizeY];
+    ///
+    /// \brief Y
+    /// Size : sizeKx * sizeY
+    ///
+    layerOut_t *Y;
 
 private:
-    const matrixProdKernel_t K[sizeKx * sizeKy];
+    ///
+    /// \brief K
+    /// Size : sizeKx * sizeKy
+    ///
+    const matrixProdKernel_t *K;
 };
 
 ///
@@ -22,18 +30,14 @@ private:
 ///
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
-MatrixMultiply<sizeKx, sizeKy, sizeY>::
-MatrixMultiply(const matrixProdKernel_t K[])
+Perceptron<sizeKx, sizeKy, sizeY>::
+Perceptron(const matrixProdKernel_t K[], layerOut_t *pY) : Y(pY), K(K)
 {
-    std::fill(Y, Y + sizeKx * sizeY, 0);
-    for (unsigned int i = 0; i < sizeKx * sizeKy; ++i)
-        {
-        (this->K)[i] = K[i];
-        }
+
 }
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
-void MatrixMultiply<sizeKx, sizeKy, sizeY>::
+void Perceptron<sizeKx, sizeKy, sizeY>::
 apply(layerOut_t *I)
 {
     for (unsigned int iX = 0; iX < sizeKx; ++iX)
@@ -48,4 +52,4 @@ apply(layerOut_t *I)
         }
 }
 
-#endif // MATRIXMULTIPLY_H
+#endif // PERCEPTRON_H

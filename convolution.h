@@ -45,7 +45,7 @@ private:
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 Convolution<sizeX, sizeY, sizeC, sizeL>::
 Convolution(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t *pY) :
-    Y(pY), B(B), K(K)
+    Y(pY), K(K), B(B)
 {
 
 }

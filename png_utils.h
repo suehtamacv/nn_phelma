@@ -4,8 +4,17 @@
 #include <png.h>
 #include <fixedpointvariables.h>
 
+#ifdef __SIMULATION__
+
 #define WIDTH  256
 #define HEIGHT 256
+
+#else
+
+#define WIDTH  32
+#define HEIGHT 32
+
+#endif
 
 static png_structp png_ptr;
 static png_infop info_ptr;

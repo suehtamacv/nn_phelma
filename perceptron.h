@@ -33,7 +33,11 @@ template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>
 Perceptron<sizeKx, sizeKy, sizeY>::
 Perceptron(const matrixProdKernel_t K[], layerOut_t *pY) : Y(pY), K(K)
 {
-
+loopInitOutput:
+    for (unsigned int i = 0; i < sizeKx * sizeY; ++i)
+        {
+        Y[i] = 0;
+        }
 }
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeY>

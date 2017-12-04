@@ -112,16 +112,16 @@ loopInverseTransform2:
                         //
                         if (l == 0)
                             {
-                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] =
+                            Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] =
                                 temp[j][0] + temp[j][1] + temp[j][2] + B[l];
-                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] =
+                            Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] =
                                 temp[j][1] - temp[j][2] - temp[j][3] + B[l];
                             }
                         else
                             {
-                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
+                            Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] +=
                                 temp[j][0] + temp[j][1] + temp[j][2];
-                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] +=
+                            Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] +=
                                 temp[j][1] - temp[j][2] - temp[j][3];
                             }
                         }

@@ -196,45 +196,29 @@ getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const uns
 
 #ifdef __HWC__
 #define T(x, y) \
-    I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]
+    I[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
 #else
 #define T(x, y) \
-    I[cI * sizeY * sizeX + (yI + y) * sizeX + (xI + x)]
+    I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
-    const unsigned int yLimit = (yI + overlap < sizeY) ? 4 : 2;
+    const bool xBorderL = (xI == 0);
+    const bool xBorderR = (xI + tileSize > sizeX);
+    const bool yBorderT = (yI == 0);
+    const bool yBorderB = (yI + tileSize > sizeY);
 
-    if (yI == lastYi) // Same line !
+    const unsigned int yLimInf = yBorderT ? 1 : 0;
+    const unsigned int yLimSup = yBorderB ? 2 : 3;
+    const int xLimInf = xBorderL ? 1 : 0;
+    const int xLimSup = xBorderR ? 2 : 3;
+
+loopImageBlockY:
+    for (unsigned int j = yLimInf; j <= yLimSup; ++j)
         {
-        const bool xNotBorder = xI + overlap < sizeX;
-
-loopTranspose:
-        for (unsigned int i = 0; i < yLimit; ++i)
+loopImageBlockX:
+        for (unsigned int i = xLimInf; i <= xLimSup; ++i)
             {
-            B(0, i) = B(2, i);
-            B(1, i) = B(3, i);
-
-            if (xNotBorder)
-                {
-                B(2, i) = T(2, i);
-                B(3, i) = T(3, i);
-                }
-            else
-                {
-                B(2, i) = B(3, i) = 0;
-                }
-
-            }
-        }
-    else
-        {
-loopGetAllBlock:
-        for (unsigned int i = 0; i < yLimit; ++i)
-            {
-            B(0, i) = T(0, i);
-            B(1, i) = T(1, i);
-            B(2, i) = T(2, i);
-            B(3, i) = T(3, i);
+            B(i, j) = T(i - 1, j - 1);
             }
         }
 

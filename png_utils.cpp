@@ -137,7 +137,11 @@ void flattenPNG(layerOut_t *I)
             {
             for (unsigned int c = 0; c < 3; ++c)
                 {
+#ifdef __HWC__
                 I[y * WIDTH * 3 + x * 3 + c] = row_pointers[y][x * 3 + c];
+#else
+                I[c * HEIGHT * WIDTH + y * WIDTH + x] = row_pointers[y][x * 3 + c];
+#endif
                 }
             }
         }
@@ -151,8 +155,13 @@ void unflattenPNG(layerOut_t *I)
             {
             for (unsigned int c = 0; c < 3; ++c)
                 {
+#ifdef __HWC__
                 row_pointers[y][x * 3 + c] = (I[y * WIDTH * 3 + x * 3 + c]).slc<INPUT_BITS_PER_PIXEL>
                                              (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL);
+#else
+                row_pointers[y][x * 3 + c] = (I[c * HEIGHT * WIDTH + y * WIDTH + x]).slc<INPUT_BITS_PER_PIXEL>
+                                             (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL);
+#endif
                 }
             }
         }

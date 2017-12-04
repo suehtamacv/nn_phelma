@@ -57,7 +57,7 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     MaxPooling<2, 3, 12, 12, 32> MaxPool2(MaxPool2_Out);
     ConvolutionReLU<6, 6, 32, 20> Conv3(convKernel3, convBias3, Conv3_Out);
     MaxPooling<2, 3, 6, 6, 20> MaxPool3(MaxPool3_Out);
-    Perceptron<10, 180, 1> Percep4(perceptronKernel4, Out);
+    Perceptron<10, 180, 1> Percep4(perceptronKernel4, perceptronBias4, Out);
 
     std::clog << "Convolution 1" << std::endl;
     Conv1.apply(In);
@@ -92,8 +92,7 @@ int main()
 #else
     for (unsigned int i = 0; i < 10; ++i)
         {
-        std::cout << "(" << i << ")\t" << (int8) (completeOut[i]).slc<INPUT_BITS_PER_PIXEL>
-                  (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL) << std::endl;
+        std::cout << "(" << i << ")\t" << completeOut[i] << std::endl;
         }
 #endif
 

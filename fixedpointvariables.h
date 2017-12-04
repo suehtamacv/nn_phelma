@@ -19,8 +19,11 @@
 #define SOFTMAX_DYN  8  // 0 to 255
 #define SOFTMAX_PREC 8
 
-#define MATRIX_PROD_DYN  KERNEL_DYN
-#define MATRIX_PROD_PREC KERNEL_PREC
+#define PERCEP_KERNEL_DYN  KERNEL_DYN
+#define PERCEP_KERNEL_PREC KERNEL_PREC
+
+#define PERCEP_BIAS_DYN  KERNEL_DYN
+#define PERCEP_BIAS_PREC KERNEL_PREC
 
 #else
 
@@ -38,8 +41,11 @@
 #define BIAS_DYN   8 // -127 to 127
 #define BIAS_PREC  4
 
-#define MATRIX_PROD_DYN  KERNEL_DYN
-#define MATRIX_PROD_PREC KERNEL_PREC
+#define PERCEP_KERNEL_DYN  KERNEL_DYN
+#define PERCEP_KERNEL_PREC KERNEL_PREC
+
+#define PERCEP_BIAS_DYN  KERNEL_DYN
+#define PERCEP_BIAS_PREC KERNEL_PREC
 
 #endif
 
@@ -58,6 +64,7 @@ typedef ac_fixed < SOFTMAX_PREC, 2, false > softE_t;
 typedef ac_fixed < SOFTMAX_DYN + SOFTMAX_PREC, SOFTMAX_DYN, false > softSE_t;
 
 // Matrix product types
-typedef ac_fixed < MATRIX_PROD_DYN + MATRIX_PROD_PREC, MATRIX_PROD_DYN, true > matrixProdKernel_t;
+typedef ac_fixed < PERCEP_KERNEL_DYN + PERCEP_KERNEL_PREC, PERCEP_KERNEL_DYN, true > perceptronKernel_t;
+typedef ac_fixed < PERCEP_BIAS_DYN + PERCEP_BIAS_PREC, PERCEP_BIAS_DYN, true > perceptronBias_t;
 
 #endif // FIXEDPOINTVARIABLES_H

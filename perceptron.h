@@ -7,22 +7,29 @@ template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 class Perceptron
 {
 public:
-    Perceptron(const matrixProdKernel_t K[sizeKx * sizeKy], layerOut_t *pY);
+    Perceptron(const perceptronKernel_t K[sizeKx * sizeKy], const perceptronBias_t B[sizeX * sizeKy],
+               layerOut_t *pY);
 
     void apply(layerOut_t*);
 
     ///
     /// \brief Y
-    /// Size : sizeX * sizeKy
+    /// Size : sizeKx * sizeX
     ///
     layerOut_t *Y;
 
 private:
     ///
     /// \brief K
-    /// Size : sizeKx * sizeKy
+    /// Size : sizeKy * sizeKx
     ///
-    const matrixProdKernel_t *K;
+    const perceptronKernel_t *K;
+
+    ///
+    /// \brief B
+    /// Size : sizeKx * sizeX
+    const perceptronBias_t *B;
+
 };
 
 ///
@@ -31,13 +38,9 @@ private:
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 Perceptron<sizeKx, sizeKy, sizeX>::
-Perceptron(const matrixProdKernel_t *K, layerOut_t *pY) : Y(pY), K(K)
+Perceptron(const perceptronKernel_t *K, const perceptronBias_t *B, layerOut_t *pY) : Y(pY), K(K), B(B)
 {
-loopInitOutput:
-    for (unsigned int i = 0; i < sizeKx * sizeX; ++i)
-        {
-        Y[i] = 0;
-        }
+
 }
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
@@ -51,7 +54,14 @@ apply(layerOut_t *I)
             {
             for (unsigned iX = 0; iX < sizeX; ++iX)
                 {
-                Y[kX * sizeX + iX] += K[kY * sizeKx + kX] * I[kY * sizeX + iX];
+                if (kY == 0)
+                    {
+                    Y[kX * sizeX + iX] = K[kY * sizeKx + kX] * I[kY * sizeX + iX] + B[kX * sizeX + iX];
+                    }
+                else
+                    {
+                    Y[kX * sizeX + iX] += K[kY * sizeKx + kX] * I[kY * sizeX + iX];
+                    }
                 }
             }
         }

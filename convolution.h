@@ -57,6 +57,7 @@ layerOut_t *Convolution<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
+    layerOut_t tempResult[2][2];
 
     // X coordinate
 loopConvXi:
@@ -97,50 +98,25 @@ loopTile:
                     }
 
                 // Transform to image space
-                    {
 loopInverseTransform:
-                    for (unsigned int i = 0; i < 4; ++i)
-                        {
-                        temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
-                        temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-                        }
+                for (unsigned int i = 0; i < 4; ++i)
+                    {
+                    temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
+                    temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
+                    }
 
 loopInverseTransform2:
-                    for (unsigned int j = 0; j < 2; ++j)
-                        {
-                        // If is the first iteration, initialization of Y
-                        //
-                        if (l == 0)
-                            {
+                for (unsigned int j = 0; j < 2; ++j)
+                    {
 #ifdef __HWC__
-                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] =
-                                temp[j][0] + temp[j][1] + temp[j][2] + B[l];
-                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] =
-                                temp[j][1] - temp[j][2] - temp[j][3] + B[l];
+                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] = temp[j][0] + temp[j][1] + temp[j][2] + B[l];
+                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] = temp[j][1] - temp[j][2] - temp[j][3] + B[l];
 #else
-                            Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] =
-                                temp[j][0] + temp[j][1] + temp[j][2] + B[l];
-                            Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] =
-                                temp[j][1] - temp[j][2] - temp[j][3] + B[l];
+                    Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] = temp[j][0] + temp[j][1] + temp[j][2] + B[l];
+                    Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = temp[j][1] - temp[j][2] - temp[j][3] + B[l];
 #endif
-                            }
-                        else
-                            {
-#ifdef __HWC__
-                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
-                                temp[j][0] + temp[j][1] + temp[j][2];
-                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] +=
-                                temp[j][1] - temp[j][2] - temp[j][3];
-#else
-                            Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] +=
-                                temp[j][0] + temp[j][1] + temp[j][2];
-                            Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] +=
-                                temp[j][1] - temp[j][2] - temp[j][3];
-#endif
-                            }
-                        }
-
-                    } // End transformation
+                    }
+                // End transformation
 
                 }
             }

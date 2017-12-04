@@ -112,19 +112,34 @@ loopInverseTransform2:
                         //
                         if (l == 0)
                             {
+#ifdef __HWC__
+                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] =
+                                temp[j][0] + temp[j][1] + temp[j][2] + B[l];
+                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] =
+                                temp[j][1] - temp[j][2] - temp[j][3] + B[l];
+#else
                             Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] =
                                 temp[j][0] + temp[j][1] + temp[j][2] + B[l];
                             Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] =
                                 temp[j][1] - temp[j][2] - temp[j][3] + B[l];
+#endif
                             }
                         else
                             {
+#ifdef __HWC__
+                            Y[yI * sizeX * sizeL + (xI + j) * sizeL + l] +=
+                                temp[j][0] + temp[j][1] + temp[j][2];
+                            Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + l] +=
+                                temp[j][1] - temp[j][2] - temp[j][3];
+#else
                             Y[l * sizeY * sizeX + yI * sizeX + (xI + j)] +=
                                 temp[j][0] + temp[j][1] + temp[j][2];
                             Y[l * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] +=
                                 temp[j][1] - temp[j][2] - temp[j][3];
+#endif
                             }
                         }
+
                     } // End transformation
 
                 }
@@ -164,8 +179,13 @@ void Convolution<sizeX, sizeY, sizeC, sizeL>::
 calculateD(layerOut_t *I, convD_t *D, const unsigned int xI,
            const unsigned int yI, const unsigned int cI)
 {
+#ifdef __HWC__
+#define T(y, x) \
+    I[(yI + y) * sizeX * sizeC + (xI + x) * sizeC + cI]
+#else
 #define T(y, x) \
     I[cI * sizeY * sizeX + (yI + y) * sizeX + (xI + x)]
+#endif
 
     const bool xNotBorder = xI < sizeX - overlap;
     const bool yNotBorder = yI < sizeY - overlap;

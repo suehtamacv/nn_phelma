@@ -52,11 +52,11 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     layerOut_t MaxPool3_Out[3 * 3 * 20];
 
     ConvolutionReLU<24, 24, 3, 64> Conv1(KernelImp, Biases, Conv1_Out);
-    MaxPooling<2, 24, 24, 64> MaxPool1(MaxPool1_Out);
+    MaxPooling<2, 3, 24, 24, 64> MaxPool1(MaxPool1_Out);
     ConvolutionReLU<12, 12, 64, 32> Conv2(KernelImp, Biases, Conv2_Out);
-    MaxPooling<2, 12, 12, 32> MaxPool2(MaxPool2_Out);
+    MaxPooling<2, 3, 12, 12, 32> MaxPool2(MaxPool2_Out);
     ConvolutionReLU<6, 6, 32, 20> Conv3(KernelImp, Biases, Conv3_Out);
-    MaxPooling<2, 6, 6, 20> MaxPool3(MaxPool3_Out);
+    MaxPooling<2, 3, 6, 6, 20> MaxPool3(MaxPool3_Out);
     Perceptron<180, 10, 1> Percep4(KernelImp, Out);
 
     Conv1.apply(In);

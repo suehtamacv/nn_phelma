@@ -3,7 +3,7 @@
 
 #include "fixedpointvariables.h"
 
-template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
+template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 class MaxPooling
 {
 public:
@@ -22,20 +22,28 @@ private:
 /// IMPLEMENTATION
 ///
 
-template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-MaxPooling<stride, sizeX, sizeY, sizeC>::
+template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
+MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 MaxPooling(layerOut_t* pY) :
     Y(pY),
-    newSizeX(sizeX / stride),
-    newSizeY(sizeY / stride)
+    newSizeX(((sizeX - poolSize) / stride) + 1),
+    newSizeY(((sizeY - poolSize) / stride) + 1)
 {
 
 }
 
-template<unsigned int stride, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-void MaxPooling<stride, sizeX, sizeY, sizeC>::
+template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
+void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 apply(layerOut_t *I)
 {
+#ifdef __HWC__
+#define T(x, y) \
+    I[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
+#else
+#define T(x, y) \
+    I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
+#endif
+
     unsigned int nxI = 0, nyI = 0;
 
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
@@ -46,17 +54,26 @@ apply(layerOut_t *I)
 
             for (unsigned int cI = 0; cI < sizeC; ++cI)
                 {
+#ifdef __HWC__
                 const unsigned int offsetY = nyI * newSizeX * sizeC + nxI * sizeC + cI;
-                const unsigned int offsetI = yI * sizeX * sizeC + xI * sizeC + cI;
-                Y[offsetY] = I[offsetI];
+#else
+                const unsigned int offsetY = cI * newSizeY * newSizeX + nyI * newSizeX + nxI;
+#endif
 
-                for (unsigned int yO = 0; yO < stride; ++yO)
+                const bool xBorder = xI + poolSize >= sizeX;
+                const bool yBorder = yI + poolSize >= sizeY;
+
+                const unsigned int xLim = xBorder ? sizeX - xI + 1 : poolSize;
+                const unsigned int yLim = yBorder ? sizeY - yI + 1 : poolSize;
+
+                Y[offsetY] = T(0, 0);
+                for (unsigned int yO = 0; yO < xLim; ++yO)
                     {
-                    for (unsigned int xO = 0; xO < stride; ++xO)
+                    for (unsigned int xO = 0; xO < yLim; ++xO)
                         {
-                        if (Y[offsetY] < I[offsetI + yO * sizeX * sizeC + xO * sizeC])
+                        if (Y[offsetY] < T(xO, yO))
                             {
-                            Y[offsetY] = I[offsetI + yO * sizeX * sizeC + xO * sizeC];
+                            Y[offsetY] = T(xO, yO);
                             }
                         }
                     }
@@ -64,6 +81,7 @@ apply(layerOut_t *I)
 
             }
         }
+#undef T
 }
 
 #endif // MAXPOOLING_H

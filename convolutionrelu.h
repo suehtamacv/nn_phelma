@@ -191,14 +191,14 @@ void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
               const unsigned int cI)
 {
-#define B(x, y) \
-    Block[(y) * tileSize + (x)]
+#define B(y, x) \
+    Block[y * tileSize + x]
 
 #ifdef __HWC__
-#define T(x, y) \
+#define T(y, x) \
     I[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
 #else
-#define T(x, y) \
+#define T(y, x) \
     I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
@@ -218,7 +218,7 @@ loopImageBlockY:
 loopImageBlockX:
         for (unsigned int i = xLimInf; i <= xLimSup; ++i)
             {
-            B(i, j) = T(i - 1, j - 1);
+            B(j, i) = T(j - 1, i - 1);
             }
         }
 

@@ -26,8 +26,8 @@ template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigne
 MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 MaxPooling(layerOut_t* pY) :
     Y(pY),
-    newSizeX(((sizeX - poolSize) / stride) + 1),
-    newSizeY(((sizeY - poolSize) / stride) + 1)
+    newSizeX(sizeX / stride),
+    newSizeY(sizeY / stride)
 {
 
 }

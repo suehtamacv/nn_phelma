@@ -7,7 +7,7 @@ template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 class Perceptron
 {
 public:
-    Perceptron(const perceptronKernel_t K[sizeKx * sizeKy], const perceptronBias_t B[sizeX * sizeKy],
+    Perceptron(const perceptronKernel_t K[sizeKx * sizeKy], const perceptronBias_t B[sizeX * sizeKx],
                layerOut_t *pY);
 
     void apply(layerOut_t*);
@@ -48,19 +48,19 @@ void Perceptron<sizeKx, sizeKy, sizeX>::
 apply(layerOut_t *I)
 {
 
-    for (unsigned int kY = 0; kY < sizeKy; ++kY)
+    for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
         {
-        for (unsigned int kX = 0; kX < sizeKx; ++kX)
+        for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
             {
-            for (unsigned iX = 0; iX < sizeX; ++iX)
+            for (unsigned iIx = 0; iIx < sizeX; ++iIx)
                 {
-                if (kY == 0)
+                if (iKy == 0)
                     {
-                    Y[kX * sizeX + iX] = K[kY * sizeKx + kX] * I[kY * sizeX + iX] + B[kX * sizeX + iX];
+                    Y[iKy * sizeX + iIx] = K[iKy * sizeKx + iKx] * I[iKx * sizeX + iIx] + B[iKy * sizeX + iIx];
                     }
                 else
                     {
-                    Y[kX * sizeX + iX] += K[kY * sizeKx + kX] * I[kY * sizeX + iX];
+                    Y[iKy * sizeX + iIx] += K[iKy * sizeKx + iKx] * I[iKx * sizeX + iIx];
                     }
                 }
             }

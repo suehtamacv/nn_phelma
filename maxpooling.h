@@ -46,14 +46,15 @@ apply(layerOut_t *I)
 
     unsigned int nxI = 0, nyI = 0;
 
-    for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
+    for (unsigned int cI = 0; cI < sizeC; ++cI)
         {
-        nxI = 0;
-        for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
+        nyI = 0;
+        for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
             {
-
-            for (unsigned int cI = 0; cI < sizeC; ++cI)
+            nxI = 0;
+            for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
+
 #ifdef __HWC__
                 const unsigned int offsetY = nyI * newSizeX * sizeC + nxI * sizeC + cI;
 #else

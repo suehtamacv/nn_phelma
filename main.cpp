@@ -17,32 +17,10 @@ FILE* image;
 
 #include <stdlib.h>
 
-static const convKernel_t KernelImp[3 * 3 * 3 * 3] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 1, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, 0, 1, 0, 0, 0, 0
-                                                     };
-static const convKernel_t Gaussian[3 * 3 * 3 * 3] = {1.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 4.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 1.0 / 16,
-                                                     0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                     0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                     0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                     1.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 4.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 1.0 / 16,
-                                                     0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                     0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                     0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                     1.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 4.0 / 16, 2.0 / 16, 1.0 / 16, 2.0 / 16, 1.0 / 16
-                                                    };
-static const convBias_t Biases[3] = {0, 0, 0};
-
 #pragma hls_design top
 void apply(layerOut_t In[INPUT_SIZE], layerOut_t Out[OUTPUT_SIZE])
 {
-    ConvolutionReLU<HEIGHT, WIDTH, 3, 64> Conv1(KernelImp, Biases, Out);
+    ConvolutionReLU<HEIGHT, WIDTH, 3, 64> Conv1(convKernel1, convBias1, Out);
     Conv1.apply(In);
 }
 

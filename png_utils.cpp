@@ -48,7 +48,6 @@ void readPNG(const char* filename)
         abort();
         }
 
-    row_pointers = new png_bytep[HEIGHT];
     for (unsigned int y = 0; y < HEIGHT; y++)
         {
         row_pointers[y] = new png_byte[WIDTH * 3];
@@ -151,6 +150,8 @@ void unflattenPNG(layerOut_t *I)
 {
     for (unsigned int y = 0; y < HEIGHT; ++y)
         {
+        row_pointers[y] = new png_byte[WIDTH * 3];
+
         for (unsigned int x = 0; x < WIDTH; ++x)
             {
             for (unsigned int c = 0; c < 3; ++c)

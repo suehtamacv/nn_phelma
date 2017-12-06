@@ -17,7 +17,6 @@ HEADERS += \
     softmax.h \
     fixedpointvariables.h \
     nnarrays.h \
-    image1.h \
     convolutionrelu.h \
     perceptron.h \
     biases.h \

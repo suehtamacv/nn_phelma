@@ -19,7 +19,7 @@
 static png_structp png_ptr;
 static png_infop info_ptr;
 static int number_of_passes;
-static png_bytep *row_pointers;
+static png_bytep row_pointers[HEIGHT];
 
 static png_byte color_type;
 static png_byte bit_depth;

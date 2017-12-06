@@ -13,6 +13,8 @@
 #include "fixedpointvariables.h"
 #include "nnarrays.h"
 
+#include <stdlib.h>
+
 static const convKernel_t KernelImp[3 * 3 * 3 * 3] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
                                                       0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                       0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -75,26 +77,65 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     Percep4.apply(MaxPool3.Y);
 }
 
+void readAndNormalize(const char* filename)
+{
+    char ImageData[32 * 32 * 3];
+
+    double Average = 0;
+    double StdDev = 0;
+    const double minStdDev = 1.0 / sqrt(24 * 24 * 3);
+
+    FILE* image = fopen(filename, "rb");
+    fread(ImageData, 1, 32 * 32 * 3, image);
+
+    for (unsigned int cI = 0; cI < 3; ++cI)
+        {
+        for (unsigned int yI = 0; yI < 24; ++yI)
+            {
+            for (unsigned int xI = 0; xI < 24; ++xI)
+                {
+                Average += ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)];
+                }
+            }
+        }
+    Average /= (24 * 24 * 3);
+
+    for (unsigned int cI = 0; cI < 3; ++cI)
+        {
+        for (unsigned int yI = 0; yI < 24; ++yI)
+            {
+            for (unsigned int xI = 0; xI < 24; ++xI)
+                {
+                StdDev += pow((ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average), 2);
+                }
+            }
+        }
+    StdDev = sqrt(StdDev / (24 * 24 * 3));
+
+    for (unsigned int cI = 0; cI < 3; ++cI)
+        {
+        for (unsigned int yI = 0; yI < 24; ++yI)
+            {
+            for (unsigned int xI = 0; xI < 24; ++xI)
+                {
+                ImageIn[cI * 24 * 24 + yI * 24 + xI] =
+                    (ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                }
+            }
+        }
+}
+
 int main()
 {
-    // Reads PNG
-#ifdef __SIMULATION__
-    readPNG("lena.png");
-    flattenPNG(ImageIn);
-#endif
+    // Reads RAW
+    readAndNormalize("Fig1.raw");
 
     layerOut_t completeOut[10];
     applyComplete(ImageIn, completeOut);
 
-#ifdef __SIMULATION__
-    unflattenPNG(ImageOut);
-    writePNG("out.png");
-#else
     for (unsigned int i = 0; i < 10; ++i)
         {
         std::cout << "(" << i << ")\t" << completeOut[i] << std::endl;
         }
-#endif
-
     return 0;
 }

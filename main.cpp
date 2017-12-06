@@ -5,6 +5,8 @@
 #include "softmax.h"
 #include "png_utils.h"
 
+FILE* image;
+
 #endif
 
 #include "convolutionrelu.h"
@@ -77,15 +79,16 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     Percep4.apply(MaxPool3.Y);
 }
 
-void readAndNormalize(const char* filename)
+int readAndNormalize(unsigned int i)
 {
     char ImageData[32 * 32 * 3];
+    char ImageLabel;
 
     double Average = 0;
     double StdDev = 0;
     const double minStdDev = 1.0 / sqrt(24 * 24 * 3);
 
-    FILE* image = fopen(filename, "rb");
+    fread(&ImageLabel, 1, 1, image);
     fread(ImageData, 1, 32 * 32 * 3, image);
 
     for (unsigned int cI = 0; cI < 3; ++cI)
@@ -123,19 +126,49 @@ void readAndNormalize(const char* filename)
                 }
             }
         }
+
+    return ImageLabel;
 }
 
 int main()
 {
-    // Reads RAW
-    readAndNormalize("Fig1.raw");
-
+    image = fopen("data_batch_1.bin", "rb");
     layerOut_t completeOut[10];
-    applyComplete(ImageIn, completeOut);
 
-    for (unsigned int i = 0; i < 10; ++i)
+    double CorrectFound = 0;
+    unsigned int limit = 1000;
+
+    for (unsigned int i = 0; i < limit; ++i)
         {
-        std::cout << "(" << i << ")\t" << completeOut[i] << std::endl;
+        // Reads RAW
+        int goldenLabel = readAndNormalize(i);
+
+        applyComplete(ImageIn, completeOut);
+        int foundLabel = 0;
+        layerOut_t maxFoundLabel = completeOut[0];
+
+        for (unsigned int i = 1; i < 10; ++i)
+            {
+            if (completeOut[i] > maxFoundLabel)
+                {
+                maxFoundLabel = completeOut[i];
+                foundLabel = i;
+                }
+            }
+
+        if (goldenLabel == foundLabel)
+            {
+            std::cout << "Correctly classified " << goldenLabel << "!" << std::endl;
+            CorrectFound++;
+            }
+        else
+            {
+            std::cout << "Incorrectly classified " << goldenLabel << " as " << foundLabel << "." << std::endl;
+            }
+
         }
+
+    std::cout << "Correct examples" << CorrectFound / (double) limit << std::endl;
+
     return 0;
 }

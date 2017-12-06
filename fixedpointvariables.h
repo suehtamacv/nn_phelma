@@ -5,19 +5,19 @@
 
 #ifdef __SIMULATION__
 
-#define INPUT_BITS_PER_PIXEL 64
+#define INPUT_BITS_PER_PIXEL 32
 
-#define LAYER_OUTPUT_DYN   64 // -255 to 255
-#define LAYER_OUTPUT_PREC  64
+#define LAYER_OUTPUT_DYN   32
+#define LAYER_OUTPUT_PREC  32
 
-#define KERNEL_DYN   64 // -127 to 127
-#define KERNEL_PREC  64
+#define KERNEL_DYN   32
+#define KERNEL_PREC  32
 
-#define BIAS_DYN   64 // -127 to 127
-#define BIAS_PREC  64
+#define BIAS_DYN   32
+#define BIAS_PREC  32
 
-#define SOFTMAX_DYN  64  // 0 to 255
-#define SOFTMAX_PREC 64
+#define SOFTMAX_DYN  32
+#define SOFTMAX_PREC 32
 
 #define PERCEP_KERNEL_DYN  KERNEL_DYN
 #define PERCEP_KERNEL_PREC KERNEL_PREC

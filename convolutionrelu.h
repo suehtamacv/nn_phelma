@@ -217,15 +217,11 @@ getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const uns
     I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
-    const bool xBorderL = (xI == 0);
-    const bool xBorderR = (xI + tileSize > sizeX);
-    const bool yBorderT = (yI == 0);
-    const bool yBorderB = (yI + tileSize > sizeY);
+    const bool xBorderR = (xI + tileSize >= sizeX);
+    const bool yBorderB = (yI + tileSize >= sizeY);
 
-    const unsigned int yLimInf = yBorderT ? 1 : 0;
-    const unsigned int yLimSup = yBorderB ? 2 : 3;
-    const unsigned int xLimInf = xBorderL ? 1 : 0;
-    const unsigned int xLimSup = xBorderR ? 2 : 3;
+    const unsigned int yLimSup = yBorderB ? 1 : 3;
+    const unsigned int xLimSup = xBorderR ? 1 : 3;
 
 loopInitBlock:
     for (unsigned int i = 0; i < 16; ++i)
@@ -234,12 +230,12 @@ loopInitBlock:
         }
 
 loopImageBlockY:
-    for (unsigned int j = yLimInf; j <= yLimSup; ++j)
+    for (unsigned int j = 0; j <= yLimSup; ++j)
         {
 loopImageBlockX:
-        for (unsigned int i = xLimInf; i <= xLimSup; ++i)
+        for (unsigned int i = 0; i <= xLimSup; ++i)
             {
-            B(j, i) = T(j - 1, i - 1);
+            B(j, i) = T(j, i);
             }
         }
 

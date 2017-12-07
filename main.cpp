@@ -144,7 +144,7 @@ int main()
 
         }
 
-    std::cout << "Correct examples" << CorrectFound / (double) limit << std::endl;
+    std::cout << "Correct examples:\t" << CorrectFound / (double) limit << std::endl;
 
     return 0;
 }

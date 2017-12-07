@@ -51,14 +51,13 @@ template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 void Perceptron<sizeKx, sizeKy, sizeX>::
 apply(layerOut_t *I)
 {
-
     for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
         {
         for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
             {
             for (unsigned iIx = 0; iIx < sizeX; ++iIx)
                 {
-                if (iKy == 0)
+                if (iKx == 0)
                     {
                     Y[iKy * sizeX + iIx] = K[iKy * sizeKx + iKx] * I[iKx * sizeX + iIx] + B[iKy * sizeX + iIx];
                     }

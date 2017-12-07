@@ -7,7 +7,8 @@ template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 class Perceptron
 {
 public:
-    Perceptron(const perceptronKernel_t K[sizeKx * sizeKy], const perceptronBias_t B[sizeX * sizeKx],
+    Perceptron(const std::string name, const perceptronKernel_t K[sizeKx * sizeKy],
+               const perceptronBias_t B[sizeX * sizeKx],
                layerOut_t *pY);
 
     void apply(layerOut_t*);
@@ -30,6 +31,7 @@ private:
     /// Size : sizeKx * sizeX
     const perceptronBias_t *B;
 
+    const std::string name;
 };
 
 ///
@@ -38,7 +40,9 @@ private:
 
 template<unsigned int sizeKx, unsigned int sizeKy, unsigned int sizeX>
 Perceptron<sizeKx, sizeKy, sizeX>::
-Perceptron(const perceptronKernel_t *K, const perceptronBias_t *B, layerOut_t *pY) : Y(pY), K(K), B(B)
+Perceptron(const std::string name, const perceptronKernel_t *K, const perceptronBias_t *B,
+           layerOut_t *pY) : Y(pY),
+    K(K), B(B), name(name)
 {
 
 }

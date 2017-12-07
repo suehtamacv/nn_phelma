@@ -20,7 +20,7 @@ FILE* image;
 #pragma hls_design top
 void apply(layerOut_t In[INPUT_SIZE], layerOut_t Out[OUTPUT_SIZE])
 {
-    ConvolutionReLU<HEIGHT, WIDTH, 3, 64> Conv1(convKernel1, convBias1, Out);
+    ConvolutionReLU<HEIGHT, WIDTH, 3, 64> Conv1("Conv1", convKernel1, convBias1, Out);
     Conv1.apply(In);
 }
 
@@ -33,13 +33,13 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     layerOut_t Conv3_Out[6 * 6 * 20];
     layerOut_t MaxPool3_Out[3 * 3 * 20];
 
-    ConvolutionReLU<24, 24, 3, 64> Conv1(convKernel1, convBias1, Conv1_Out);
-    MaxPooling<2, 3, 24, 24, 64> MaxPool1(MaxPool1_Out);
-    ConvolutionReLU<12, 12, 64, 32> Conv2(convKernel2, convBias2, Conv2_Out);
-    MaxPooling<2, 3, 12, 12, 32> MaxPool2(MaxPool2_Out);
-    ConvolutionReLU<6, 6, 32, 20> Conv3(convKernel3, convBias3, Conv3_Out);
-    MaxPooling<2, 3, 6, 6, 20> MaxPool3(MaxPool3_Out);
-    Perceptron<180, 10, 1> Percep4(perceptronKernel4, perceptronBias4, Out);
+    ConvolutionReLU<24, 24, 3, 64> Conv1("Conv1", convKernel1, convBias1, Conv1_Out);
+    MaxPooling<2, 3, 24, 24, 64> MaxPool1("MaxPool1", MaxPool1_Out);
+    ConvolutionReLU<12, 12, 64, 32> Conv2("Conv2", convKernel2, convBias2, Conv2_Out);
+    MaxPooling<2, 3, 12, 12, 32> MaxPool2("MaxPool2", MaxPool2_Out);
+    ConvolutionReLU<6, 6, 32, 20> Conv3("Conv3", convKernel3, convBias3, Conv3_Out);
+    MaxPooling<2, 3, 6, 6, 20> MaxPool3("MaxPool3", MaxPool3_Out);
+    Perceptron<180, 10, 1> Percep4("Percep4", perceptronKernel4, perceptronBias4, Out);
 
     Conv1.apply(In);
     MaxPool1.apply(Conv1.Y);

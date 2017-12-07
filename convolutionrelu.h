@@ -10,7 +10,9 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 class ConvolutionReLU
 {
 public:
-    ConvolutionReLU(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t* pY);
+    ConvolutionReLU(const std::string name,
+                    const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL],
+                    layerOut_t* pY);
 
     layerOut_t* apply(layerOut_t *I);
 
@@ -33,6 +35,8 @@ private:
     ///
     const convBias_t *B;
 
+    const std::string name;
+
     void calculateG(convKernel_t *, const convKernel_t *);
     void calculateD(layerOut_t *I, convD_t *D);
     void getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
@@ -45,8 +49,10 @@ private:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-ConvolutionReLU(const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL], layerOut_t *pY) :
-    Y(pY), K(K), B(B)
+ConvolutionReLU(const std::string name,
+                const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL],
+                layerOut_t* pY) :
+    Y(pY), K(K), B(B), name(name)
 {
 
 }

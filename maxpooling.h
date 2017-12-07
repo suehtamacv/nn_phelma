@@ -7,7 +7,7 @@ template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigne
 class MaxPooling
 {
 public:
-    MaxPooling(layerOut_t*);
+    MaxPooling(const std::string name, layerOut_t*);
 
     void apply(layerOut_t *I);
 
@@ -16,6 +16,8 @@ public:
 private:
     const unsigned int newSizeX;
     const unsigned int newSizeY;
+
+    const std::string name;
 };
 
 ///
@@ -24,10 +26,11 @@ private:
 
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-MaxPooling(layerOut_t* pY) :
+MaxPooling(const std::string name, layerOut_t* pY) :
     Y(pY),
     newSizeX(sizeX / stride),
-    newSizeY(sizeY / stride)
+    newSizeY(sizeY / stride),
+    name(name)
 {
 
 }

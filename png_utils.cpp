@@ -122,7 +122,6 @@ void writePNG(const char* file_name)
         {
         delete[] row_pointers[y];
         }
-    delete[] row_pointers;
 
     fclose(fp);
 }
@@ -161,7 +160,7 @@ void unflattenPNG(layerOut_t *I)
                                              (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL);
 #else
                 row_pointers[y][x * 3 + c] = (I[c * HEIGHT * WIDTH + y * WIDTH + x]).slc<INPUT_BITS_PER_PIXEL>
-                                             (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1 - INPUT_BITS_PER_PIXEL);
+                                             (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - INPUT_BITS_PER_PIXEL);
 #endif
                 }
             }

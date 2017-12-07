@@ -59,6 +59,7 @@ int readAndNormalize(unsigned int i)
     double StdDev = 0;
     const double minStdDev = 1.0 / sqrt(24 * 24 * 3);
 
+    fseek(image, 3073 * i, SEEK_SET);
     fread(&ImageLabel, 1, 1, image);
     fread(ImageData, 1, 32 * 32 * 3, image);
 

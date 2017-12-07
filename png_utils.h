@@ -4,8 +4,13 @@
 #include <png.h>
 #include <fixedpointvariables.h>
 
+#ifndef WIDTH
 #define WIDTH  24
+#endif
+
+#ifndef HEIGHT
 #define HEIGHT 24
+#endif
 
 static png_structp png_ptr;
 static png_infop info_ptr;

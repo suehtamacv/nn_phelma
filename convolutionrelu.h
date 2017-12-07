@@ -147,7 +147,7 @@ void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 calculateG(convKernel_t *G, const convKernel_t *K)
 {
     // Flipping convolution kernel
-#define K(y, x) K[y * 3 + x]
+#define K(y, x) K[(2 - y) * 3 + (2 - x)]
 
     G[0]  = K(0, 0);
     G[1]  = (K(0, 0) + K(0, 1) + K(0, 2)) >> 1;
@@ -226,6 +226,12 @@ getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const uns
     const unsigned int yLimSup = yBorderB ? 2 : 3;
     const unsigned int xLimInf = xBorderL ? 1 : 0;
     const unsigned int xLimSup = xBorderR ? 2 : 3;
+
+loopInitBlock:
+    for (unsigned int i = 0; i < 16; ++i)
+        {
+        Block[i] = 0;
+        }
 
 loopImageBlockY:
     for (unsigned int j = yLimInf; j <= yLimSup; ++j)

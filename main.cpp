@@ -52,8 +52,8 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
 
 int readAndNormalize(unsigned int i)
 {
-    char ImageData[32 * 32 * 3];
-    char ImageLabel;
+    unsigned char ImageData[32 * 32 * 3];
+    unsigned char ImageLabel;
 
     double Average = 0;
     double StdDev = 0;
@@ -69,7 +69,7 @@ int readAndNormalize(unsigned int i)
             {
             for (unsigned int xI = 0; xI < 24; ++xI)
                 {
-                Average += (uint8) ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)];
+                Average += ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)];
                 }
             }
         }
@@ -81,7 +81,7 @@ int readAndNormalize(unsigned int i)
             {
             for (unsigned int xI = 0; xI < 24; ++xI)
                 {
-                StdDev += pow((((uint8) ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)]).to_double() - Average), 2);
+                StdDev += pow((ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average), 2);
                 }
             }
         }

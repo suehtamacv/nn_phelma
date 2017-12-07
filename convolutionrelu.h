@@ -65,6 +65,7 @@ layerOut_t *ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
     layerOut_t Block[tileSize * tileSize];
+    layerOut_t preReLU[2][2];
 
     // X coordinate
 loopConvXi:
@@ -114,18 +115,22 @@ loopInverseTransform:
                     }
 
 loopOutputBlock:
-                // Applies ReLU
                 for (unsigned int j = 0; j < 2; ++j)
                     {
-                    layerOut_t tempOutput1 = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    layerOut_t tempOutput2 = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    // Inverse transform
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+
+                    // Applies ReLU
+                    preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
+                    preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
 #ifdef __HWC__
-                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = tempOutput1 >= 0 ? tempOutput1 : 0;
-                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = tempOutput2 >= 0 ? tempOutput2 : 0;
+                    Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
+                    Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][1];
 #else
-                    Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = tempOutput1 >= 0 ? tempOutput1 : 0;
-                    Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = tempOutput2 >= 0 ? tempOutput2 : 0;
+                    Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
+                    Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
 #endif
                     }
                 // End transformation

@@ -39,7 +39,7 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     MaxPooling<2, 3, 12, 12, 32> MaxPool2("MaxPool2", MaxPool2_Out);
     ConvolutionReLU<6, 6, 32, 20> Conv3("Conv3", convKernel3, convBias3, Conv3_Out);
     MaxPooling<2, 3, 6, 6, 20> MaxPool3("MaxPool3", MaxPool3_Out);
-    Perceptron<180, 10, 1> Percep4("Percep4", perceptronKernel4, perceptronBias4, Out);
+    Perceptron<180, 10> Percep4("Percep4", perceptronKernel4, perceptronBias4, Out);
 
     Conv1.apply(In);
     MaxPool1.apply(Conv1.Y);

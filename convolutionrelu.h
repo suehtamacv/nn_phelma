@@ -142,7 +142,7 @@ void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 calculateG(convKernel_t *G, const convKernel_t *K)
 {
     // Flipping convolution kernel
-#define K(y, x) K[(2 - y) * 3 + (2 - x)]
+#define K(y, x) K[y * 3 + x]
 
     G[0]  = K(0, 0);
     G[1]  = (K(0, 0) + K(0, 1) + K(0, 2)) >> 1;

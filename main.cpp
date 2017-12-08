@@ -50,6 +50,8 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     Percep4.apply(MaxPool3.Y);
 }
 
+#ifdef __SIMULATION__
+
 int readAndNormalize(unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
@@ -112,7 +114,11 @@ int main()
     layerOut_t completeOut[10];
 
     double CorrectFound = 0;
-    unsigned int limit = 1; /* remettre 1000 a la fin de l'analyse statistique*/
+#ifdef __STAT__
+    unsigned int limit = 1;
+#else
+    unsigned int limit = 1000;
+#endif
 
     for (unsigned int i = 0; i < limit; ++i)
         {
@@ -144,7 +150,9 @@ int main()
 
         }
 
-    std::cout << "Correct examples" << CorrectFound / (double) limit << std::endl;
+    std::cout << "Correct examples " << CorrectFound / (double) limit << std::endl;
 
     return 0;
 }
+
+#endif

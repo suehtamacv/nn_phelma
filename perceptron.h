@@ -63,12 +63,11 @@ apply(layerOut_t *I)
                 {
                 Y[iKy] += K[iKy * sizeKx + iKx] * I[iKx];
                 }
-		
-		
             }
-	std::cout << name << " Y " << Y[iKy] << std::endl;
-        
-	}
+#ifdef __STAT__
+        std::cout << name << " Y " << Y[iKy] << std::endl;
+#endif
+        }
 
 }
 

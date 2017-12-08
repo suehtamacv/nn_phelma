@@ -54,15 +54,17 @@ ConvolutionReLU(const std::string name,
                 layerOut_t* pY) :
     Y(pY), K(K), B(B), name(name)
 {
-	for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
-	{
-    	std::cout << name << " K " << K[i] << std::endl;
-	}
-	
-	for (unsigned int i = 0; i <sizeL; ++i)
-	{
-	std::cout << name << " B " << B[i] << std::endl;
-	}
+#ifdef __STAT__
+    for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
+        {
+        std::cout << name << " K " << K[i] << std::endl;
+        }
+
+    for (unsigned int i = 0; i < sizeL; ++i)
+        {
+        std::cout << name << " B " << B[i] << std::endl;
+        }
+#endif
 
 }
 
@@ -112,7 +114,9 @@ loopTile:
                             {
                             M[i] += D[i] * G[i];
                             }
-    		std::cout << name << " M " << M[i] << std::endl;
+#ifdef __STAT__
+                        std::cout << name << " M " << M[i] << std::endl;
+#endif
                         }
                     }
 
@@ -122,11 +126,11 @@ loopInverseTransform:
                     {
                     temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-    		   
-		    std::cout << name << " temp " << temp[0][i] << std::endl;
- 		    std::cout << name << " temp " << temp[1][i] << std::endl;
 
-
+#ifdef __STAT__
+                    std::cout << name << " temp " << temp[0][i] << std::endl;
+                    std::cout << name << " temp " << temp[1][i] << std::endl;
+#endif
                     }
 
 loopOutputBlock:
@@ -139,9 +143,11 @@ loopOutputBlock:
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
-		    
-		    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
-		    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
+
+#ifdef __STAT__
+                    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
+                    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
+#endif
 
 #ifdef __HWC__
                     Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
@@ -187,12 +193,13 @@ calculateG(convKernel_t *G, const convKernel_t *K)
     G[14] = (K(2, 0) - K(2, 1) + K(2, 2)) >> 1;
     G[15] = K(2, 2);
 
-for (unsigned int i = 0; i < 16; ++i)
-{
-    std::cout << name << " G " << G[i] << std::endl;
-}
+#ifdef __STAT__
+    for (unsigned int i = 0; i < 16; ++i)
+        {
+        std::cout << name << " G " << G[i] << std::endl;
+        }
+#endif
 
-  
 #undef K
 }
 
@@ -223,10 +230,12 @@ calculateD(layerOut_t *Block, convD_t *D)
     D[14] = -B(1, 1) + B(1, 2) + B(3, 1) - B(3, 2);
     D[15] = B(1, 1) - B(1, 3) - B(3, 1) + B(3, 3);
 
-for (unsigned int i = 0; i < 16; ++i)
-{
-    std::cout << name << " D " << D[i] << std::endl;
-}
+#ifdef __STAT__
+    for (unsigned int i = 0; i < 16; ++i)
+        {
+        std::cout << name << " D " << D[i] << std::endl;
+        }
+#endif
 
 #undef B
 }

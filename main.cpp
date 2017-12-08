@@ -17,12 +17,26 @@ FILE* image;
 
 #include <stdlib.h>
 
+convKernel_t convKernel[] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 1, 0, 0, 0, 0
+                            };
+convBias_t   convBias[]   = {0, 0, 0};
+
 #pragma hls_design top
-void apply(layerOut_t In[INPUT_SIZE], layerOut_t Out[OUTPUT_SIZE])
+void apply(layerOut_t In[256 * 256 * 3], layerOut_t Out[256 * 256 * 3])
 {
-    ConvolutionReLU<HEIGHT, WIDTH, 3, 64> Conv1("Conv1", convKernel1, convBias1, Out);
+    ConvolutionReLU<256, 256, 3, 3> Conv1("Conv1", convKernel, convBias, Out);
     Conv1.apply(In);
 }
+
+#ifdef __SIMULATION__
 
 void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
 {
@@ -49,8 +63,6 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     MaxPool3.apply(Conv3.Y);
     Percep4.apply(MaxPool3.Y);
 }
-
-#ifdef __SIMULATION__
 
 int readAndNormalize(unsigned int i)
 {

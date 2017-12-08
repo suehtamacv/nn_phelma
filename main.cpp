@@ -112,7 +112,7 @@ int main()
     layerOut_t completeOut[10];
 
     double CorrectFound = 0;
-    unsigned int limit = 1000;
+    unsigned int limit = 1; /* remettre 1000 a la fin de l'analyse statistique*/
 
     for (unsigned int i = 0; i < limit; ++i)
         {
@@ -144,7 +144,7 @@ int main()
 
         }
 
-    std::cout << "Correct examples:\t" << CorrectFound / (double) limit << std::endl;
+    std::cout << "Correct examples" << CorrectFound / (double) limit << std::endl;
 
     return 0;
 }

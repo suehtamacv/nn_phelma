@@ -54,6 +54,15 @@ ConvolutionReLU(const std::string name,
                 layerOut_t* pY) :
     Y(pY), K(K), B(B), name(name)
 {
+	for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
+	{
+    	std::cout << name << " K " << K[i] << std::endl;
+	}
+	
+	for (unsigned int i = 0; i <sizeL; ++i)
+	{
+	std::cout << name << " B " << B[i] << std::endl;
+	}
 
 }
 
@@ -103,6 +112,7 @@ loopTile:
                             {
                             M[i] += D[i] * G[i];
                             }
+    		std::cout << name << " M " << M[i] << std::endl;
                         }
                     }
 
@@ -112,6 +122,11 @@ loopInverseTransform:
                     {
                     temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
+    		   
+		    std::cout << name << " temp " << temp[0][i] << std::endl;
+ 		    std::cout << name << " temp " << temp[1][i] << std::endl;
+
+
                     }
 
 loopOutputBlock:
@@ -124,6 +139,9 @@ loopOutputBlock:
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
+		    
+		    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
+		    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
 
 #ifdef __HWC__
                     Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
@@ -147,7 +165,7 @@ void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 calculateG(convKernel_t *G, const convKernel_t *K)
 {
     // Flipping convolution kernel
-#define K(y, x) K[(2 - y) * 3 + (2 - x)]
+#define K(y, x) K[y * 3 + x]
 
     G[0]  = K(0, 0);
     G[1]  = (K(0, 0) + K(0, 1) + K(0, 2)) >> 1;
@@ -168,6 +186,13 @@ calculateG(convKernel_t *G, const convKernel_t *K)
     G[13] = (K(2, 0) + K(2, 1) + K(2, 2)) >> 1;
     G[14] = (K(2, 0) - K(2, 1) + K(2, 2)) >> 1;
     G[15] = K(2, 2);
+
+for (unsigned int i = 0; i < 16; ++i)
+{
+    std::cout << name << " G " << G[i] << std::endl;
+}
+
+  
 #undef K
 }
 
@@ -198,6 +223,11 @@ calculateD(layerOut_t *Block, convD_t *D)
     D[14] = -B(1, 1) + B(1, 2) + B(3, 1) - B(3, 2);
     D[15] = B(1, 1) - B(1, 3) - B(3, 1) + B(3, 3);
 
+for (unsigned int i = 0; i < 16; ++i)
+{
+    std::cout << name << " D " << D[i] << std::endl;
+}
+
 #undef B
 }
 
@@ -217,25 +247,23 @@ getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const uns
     I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
-    const bool xBorderR = (xI + tileSize >= sizeX);
-    const bool yBorderB = (yI + tileSize >= sizeY);
+    const bool xBorderL = (xI == 0);
+    const bool xBorderR = (xI + tileSize > sizeX);
+    const bool yBorderT = (yI == 0);
+    const bool yBorderB = (yI + tileSize > sizeY);
 
-    const unsigned int yLimSup = yBorderB ? 1 : 3;
-    const unsigned int xLimSup = xBorderR ? 1 : 3;
-
-loopInitBlock:
-    for (unsigned int i = 0; i < 16; ++i)
-        {
-        Block[i] = 0;
-        }
+    const unsigned int yLimInf = yBorderT ? 1 : 0;
+    const unsigned int yLimSup = yBorderB ? 2 : 3;
+    const unsigned int xLimInf = xBorderL ? 1 : 0;
+    const unsigned int xLimSup = xBorderR ? 2 : 3;
 
 loopImageBlockY:
-    for (unsigned int j = 0; j <= yLimSup; ++j)
+    for (unsigned int j = yLimInf; j <= yLimSup; ++j)
         {
 loopImageBlockX:
-        for (unsigned int i = 0; i <= xLimSup; ++i)
+        for (unsigned int i = xLimInf; i <= xLimSup; ++i)
             {
-            B(j, i) = T(j, i);
+            B(j, i) = T(j - 1, i - 1);
             }
         }
 

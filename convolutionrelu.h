@@ -266,19 +266,13 @@ getImageBlock(layerOut_t *I, layerOut_t *Block, const unsigned int xI, const uns
     const unsigned int xLimInf = xBorderL ? 1 : 0;
     const unsigned int xLimSup = xBorderR ? 2 : 3;
 
-loopInitBlock:
-    for (unsigned int i = 0; i < 16; ++i)
-        {
-        Block[i] = 0;
-        }
-
 loopImageBlockY:
-    for (unsigned int j = yLimInf; j <= yLimSup; ++j)
+    for (unsigned int j = 0; j < 4; ++j)
         {
 loopImageBlockX:
-        for (unsigned int i = xLimInf; i <= xLimSup; ++i)
+        for (unsigned int i = 0; i < 4; ++i)
             {
-            B(j, i) = T(j - 1, i - 1);
+            B(j, i) = ((j >= yLimInf) && (j <= yLimSup) && (i >= xLimInf) && (i <= xLimSup)) ? T(j - 1, i - 1) : 0;
             }
         }
 

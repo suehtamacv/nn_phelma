@@ -28,7 +28,7 @@ void apply(layerOut_t In[256 * 256 * 3], layerOut_t Out[256 * 256 * 3])
     Conv1.apply(In);
 }
 
-#ifdef __SIMULATION__
+#ifndef __SIMULATION__
 
 void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
 {

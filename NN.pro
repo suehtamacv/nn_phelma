@@ -3,18 +3,15 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CFLAGS += -O0 -D__SIMULATION__
-QMAKE_CXXFLAGS += -O0 -D__SIMULATION__
+QMAKE_CFLAGS += -O0 -D__SIMULATION__ -D__STAT__ -D__FLOATVERSION__
+QMAKE_CXXFLAGS += -O0 -D__SIMULATION__ -D__STAT__ -D__FLOATVERSION__
 
 INCLUDEPATH += include/
 
-SOURCES += main.cpp \
-    png_utils.cpp
+SOURCES += main.cpp
 
 HEADERS += \
-    png_utils.h \
     maxpooling.h \
-    softmax.h \
     fixedpointvariables.h \
     nnarrays.h \
     convolutionrelu.h \

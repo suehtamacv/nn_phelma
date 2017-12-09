@@ -5,8 +5,6 @@
 
 #ifdef __SIMULATION__
 
-#define INPUT_BITS_PER_PIXEL 32
-
 #define LAYER_OUTPUT_DYN   32
 #define LAYER_OUTPUT_PREC  32
 
@@ -16,9 +14,6 @@
 #define BIAS_DYN   32
 #define BIAS_PREC  32
 
-#define SOFTMAX_DYN  32
-#define SOFTMAX_PREC 32
-
 #define PERCEP_KERNEL_DYN  32
 #define PERCEP_KERNEL_PREC 32
 
@@ -27,16 +22,11 @@
 
 #else
 
-#define INPUT_BITS_PER_PIXEL 8
-
 #define LAYER_OUTPUT_DYN   9 // -255 to 255
 #define LAYER_OUTPUT_PREC  7
 
 #define KERNEL_DYN   8 // -127 to 127
 #define KERNEL_PREC  4
-
-#define SOFTMAX_DYN  8  // 0 to 255
-#define SOFTMAX_PREC 8
 
 #define BIAS_DYN   8 // -127 to 127
 #define BIAS_PREC  4
@@ -49,6 +39,24 @@
 
 #endif
 
+#ifdef __FLOATVERSION__
+
+// Layer output
+typedef double layerOut_t;
+
+// Convolution types
+typedef double convD_t;
+typedef double convM_t;
+typedef double convTemp_t;
+typedef double convKernel_t;
+typedef double convBias_t;
+
+// Matrix product types
+typedef double perceptronKernel_t;
+typedef double perceptronBias_t;
+
+#else
+
 // Layer output
 typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC, LAYER_OUTPUT_DYN, true > layerOut_t;
 
@@ -59,12 +67,10 @@ typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC, LAYER_OUTPUT_DYN, true 
 typedef ac_fixed < KERNEL_DYN + KERNEL_PREC, KERNEL_DYN, true > convKernel_t;
 typedef ac_fixed < BIAS_DYN + BIAS_PREC, BIAS_DYN, true > convBias_t;
 
-// Softmax types
-typedef ac_fixed < SOFTMAX_PREC, 2, false > softE_t;
-typedef ac_fixed < SOFTMAX_DYN + SOFTMAX_PREC, SOFTMAX_DYN, false > softSE_t;
-
 // Matrix product types
 typedef ac_fixed < PERCEP_KERNEL_DYN + PERCEP_KERNEL_PREC, PERCEP_KERNEL_DYN, true > perceptronKernel_t;
 typedef ac_fixed < PERCEP_BIAS_DYN + PERCEP_BIAS_PREC, PERCEP_BIAS_DYN, true > perceptronBias_t;
+
+#endif
 
 #endif // FIXEDPOINTVARIABLES_H

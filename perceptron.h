@@ -53,16 +53,10 @@ apply(layerOut_t *I)
 {
     for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
         {
+        Y[iKy] = B[iKy];
         for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
             {
-            if (iKx == 0)
-                {
-                Y[iKy] = K[iKy * sizeKx + iKx] * I[iKx] + B[iKy];
-                }
-            else
-                {
-                Y[iKy] += K[iKy * sizeKx + iKx] * I[iKx];
-                }
+            Y[iKy] += K[iKy * sizeKx + iKx] * I[iKx];
             }
 #ifdef __STAT__
         std::cout << name << " Y " << Y[iKy] << std::endl;

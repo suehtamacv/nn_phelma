@@ -1,13 +1,5 @@
-#ifdef __SIMULATION__
-
 #include <iostream>
-
-#include "softmax.h"
-#include "png_utils.h"
-
-FILE* image;
-
-#endif
+#include <stdlib.h>
 
 #include "convolutionrelu.h"
 #include "maxpooling.h"
@@ -15,7 +7,7 @@ FILE* image;
 #include "fixedpointvariables.h"
 #include "nnarrays.h"
 
-#include <stdlib.h>
+FILE* image;
 
 convKernel_t convKernel[] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
                              0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -141,8 +133,9 @@ int main()
         int foundLabel = 0;
         layerOut_t maxFoundLabel = completeOut[0];
 
-        for (unsigned int i = 1; i < 10; ++i)
+        for (unsigned int i = 0; i < 10; ++i)
             {
+            std::cout << "Class " << i << ":\t" << completeOut[i] << std::endl;
             if (completeOut[i] > maxFoundLabel)
                 {
                 maxFoundLabel = completeOut[i];

@@ -135,7 +135,6 @@ int main()
 
         for (unsigned int i = 0; i < 10; ++i)
             {
-            std::cout << "Class " << i << ":\t" << completeOut[i] << std::endl;
             if (completeOut[i] > maxFoundLabel)
                 {
                 maxFoundLabel = completeOut[i];
@@ -155,7 +154,7 @@ int main()
 
         }
 
-    std::cout << "Correct examples " << CorrectFound / (double) limit << std::endl;
+    std::cout << "Correct rate : " << 100 * CorrectFound / (double) limit << "%" << std::endl;
 
     return 0;
 }

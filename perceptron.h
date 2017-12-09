@@ -44,7 +44,17 @@ Perceptron(const std::string name, const perceptronKernel_t *K, const perceptron
            layerOut_t *pY) : Y(pY),
     K(K), B(B), name(name)
 {
+#ifdef __STAT__
+    for (unsigned int i = 0; i < sizeKy * sizeKx; ++i)
+        {
+        std::cout << name << " K " << K[i] << std::endl;
+        }
 
+    for (unsigned int i = 0; i < sizeKx; ++i)
+        {
+        std::cout << name << " B " << B[i] << std::endl;
+        }
+#endif
 }
 
 template<unsigned int sizeKx, unsigned int sizeKy>

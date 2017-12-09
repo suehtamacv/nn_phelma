@@ -114,12 +114,12 @@ int readAndNormalize(unsigned int i)
 
 int main()
 {
-    image = fopen("data_batch_1.bin", "rb");
+    image = fopen("test_batch.bin", "rb");
     layerOut_t completeOut[10];
 
     double CorrectFound = 0;
 #ifdef __STAT__
-    unsigned int limit = 1;
+    unsigned int limit = 5;
 #else
     unsigned int limit = 1000;
 #endif

@@ -8,34 +8,49 @@
 #define LAYER_OUTPUT_DYN   32
 #define LAYER_OUTPUT_PREC  32
 
-#define KERNEL_DYN   32
-#define KERNEL_PREC  32
+#define CONV_KERNEL_DYN    32
+#define CONV_KERNEL_PREC   32
 
-#define BIAS_DYN   32
-#define BIAS_PREC  32
+#define CONV_BIAS_DYN      32
+#define CONV_BIAS_PREC     32
+
+#define CONV_M_DYN         32
+#define CONV_M_PREC        32
+
+#define CONV_D_DYN         32
+#define CONV_D_PREC        32
 
 #define PERCEP_KERNEL_DYN  32
 #define PERCEP_KERNEL_PREC 32
 
-#define PERCEP_BIAS_DYN  32
-#define PERCEP_BIAS_PREC 32
+#define PERCEP_BIAS_DYN    32
+#define PERCEP_BIAS_PREC   32
 
 #else
 
-#define LAYER_OUTPUT_DYN   9 // -255 to 255
-#define LAYER_OUTPUT_PREC  7
+#define LAYER_OUTPUT_DYN   8 // -128 to 127
+#define LAYER_OUTPUT_PREC  4
 
-#define KERNEL_DYN   8 // -127 to 127
-#define KERNEL_PREC  4
+#define CONV_KERNEL_DYN    3 // -4 to 3
+#define CONV_KERNEL_PREC   9
 
-#define BIAS_DYN   8 // -127 to 127
-#define BIAS_PREC  4
+#define CONV_BIAS_DYN      3 // -4 to 3
+#define CONV_BIAS_PREC     5
 
-#define PERCEP_KERNEL_DYN  KERNEL_DYN
-#define PERCEP_KERNEL_PREC KERNEL_PREC
+#define CONV_M_DYN         7 // -64 to 63
+#define CONV_M_PREC        6
 
-#define PERCEP_BIAS_DYN  KERNEL_DYN
-#define PERCEP_BIAS_PREC KERNEL_PREC
+#define CONV_D_DYN         7 // -64 to 63
+#define CONV_D_PREC        3
+
+#define CONV_TEMP_DYN      7 // -64 to 63
+#define CONV_TEMP_PREC     3
+
+#define PERCEP_KERNEL_DYN  0 // -.5 to .5
+#define PERCEP_KERNEL_PREC 4
+
+#define PERCEP_BIAS_DYN    3 // -4 to 3
+#define PERCEP_BIAS_PREC   1
 
 #endif
 
@@ -61,11 +76,11 @@ typedef double perceptronBias_t;
 typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC, LAYER_OUTPUT_DYN, true > layerOut_t;
 
 // Convolution types
-typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC + 2, LAYER_OUTPUT_DYN + 2, true > convD_t;
-typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - 1, LAYER_OUTPUT_DYN - 1, true > convM_t;
-typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC, LAYER_OUTPUT_DYN, true > convTemp_t;
-typedef ac_fixed < KERNEL_DYN + KERNEL_PREC, KERNEL_DYN, true > convKernel_t;
-typedef ac_fixed < BIAS_DYN + BIAS_PREC, BIAS_DYN, true > convBias_t;
+typedef ac_fixed < CONV_D_DYN + CONV_D_PREC, CONV_D_DYN, true > convD_t;
+typedef ac_fixed < CONV_M_DYN + CONV_M_PREC, CONV_M_DYN, true > convM_t;
+typedef ac_fixed < CONV_TEMP_DYN + CONV_TEMP_PREC, CONV_TEMP_DYN, true > convTemp_t;
+typedef ac_fixed < CONV_KERNEL_DYN + CONV_KERNEL_PREC, CONV_KERNEL_DYN, true > convKernel_t;
+typedef ac_fixed < CONV_BIAS_DYN + CONV_BIAS_PREC, CONV_BIAS_DYN, true > convBias_t;
 
 // Matrix product types
 typedef ac_fixed < PERCEP_KERNEL_DYN + PERCEP_KERNEL_PREC, PERCEP_KERNEL_DYN, true > perceptronKernel_t;

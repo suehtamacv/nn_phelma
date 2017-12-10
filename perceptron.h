@@ -15,7 +15,7 @@ public:
 
     ///
     /// \brief Y
-    /// Size : sizeKx
+    /// Size : sizeKy
     ///
     layerOut_t *Y;
 
@@ -61,13 +61,21 @@ template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
 apply(layerOut_t *I)
 {
+    layerOut_t tempY[sizeKy];
+
+loopY:
     for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
         {
-        Y[iKy] = B[iKy];
+        tempY[iKy] = B[iKy];
+
+loopX:
         for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
             {
-            Y[iKy] += K[iKy * sizeKx + iKx] * I[iKx];
+            tempY[iKy] += K[iKy * sizeKx + iKx] * I[iKx];
             }
+
+        Y[iKy] = tempY[iKy];
+
 #ifdef __STAT__
         std::cout << name << " Y " << Y[iKy] << std::endl;
 #endif

@@ -48,13 +48,17 @@ apply(layerOut_t *I)
 #endif
 
     unsigned int nxI = 0, nyI = 0;
+    layerOut_t tempMax = 0;
 
+loopChannels:
     for (unsigned int cI = 0; cI < sizeC; ++cI)
         {
         nyI = 0;
+loopY:
         for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
             {
             nxI = 0;
+loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
 
@@ -70,17 +74,21 @@ apply(layerOut_t *I)
                 const unsigned int xLim = xBorder ? sizeX - xI : poolSize;
                 const unsigned int yLim = yBorder ? sizeY - yI : poolSize;
 
-                Y[offsetY] = T(0, 0);
+                tempMax = T(0, 0);
+loopYBlock:
                 for (unsigned int yO = 0; yO < yLim; ++yO)
                     {
+loopXBlock:
                     for (unsigned int xO = 0; xO < xLim; ++xO)
                         {
-                        if (Y[offsetY] < T(xO, yO))
+                        if (tempMax < T(xO, yO))
                             {
-                            Y[offsetY] = T(xO, yO);
+                            tempMax = T(xO, yO);
                             }
                         }
                     }
+
+                Y[offsetY] = tempMax;
                 }
 
             }

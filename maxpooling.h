@@ -35,6 +35,7 @@ MaxPooling(const std::string name, layerOut_t* pY) :
 
 }
 
+#pragma design
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 apply(layerOut_t *I)

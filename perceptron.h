@@ -57,6 +57,7 @@ Perceptron(const std::string name, const perceptronKernel_t *K, const perceptron
 #endif
 }
 
+#pragma design
 template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
 apply(layerOut_t *I)

@@ -68,6 +68,7 @@ ConvolutionReLU(const std::string name,
 
 }
 
+#pragma design
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 layerOut_t *ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(layerOut_t *I)
 {

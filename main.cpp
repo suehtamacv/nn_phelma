@@ -52,6 +52,7 @@ CCS_MAIN(int argc, char* argv)
 #else
     std::ifstream Ref("GoldenReference");
 #endif
+    std::ofstream Out("OutputClasses");
 
     double CorrectFound = 0;
     double CorrectFoundGolden = 0;
@@ -84,6 +85,7 @@ CCS_MAIN(int argc, char* argv)
 #ifdef __FLOATVERSION__
         Ref << foundLabel << std::endl;
 #endif
+        Out << foundLabel << std::endl;
 
         if (realLabel == foundLabel)
             {
@@ -109,6 +111,7 @@ CCS_MAIN(int argc, char* argv)
               100 * CorrectFoundGolden / (double) limit << "%" << std::endl;
 
     Ref.close();
+    Out.close();
 
     CCS_RETURN(0);
 }

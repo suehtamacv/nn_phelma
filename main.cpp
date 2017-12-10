@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <stdlib.h>
 
 #include "convolutionrelu.h"
@@ -7,29 +9,12 @@
 #include "fixedpointvariables.h"
 #include "nnarrays.h"
 
-FILE* image;
+#include <mc_scverify.h>
 
-convKernel_t convKernel[] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 1, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 1, 0, 0, 0, 0
-                            };
-convBias_t   convBias[]   = {0, 0, 0};
+int readAndNormalize(FILE* image, unsigned int i);
+void applyComplete(layerOut_t In[], layerOut_t Out[]);
 
 #pragma hls_design top
-void apply(layerOut_t In[256 * 256 * 3], layerOut_t Out[256 * 256 * 3])
-{
-    ConvolutionReLU<256, 256, 3, 3> Conv1("Conv1", convKernel, convBias, Out);
-    Conv1.apply(In);
-}
-
-#ifndef __SIMULATION__
-
 void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
 {
     layerOut_t Conv1_Out[24 * 24 * 64];
@@ -56,7 +41,79 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
     Percep4.apply(MaxPool3.Y);
 }
 
-int readAndNormalize(unsigned int i)
+CCS_MAIN(int argc, char* argv)
+{
+    FILE* image = fopen("test_batch.bin", "rb");
+    layerOut_t networkOut[10];
+    double goldenOut[10];
+
+#ifdef __FLOATVERSION__
+    std::ofstream Ref("GoldenReference");
+#else
+    std::ifstream Ref("GoldenReference");
+#endif
+
+    double CorrectFound = 0;
+    double CorrectFoundGolden = 0;
+    unsigned int limit = 1000;
+    int goldenLabel;
+
+    for (unsigned int i = 0; i < limit; ++i)
+        {
+        // Reads RAW
+        int realLabel = readAndNormalize(image, i);
+
+#ifndef __FLOATVERSION__
+        // Reads golden version data
+        Ref >> goldenLabel;
+#endif
+
+        CCS_DESIGN(applyComplete)(ImageIn, networkOut);
+
+        int foundLabel = 0;
+        layerOut_t maxFoundLabel = networkOut[0];
+
+        for (unsigned int j = 0; j < 10; ++j)
+            {
+            if (networkOut[j] > maxFoundLabel)
+                {
+                maxFoundLabel = networkOut[j];
+                foundLabel = j;
+                }
+            }
+#ifdef __FLOATVERSION__
+        Ref << foundLabel << std::endl;
+#endif
+
+        if (realLabel == foundLabel)
+            {
+            std::cout << "Correctly classified " << realLabel << "!" << std::endl;
+            CorrectFound++;
+            }
+        else
+            {
+            std::cout << "Incorrectly classified " << realLabel << " as " << foundLabel << "." << std::endl;
+            }
+
+        if (realLabel == goldenLabel)
+            {
+            CorrectFoundGolden++;
+            }
+
+        }
+
+    std::cout << std::endl;
+    std::cout << "Correct rate : " <<
+              100 * CorrectFound / (double) limit << "%" << std::endl;
+    std::cout << "Correct rate found by golden version : " <<
+              100 * CorrectFoundGolden / (double) limit << "%" << std::endl;
+
+    Ref.close();
+
+    CCS_RETURN(0);
+}
+
+int readAndNormalize(FILE* image, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
     unsigned char ImageLabel;
@@ -111,52 +168,3 @@ int readAndNormalize(unsigned int i)
 
     return ImageLabel;
 }
-
-int main()
-{
-    image = fopen("test_batch.bin", "rb");
-    layerOut_t completeOut[10];
-
-    double CorrectFound = 0;
-#ifdef __STAT__
-    unsigned int limit = 5;
-#else
-    unsigned int limit = 1000;
-#endif
-
-    for (unsigned int i = 0; i < limit; ++i)
-        {
-        // Reads RAW
-        int goldenLabel = readAndNormalize(i);
-
-        applyComplete(ImageIn, completeOut);
-        int foundLabel = 0;
-        layerOut_t maxFoundLabel = completeOut[0];
-
-        for (unsigned int i = 0; i < 10; ++i)
-            {
-            if (completeOut[i] > maxFoundLabel)
-                {
-                maxFoundLabel = completeOut[i];
-                foundLabel = i;
-                }
-            }
-
-        if (goldenLabel == foundLabel)
-            {
-            std::cout << "Correctly classified " << goldenLabel << "!" << std::endl;
-            CorrectFound++;
-            }
-        else
-            {
-            std::cout << "Incorrectly classified " << goldenLabel << " as " << foundLabel << "." << std::endl;
-            }
-
-        }
-
-    std::cout << "Correct rate : " << 100 * CorrectFound / (double) limit << "%" << std::endl;
-
-    return 0;
-}
-
-#endif

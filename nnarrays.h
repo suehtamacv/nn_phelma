@@ -12,10 +12,8 @@
 #endif
 
 #define INPUT_SIZE    HEIGHT * WIDTH * 3
-#define OUTPUT_SIZE   HEIGHT * WIDTH * 64
 
 static layerOut_t ImageIn[INPUT_SIZE] = {0};
-static layerOut_t ImageOut[OUTPUT_SIZE] = {0};
 
 #include "biases.h"
 #include "kernels.h"

@@ -11,11 +11,9 @@ public:
     typedef memInterface<sizeY * sizeX * sizeC> memInStruct;
     typedef memInterface < (sizeY / stride) * (sizeX / stride) * sizeC > memOutStruct;
 
-    MaxPooling(const std::string name, ac_channel<memOutStruct> &);
+    MaxPooling(const std::string name);
 
-    void apply(ac_channel<memInStruct> &I);
-
-    ac_channel<memOutStruct> &Y;
+    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y);
 
 private:
     const unsigned int newSizeX;
@@ -33,8 +31,7 @@ private:
 
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-MaxPooling(const std::string name, ac_channel<memOutStruct> &Y) :
-    Y(Y),
+MaxPooling(const std::string name) :
     newSizeX(sizeX / stride),
     newSizeY(sizeY / stride),
     name(name)
@@ -45,7 +42,7 @@ MaxPooling(const std::string name, ac_channel<memOutStruct> &Y) :
 #pragma design
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-apply(ac_channel<memInStruct> &I)
+apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
 {
     if (!I.available(1))
         {

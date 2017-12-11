@@ -13,27 +13,27 @@ void applyComplete(ac_channel<memInterface<INPUT_SIZE> > &In,
         return;
         }
 
-    ac_channel<ConvolutionReLU<24, 24, 3, 64>::memOutStruct> Conv1_Out;
-    ac_channel<MaxPooling<2, 3, 24, 24, 64>::memOutStruct> MaxPool1_Out;
-    ac_channel<ConvolutionReLU<12, 12, 64, 32>::memOutStruct> Conv2_Out;
-    ac_channel<MaxPooling<2, 3, 12, 12, 32>::memOutStruct> MaxPool2_Out;
-    ac_channel<ConvolutionReLU<6, 6, 32, 20>::memOutStruct> Conv3_Out;
-    ac_channel<MaxPooling<2, 3, 6, 6, 20>::memOutStruct> MaxPool3_Out;
+    static ac_channel<ConvolutionReLU<24, 24, 3, 64>::memOutStruct> Conv1_Out;
+    static ac_channel<MaxPooling<2, 3, 24, 24, 64>::memOutStruct> MaxPool1_Out;
+    static ac_channel<ConvolutionReLU<12, 12, 64, 32>::memOutStruct> Conv2_Out;
+    static ac_channel<MaxPooling<2, 3, 12, 12, 32>::memOutStruct> MaxPool2_Out;
+    static ac_channel<ConvolutionReLU<6, 6, 32, 20>::memOutStruct> Conv3_Out;
+    static ac_channel<MaxPooling<2, 3, 6, 6, 20>::memOutStruct> MaxPool3_Out;
 
-    ConvolutionReLU<24, 24, 3, 64> Conv1("Conv1", convKernel1, convBias1, Conv1_Out);
-    MaxPooling<2, 3, 24, 24, 64> MaxPool1("MaxPool1", MaxPool1_Out);
-    ConvolutionReLU<12, 12, 64, 32> Conv2("Conv2", convKernel2, convBias2, Conv2_Out);
-    MaxPooling<2, 3, 12, 12, 32> MaxPool2("MaxPool2", MaxPool2_Out);
-    ConvolutionReLU<6, 6, 32, 20> Conv3("Conv3", convKernel3, convBias3, Conv3_Out);
-    MaxPooling<2, 3, 6, 6, 20> MaxPool3("MaxPool3", MaxPool3_Out);
-    Perceptron<180, 10> Percep4("Percep4", perceptronKernel4, perceptronBias4, Out);
+    ConvolutionReLU<24, 24, 3, 64> Conv1("Conv1", convKernel1, convBias1);
+    MaxPooling<2, 3, 24, 24, 64> MaxPool1("MaxPool1");
+    ConvolutionReLU<12, 12, 64, 32> Conv2("Conv2", convKernel2, convBias2);
+    MaxPooling<2, 3, 12, 12, 32> MaxPool2("MaxPool2");
+    ConvolutionReLU<6, 6, 32, 20> Conv3("Conv3", convKernel3, convBias3);
+    MaxPooling<2, 3, 6, 6, 20> MaxPool3("MaxPool3");
+    Perceptron<180, 10> Percep4("Percep4", perceptronKernel4, perceptronBias4);
 
-    Conv1.apply(In);
-    MaxPool1.apply(Conv1.Y);
-    Conv2.apply(MaxPool1.Y);
-    MaxPool2.apply(Conv2.Y);
-    Conv3.apply(MaxPool2.Y);
-    MaxPool3.apply(Conv3.Y);
-    Percep4.apply(MaxPool3.Y);
+    Conv1.apply(In, Conv1_Out);
+    MaxPool1.apply(Conv1_Out, MaxPool1_Out);
+    Conv2.apply(MaxPool1_Out, Conv2_Out);
+    MaxPool2.apply(Conv2_Out, MaxPool2_Out);
+    Conv3.apply(MaxPool2_Out, Conv3_Out);
+    MaxPool3.apply(Conv3_Out, MaxPool3_Out);
+    Percep4.apply(MaxPool3_Out, Out);
 }
 

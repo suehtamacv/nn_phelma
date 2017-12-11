@@ -17,8 +17,6 @@ public:
     void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y);
 
 private:
-    memInStruct  bufferI;
-    memOutStruct bufferY;
 
     ///
     /// \brief K
@@ -62,7 +60,8 @@ template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
 apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
 {
-    bufferI = I.read();
+    memInStruct  bufferI = I.read();
+    memOutStruct bufferY;
 
 loopY:
     for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)

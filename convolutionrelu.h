@@ -32,14 +32,11 @@ private:
     ///
     const convBias_t B[sizeL];
 
-    memInStruct  bufferI;
-    memOutStruct bufferY;
-
     const std::string name;
 
     void calculateG(convKernel_t (&G)[16], const convKernel_t *);
     void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16]);
-    void getImageBlock(memInStruct *, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+    void getImageBlock(memInStruct &, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
                        const unsigned int cI);
 };
 
@@ -72,7 +69,8 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(ac_channel<memInStruct> &I,
         ac_channel<memOutStruct> &Y)
 {
-    bufferI = I.read();
+    memInStruct  bufferI = I.read();
+    memOutStruct bufferY;
 
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -99,7 +97,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock(&bufferI, Block, xI, yI, cI);
+                    getImageBlock(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, K + ((lI * sizeC + cI) * 9));
@@ -245,7 +243,7 @@ calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-getImageBlock(memInStruct *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+getImageBlock(memInStruct &I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
               const unsigned int cI)
 {
 #define B(y, x) \
@@ -253,10 +251,10 @@ getImageBlock(memInStruct *I, layerOut_t *Block, const unsigned int xI, const un
 
 #ifdef __HWC__
 #define T(y, x) \
-    I->Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
+    I.Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
 #else
 #define T(y, x) \
-    I->Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
+    I.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
 

@@ -19,9 +19,6 @@ private:
     const unsigned int newSizeX;
     const unsigned int newSizeY;
 
-    memInStruct  bufferI;
-    memOutStruct bufferY;
-
     const std::string name;
 };
 
@@ -44,7 +41,8 @@ template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigne
 void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
 {
-    bufferI = I.read();
+    memInStruct  bufferI = I.read();
+    memOutStruct bufferY;
 
 #ifdef __HWC__
 #define T(x, y) \

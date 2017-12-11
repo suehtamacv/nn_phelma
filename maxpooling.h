@@ -44,11 +44,6 @@ template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigne
 void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
 {
-    if (!I.available(1))
-        {
-        return;
-        }
-
     bufferI = I.read();
 
 #ifdef __HWC__

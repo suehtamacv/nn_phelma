@@ -8,11 +8,6 @@
 void applyComplete(ac_channel<memInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out)
 {
-    if (!In.available(1))
-        {
-        return;
-        }
-
     static ac_channel<ConvolutionReLU<24, 24, 3, 64>::memOutStruct> Conv1_Out;
     static ac_channel<MaxPooling<2, 3, 24, 24, 64>::memOutStruct> MaxPool1_Out;
     static ac_channel<ConvolutionReLU<12, 12, 64, 32>::memOutStruct> Conv2_Out;

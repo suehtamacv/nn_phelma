@@ -40,7 +40,8 @@ private:
 
 template<unsigned int sizeKx, unsigned int sizeKy>
 Perceptron<sizeKx, sizeKy>::
-  Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy], const perceptronBias_t (&B)[sizeKy]) :
+Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy],
+           const perceptronBias_t (&B)[sizeKy]) :
     K(K), B(B), name(name)
 {
 #ifdef __STAT__
@@ -61,10 +62,6 @@ template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
 apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
 {
-    if (!I.available(1))
-        {
-        return;
-        }
     bufferI = I.read();
 
 loopY:

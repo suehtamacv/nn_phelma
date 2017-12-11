@@ -39,7 +39,7 @@ private:
 
     void calculateG(convKernel_t (&G)[16], const convKernel_t *);
     void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16]);
-    void getImageBlock(memInStruct &, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+    void getImageBlock(memInStruct *, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
                        const unsigned int cI);
 };
 
@@ -51,7 +51,7 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 ConvolutionReLU(const std::string name,
                 const convKernel_t (&K)[sizeC * sizeL * 3 * 3], const convBias_t (&B)[sizeL]) :
-  K(K), B(B), name(name)
+    K(K), B(B), name(name)
 {
 #ifdef __STAT__
     for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
@@ -69,13 +69,9 @@ ConvolutionReLU(const std::string name,
 
 #pragma design
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-  void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
+void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(ac_channel<memInStruct> &I,
+        ac_channel<memOutStruct> &Y)
 {
-    if (!I.available(1))
-        {
-        return;
-        }
-
     bufferI = I.read();
 
     convKernel_t G[tileSize * tileSize];
@@ -103,7 +99,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock(bufferI, Block, xI, yI, cI);
+                    getImageBlock(&bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, K + ((lI * sizeC + cI) * 9));
@@ -249,7 +245,7 @@ calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-getImageBlock(memInStruct &I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+getImageBlock(memInStruct *I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
               const unsigned int cI)
 {
 #define B(y, x) \
@@ -257,10 +253,10 @@ getImageBlock(memInStruct &I, layerOut_t *Block, const unsigned int xI, const un
 
 #ifdef __HWC__
 #define T(y, x) \
-    I[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
+    I->Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
 #else
 #define T(y, x) \
-    I.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
+    I->Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
 

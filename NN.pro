@@ -17,6 +17,7 @@ HEADERS += \
     convolutionrelu.h \
     perceptron.h \
     biases.h \
-    kernels.h
+    kernels.h \
+    meminterface.h
 
 LIBS += -lpng

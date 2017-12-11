@@ -2,24 +2,31 @@
 #define PERCEPTRON_H
 
 #include "fixedpointvariables.h"
+#include "meminterface.h"
 
 template<unsigned int sizeKx, unsigned int sizeKy>
 class Perceptron
 {
 public:
+    typedef memInterface<sizeKx> memInStruct;
+    typedef memInterface<sizeKy> memOutStruct;
+
     Perceptron(const std::string name, const perceptronKernel_t K[sizeKx * sizeKy],
                const perceptronBias_t B[sizeKx],
-               layerOut_t *pY);
+               ac_channel<memOutStruct> &Y);
 
-    void apply(layerOut_t*);
+    void apply(ac_channel<memInStruct>&);
 
     ///
     /// \brief Y
     /// Size : sizeKy
     ///
-    layerOut_t *Y;
+    ac_channel<memOutStruct> &Y;
 
 private:
+    memInStruct  bufferI;
+    memOutStruct bufferY;
+
     ///
     /// \brief K
     /// Size : sizeKy * sizeKx
@@ -41,7 +48,7 @@ private:
 template<unsigned int sizeKx, unsigned int sizeKy>
 Perceptron<sizeKx, sizeKy>::
 Perceptron(const std::string name, const perceptronKernel_t *K, const perceptronBias_t *B,
-           layerOut_t *pY) : Y(pY),
+           ac_channel<memOutStruct> &Y) : Y(Y),
     K(K), B(B), name(name)
 {
 #ifdef __STAT__
@@ -60,27 +67,31 @@ Perceptron(const std::string name, const perceptronKernel_t *K, const perceptron
 #pragma design
 template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
-apply(layerOut_t *I)
+apply(ac_channel<memInStruct> &I)
 {
-    layerOut_t tempY[sizeKy];
+    if (!I.available(1))
+        {
+        return;
+        }
+    bufferI = I.read();
 
 loopY:
     for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
         {
-        tempY[iKy] = B[iKy];
+        bufferY.Y[iKy] = B[iKy];
 
 loopX:
         for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
             {
-            tempY[iKy] += K[iKy * sizeKx + iKx] * I[iKx];
+            bufferY.Y[iKy] += K[iKy * sizeKx + iKx] * bufferI.Y[iKx];
             }
-
-        Y[iKy] = tempY[iKy];
 
 #ifdef __STAT__
         std::cout << name << " Y " << Y[iKy] << std::endl;
 #endif
         }
+
+    Y.write(bufferY);
 
 }
 

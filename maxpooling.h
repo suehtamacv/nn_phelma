@@ -2,20 +2,27 @@
 #define MAXPOOLING_H
 
 #include "fixedpointvariables.h"
+#include "meminterface.h"
 
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 class MaxPooling
 {
 public:
-    MaxPooling(const std::string name, layerOut_t*);
+    typedef memInterface<sizeY * sizeX * sizeC> memInStruct;
+    typedef memInterface < (sizeY / stride) * (sizeX / stride) * sizeC > memOutStruct;
 
-    void apply(layerOut_t *I);
+    MaxPooling(const std::string name, ac_channel<memOutStruct> &);
 
-    layerOut_t *Y;
+    void apply(ac_channel<memInStruct> &I);
+
+    ac_channel<memOutStruct> &Y;
 
 private:
     const unsigned int newSizeX;
     const unsigned int newSizeY;
+
+    memInStruct  bufferI;
+    memOutStruct bufferY;
 
     const std::string name;
 };
@@ -26,8 +33,8 @@ private:
 
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-MaxPooling(const std::string name, layerOut_t* pY) :
-    Y(pY),
+MaxPooling(const std::string name, ac_channel<memOutStruct> &Y) :
+    Y(Y),
     newSizeX(sizeX / stride),
     newSizeY(sizeY / stride),
     name(name)
@@ -38,14 +45,21 @@ MaxPooling(const std::string name, layerOut_t* pY) :
 #pragma design
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-apply(layerOut_t *I)
+apply(ac_channel<memInStruct> &I)
 {
+    if (!I.available(1))
+        {
+        return;
+        }
+
+    bufferI = I.read();
+
 #ifdef __HWC__
 #define T(x, y) \
-    I[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
+    bufferI.Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
 #else
 #define T(x, y) \
-    I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
+    bufferI.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
     unsigned int nxI = 0, nyI = 0;
@@ -89,11 +103,14 @@ loopXBlock:
                         }
                     }
 
-                Y[offsetY] = tempMax;
+                bufferY.Y[offsetY] = tempMax;
                 }
 
             }
         }
+
+    Y.write(bufferY);
+
 #undef T
 }
 

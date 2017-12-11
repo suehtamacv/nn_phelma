@@ -11,18 +11,24 @@
 
 #include <mc_scverify.h>
 
-int readAndNormalize(FILE* image, unsigned int i);
+int readAndNormalize(FILE* image, memInterface<INPUT_SIZE> &Y, unsigned int i);
 void applyComplete(layerOut_t In[], layerOut_t Out[]);
 
 #pragma hls_design top
-void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
+void applyComplete(ac_channel<ConvolutionReLU<24, 24, 3, 64>::memInStruct> &In,
+                   ac_channel<memInterface<10>> &Out)
 {
-    layerOut_t Conv1_Out[24 * 24 * 64];
-    layerOut_t MaxPool1_Out[12 * 12 * 64];
-    layerOut_t Conv2_Out[12 * 12 * 32];
-    layerOut_t MaxPool2_Out[6 * 6 * 32];
-    layerOut_t Conv3_Out[6 * 6 * 20];
-    layerOut_t MaxPool3_Out[3 * 3 * 20];
+    if (!In.available(1))
+        {
+        return;
+        }
+
+    ac_channel<ConvolutionReLU<24, 24, 3, 64>::memOutStruct> Conv1_Out;
+    ac_channel<MaxPooling<2, 3, 24, 24, 64>::memOutStruct> MaxPool1_Out;
+    ac_channel<ConvolutionReLU<12, 12, 64, 32>::memOutStruct> Conv2_Out;
+    ac_channel<MaxPooling<2, 3, 12, 12, 32>::memOutStruct> MaxPool2_Out;
+    ac_channel<ConvolutionReLU<6, 6, 32, 20>::memOutStruct> Conv3_Out;
+    ac_channel<MaxPooling<2, 3, 6, 6, 20>::memOutStruct> MaxPool3_Out;
 
     ConvolutionReLU<24, 24, 3, 64> Conv1("Conv1", convKernel1, convBias1, Conv1_Out);
     MaxPooling<2, 3, 24, 24, 64> MaxPool1("MaxPool1", MaxPool1_Out);
@@ -44,7 +50,10 @@ void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
-    layerOut_t networkOut[10];
+    ac_channel<memInterface<INPUT_SIZE>> networkInChannel;
+    ac_channel<memInterface<10>> networkOutChannel;
+    memInterface<INPUT_SIZE> networkIn;
+    memInterface<10> networkOut;
     double goldenOut[10];
 
 #ifdef __FLOATVERSION__
@@ -62,23 +71,30 @@ CCS_MAIN(int argc, char* argv)
     for (unsigned int i = 0; i < limit; ++i)
         {
         // Reads RAW
-        int realLabel = readAndNormalize(image, i);
+        int realLabel = readAndNormalize(image, networkIn, i);
 
 #ifndef __FLOATVERSION__
         // Reads golden version data
         Ref >> goldenLabel;
 #endif
+        networkInChannel.write(networkIn);
 
-        CCS_DESIGN(applyComplete)(ImageIn, networkOut);
+        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel);
+
+        while (!networkOutChannel.available(1))
+            {
+
+            }
+        networkOut = networkOutChannel.read();
 
         int foundLabel = 0;
-        layerOut_t maxFoundLabel = networkOut[0];
+        layerOut_t maxFoundLabel = networkOut.Y[0];
 
         for (unsigned int j = 0; j < 10; ++j)
             {
-            if (networkOut[j] > maxFoundLabel)
+            if (networkOut.Y[j] > maxFoundLabel)
                 {
-                maxFoundLabel = networkOut[j];
+                maxFoundLabel = networkOut.Y[j];
                 foundLabel = j;
                 }
             }
@@ -116,7 +132,7 @@ CCS_MAIN(int argc, char* argv)
     CCS_RETURN(0);
 }
 
-int readAndNormalize(FILE* image, unsigned int i)
+int readAndNormalize(FILE* image, memInterface<INPUT_SIZE> &Y, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
     unsigned char ImageLabel;
@@ -160,9 +176,9 @@ int readAndNormalize(FILE* image, unsigned int i)
             for (unsigned int xI = 0; xI < 24; ++xI)
                 {
 #ifdef __HWC__
-                ImageIn[yI * 24 * 3 + xI * 3 + cI] =
+                Y.Y[yI * 24 * 3 + xI * 3 + cI] =
 #else
-                ImageIn[cI * 24 * 24 + yI * 24 + xI] =
+                Y.Y[cI * 24 * 24 + yI * 24 + xI] =
 #endif
                     (ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average) / std::max(StdDev, minStdDev);
                 }

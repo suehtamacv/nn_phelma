@@ -15,8 +15,8 @@ int readAndNormalize(FILE* image, memInterface<INPUT_SIZE> &Y, unsigned int i);
 void applyComplete(layerOut_t In[], layerOut_t Out[]);
 
 #pragma hls_design top
-void applyComplete(ac_channel<ConvolutionReLU<24, 24, 3, 64>::memInStruct> &In,
-                   ac_channel<memInterface<10>> &Out)
+void applyComplete(ac_channel<ConvolutionReLU<24, 24, 3, 64>::memInStruct > &In,
+                   ac_channel<memInterface<10> > &Out)
 {
     if (!In.available(1))
         {
@@ -50,8 +50,8 @@ void applyComplete(ac_channel<ConvolutionReLU<24, 24, 3, 64>::memInStruct> &In,
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
-    ac_channel<memInterface<INPUT_SIZE>> networkInChannel;
-    ac_channel<memInterface<10>> networkOutChannel;
+    ac_channel<memInterface<INPUT_SIZE> > networkInChannel;
+    ac_channel<memInterface<10> > networkOutChannel;
     memInterface<INPUT_SIZE> networkIn;
     memInterface<10> networkOut;
     double goldenOut[10];

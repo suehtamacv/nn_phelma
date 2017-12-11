@@ -20,7 +20,7 @@ public:
 
     void apply(ac_channel<memInStruct> &I);
 
-    ac_channel<memOutStruct> Y;
+    ac_channel<memOutStruct> &Y;
 
 private:
     ///
@@ -40,8 +40,8 @@ private:
 
     const std::string name;
 
-    void calculateG(convKernel_t *, const convKernel_t *);
-    void calculateD(layerOut_t *I, convD_t *D);
+    void calculateG(convKernel_t (&G)[16], const convKernel_t *);
+    void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16]);
     void getImageBlock(memInStruct &, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
                        const unsigned int cI);
 };
@@ -179,7 +179,7 @@ loopOutputBlock:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-calculateG(convKernel_t *G, const convKernel_t *K)
+calculateG(convKernel_t (&G)[16], const convKernel_t *K)
 {
     // Flipping convolution kernel
 #define K(y, x) K[y * 3 + x]
@@ -216,7 +216,7 @@ calculateG(convKernel_t *G, const convKernel_t *K)
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-calculateD(layerOut_t *Block, convD_t *D)
+calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
 {
 #define B(y, x) \
     Block[y * tileSize + x]

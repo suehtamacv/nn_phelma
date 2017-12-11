@@ -15,7 +15,7 @@ public:
 
     void apply(ac_channel<memInStruct> &I);
 
-    ac_channel<memOutStruct> Y;
+    ac_channel<memOutStruct> &Y;
 
 private:
     const unsigned int newSizeX;

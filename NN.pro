@@ -8,7 +8,8 @@ QMAKE_CXXFLAGS += -O1
 
 INCLUDEPATH += include/
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    top.cpp
 
 HEADERS += \
     maxpooling.h \

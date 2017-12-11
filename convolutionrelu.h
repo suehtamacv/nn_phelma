@@ -15,25 +15,25 @@ public:
     typedef memInterface<sizeY * sizeX * sizeL> memOutStruct;
 
     ConvolutionReLU(const std::string name,
-                    const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL],
+                    const convKernel_t (&K)[sizeC * sizeL * 3 * 3], const convBias_t (&B)[sizeL],
                     ac_channel<memOutStruct> &Y);
 
     void apply(ac_channel<memInStruct> &I);
 
-    ac_channel<memOutStruct> &Y;
+    ac_channel<memOutStruct> Y;
 
 private:
     ///
     /// \brief K is the convolution kernel.
     /// Size : sizeC * sizeL * 3 * 3
     ///
-    const convKernel_t *K;
+    const convKernel_t K[sizeC * sizeL * 3 * 3];
 
     ///
     /// \brief B are the biases.
     /// Size : sizeL
     ///
-    const convBias_t *B;
+    const convBias_t B[sizeL];
 
     memInStruct  bufferI;
     memOutStruct bufferY;
@@ -42,7 +42,7 @@ private:
 
     void calculateG(convKernel_t *, const convKernel_t *);
     void calculateD(layerOut_t *I, convD_t *D);
-    void getImageBlock(memInStruct, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+    void getImageBlock(memInStruct &, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
                        const unsigned int cI);
 };
 
@@ -53,7 +53,7 @@ private:
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
 ConvolutionReLU(const std::string name,
-                const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL],
+                const convKernel_t (&K)[sizeC * sizeL * 3 * 3], const convBias_t (&B)[sizeL],
                 ac_channel<memOutStruct> &Y) :
     Y(Y), K(K), B(B), name(name)
 {
@@ -253,7 +253,7 @@ calculateD(layerOut_t *Block, convD_t *D)
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-getImageBlock(memInStruct I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
+getImageBlock(memInStruct &I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
               const unsigned int cI)
 {
 #define B(y, x) \

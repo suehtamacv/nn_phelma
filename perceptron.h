@@ -11,8 +11,8 @@ public:
     typedef memInterface<sizeKx> memInStruct;
     typedef memInterface<sizeKy> memOutStruct;
 
-    Perceptron(const std::string name, const perceptronKernel_t K[sizeKx * sizeKy],
-               const perceptronBias_t B[sizeKx],
+    Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy],
+               const perceptronBias_t (&B)[sizeKy],
                ac_channel<memOutStruct> &Y);
 
     void apply(ac_channel<memInStruct>&);
@@ -31,12 +31,12 @@ private:
     /// \brief K
     /// Size : sizeKy * sizeKx
     ///
-    const perceptronKernel_t *K;
+    const perceptronKernel_t K[sizeKx * sizeKy];
 
     ///
     /// \brief B
-    /// Size : sizeKx
-    const perceptronBias_t *B;
+    /// Size : sizeKy
+    const perceptronBias_t B[sizeKy];
 
     const std::string name;
 };
@@ -47,7 +47,7 @@ private:
 
 template<unsigned int sizeKx, unsigned int sizeKy>
 Perceptron<sizeKx, sizeKy>::
-Perceptron(const std::string name, const perceptronKernel_t *K, const perceptronBias_t *B,
+Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy], const perceptronBias_t (&B)[sizeKy],
            ac_channel<memOutStruct> &Y) : Y(Y),
     K(K), B(B), name(name)
 {

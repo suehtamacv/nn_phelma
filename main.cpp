@@ -13,7 +13,7 @@ void applyComplete(ac_channel<memInterface<INPUT_SIZE> > &In,
 
 CCS_MAIN(int argc, char* argv)
 {
-    FILE* image = fopen("test_batch.bin", "rb");
+    FILE* image = fopen("/tp-fmr/SEI_SoC_CNN/cifar10_data/cifar-10-batches-bin/test_batch.bin", "rb");
     ac_channel<memInterface<INPUT_SIZE> > networkInChannel;
     ac_channel<memInterface<10> > networkOutChannel;
     memInterface<INPUT_SIZE> networkIn;

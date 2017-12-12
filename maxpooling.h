@@ -4,6 +4,9 @@
 #include "fixedpointvariables.h"
 #include "meminterface.h"
 
+#define newSizeX  (sizeX / stride)
+#define newSizeY  (sizeY / stride)
+
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 class MaxPooling
 {
@@ -16,9 +19,6 @@ public:
     void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y);
 
 private:
-    const unsigned int newSizeX;
-    const unsigned int newSizeY;
-
     const std::string name;
 };
 
@@ -29,8 +29,6 @@ private:
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
 MaxPooling(const std::string name) :
-    newSizeX(sizeX / stride),
-    newSizeY(sizeY / stride),
     name(name)
 {
 
@@ -54,6 +52,7 @@ apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
 
     unsigned int nxI = 0, nyI = 0;
     layerOut_t tempMax = 0;
+    layerOut_t tempVal = 0;
 
 loopChannels:
     for (unsigned int cI = 0; cI < sizeC; ++cI)
@@ -79,16 +78,19 @@ loopX:
                 const unsigned int xLim = xBorder ? sizeX - xI : poolSize;
                 const unsigned int yLim = yBorder ? sizeY - yI : poolSize;
 
-                tempMax = T(0, 0);
+		tempVal = T(0, 0);
+
+                tempMax = tempVal;
 loopYBlock:
                 for (unsigned int yO = 0; yO < yLim; ++yO)
                     {
 loopXBlock:
                     for (unsigned int xO = 0; xO < xLim; ++xO)
                         {
-                        if (tempMax < T(xO, yO))
+			tempVal = T(xO, yO);
+                        if (tempMax < tempVal)
                             {
-                            tempMax = T(xO, yO);
+                            tempMax = tempVal;
                             }
                         }
                     }
@@ -103,5 +105,8 @@ loopXBlock:
 
 #undef T
 }
+
+#undef newSizeX
+#undef newSizeY
 
 #endif // MAXPOOLING_H

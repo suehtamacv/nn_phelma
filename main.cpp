@@ -18,7 +18,6 @@ CCS_MAIN(int argc, char* argv)
     ac_channel<memInterface<10> > networkOutChannel;
     memInterface<INPUT_SIZE> networkIn;
     memInterface<10> networkOut;
-    double goldenOut[10];
 
 #ifdef __FLOATVERSION__
     std::ofstream Ref("GoldenReference");
@@ -29,7 +28,7 @@ CCS_MAIN(int argc, char* argv)
 
     double CorrectFound = 0;
     double CorrectFoundGolden = 0;
-    unsigned int limit = 1000;
+    unsigned int limit = 5000;
     int goldenLabel;
 
     for (unsigned int i = 0; i < limit; ++i)
@@ -45,10 +44,6 @@ CCS_MAIN(int argc, char* argv)
 
         CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel);
 
-        while (!networkOutChannel.available(1))
-            {
-
-            }
         networkOut = networkOutChannel.read();
 
         int foundLabel = 0;

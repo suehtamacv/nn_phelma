@@ -65,21 +65,13 @@ loopY:
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
-
-#ifdef __HWC__
-                const unsigned int offsetY = nyI * newSizeX * sizeC + nxI * sizeC + cI;
-#else
-                const unsigned int offsetY = cI * newSizeY * newSizeX + nyI * newSizeX + nxI;
-#endif
-
                 const bool xBorder = xI + poolSize >= sizeX;
                 const bool yBorder = yI + poolSize >= sizeY;
 
                 const unsigned int xLim = xBorder ? sizeX - xI : poolSize;
                 const unsigned int yLim = yBorder ? sizeY - yI : poolSize;
 
-		tempVal = T(0, 0);
-
+                tempVal = T(0, 0);
                 tempMax = tempVal;
 loopYBlock:
                 for (unsigned int yO = 0; yO < yLim; ++yO)
@@ -87,15 +79,16 @@ loopYBlock:
 loopXBlock:
                     for (unsigned int xO = 0; xO < xLim; ++xO)
                         {
-			tempVal = T(xO, yO);
-                        if (tempMax < tempVal)
-                            {
-                            tempMax = tempVal;
-                            }
+                        tempVal = T(xO, yO);
+                        tempMax = (tempMax < tempVal) ? tempVal : tempMax;
                         }
                     }
 
-                bufferY.Y[offsetY] = tempMax;
+#ifdef __HWC__
+                bufferY.Y[nyI * newSizeX * sizeC + nxI * sizeC + cI] = tempMax;
+#else
+                bufferY.Y[cI * newSizeY * newSizeX + nyI * newSizeX + nxI] = tempMax;
+#endif
                 }
 
             }

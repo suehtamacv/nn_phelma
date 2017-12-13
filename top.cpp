@@ -23,6 +23,8 @@ void applyComplete(ac_channel<memInterface<INPUT_SIZE> > &In,
     MaxPooling<2, 3, 6, 6, 20> MaxPool3("MaxPool3");
     Perceptron<180, 10> Percep4("Percep4");
 
+
+
     Conv1.apply(In, Conv1_Out, convKernel1, convBias1);
     MaxPool1.apply(Conv1_Out, MaxPool1_Out);
     Conv2.apply(MaxPool1_Out, Conv2_Out, convKernel2, convBias2);

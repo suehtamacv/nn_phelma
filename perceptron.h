@@ -10,11 +10,13 @@ class Perceptron
 public:
     typedef memInterface<sizeKx> memInStruct;
     typedef memInterface<sizeKy> memOutStruct;
+    typedef perceptronKernelInterface<sizeKx * sizeKy> kernelStruct;
+    typedef perceptronBiasInterface<sizeKy> biasStruct;
 
     Perceptron(const std::string name);
 
     void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
-               const perceptronKernel_t K[sizeKx * sizeKy], const perceptronBias_t B[sizeKy]);
+               const kernelStruct &KS, const biasStruct &BS);
 
 
 private:
@@ -46,8 +48,8 @@ Perceptron(const std::string name) :
 #pragma design
 template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
-apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y, const perceptronKernel_t K[sizeKx * sizeKy],
-      const perceptronBias_t B[sizeKy])
+apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
+      const kernelStruct &KS, const biasStruct &BS)
 {
     memInStruct  bufferI = I.read();
     memOutStruct bufferY;
@@ -55,12 +57,12 @@ apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y, const perceptronK
 loopY:
     for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
         {
-        bufferY.Y[iKy] = B[iKy];
+        bufferY.Y[iKy] = BS.B[iKy];
 
 loopX:
         for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
             {
-            bufferY.Y[iKy] += K[iKy * sizeKx + iKx] * bufferI.Y[iKx];
+            bufferY.Y[iKy] += KS.K[iKy * sizeKx + iKx] * bufferI.Y[iKx];
             }
 
 #ifdef __STAT__

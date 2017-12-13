@@ -13,11 +13,13 @@ class ConvolutionReLU
 public:
     typedef memInterface<sizeY * sizeX * sizeC> memInStruct;
     typedef memInterface<sizeY * sizeX * sizeL> memOutStruct;
+    typedef convKernelInterface<sizeC * sizeL * 3 * 3> kernelStruct;
+    typedef convBiasInterface<sizeL> biasStruct;
 
     ConvolutionReLU(const std::string name);
 
-    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y, const convKernel_t K[],
-               const convBias_t B[]);
+    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
+               const kernelStruct &KS, const biasStruct &BS);
 
 private:
     const std::string name;
@@ -55,7 +57,7 @@ ConvolutionReLU(const std::string name) :
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply
 (ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
- const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL])
+ const kernelStruct &KS, const biasStruct &BS)
 {
     memInStruct  bufferI = I.read();
     memOutStruct bufferY;
@@ -88,7 +90,7 @@ loopConvInChannel:
                     getImageBlock(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateG(G, KS.K + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:
@@ -126,8 +128,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + BS.B[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + BS.B[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;

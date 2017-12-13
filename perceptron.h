@@ -11,24 +11,13 @@ public:
     typedef memInterface<sizeKx> memInStruct;
     typedef memInterface<sizeKy> memOutStruct;
 
-    Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy],
-               const perceptronBias_t (&B)[sizeKy]);
+    Perceptron(const std::string name);
 
-    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y);
+    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
+               const perceptronKernel_t K[sizeKx * sizeKy], const perceptronBias_t B[sizeKy]);
+
 
 private:
-
-    ///
-    /// \brief K
-    /// Size : sizeKy * sizeKx
-    ///
-    const perceptronKernel_t K[sizeKx * sizeKy];
-
-    ///
-    /// \brief B
-    /// Size : sizeKy
-    const perceptronBias_t B[sizeKy];
-
     const std::string name;
 };
 
@@ -38,9 +27,8 @@ private:
 
 template<unsigned int sizeKx, unsigned int sizeKy>
 Perceptron<sizeKx, sizeKy>::
-Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy],
-           const perceptronBias_t (&B)[sizeKy]) :
-    K(K), B(B), name(name)
+Perceptron(const std::string name) :
+    name(name)
 {
 #ifdef __STAT__
     for (unsigned int i = 0; i < sizeKy * sizeKx; ++i)
@@ -58,7 +46,8 @@ Perceptron(const std::string name, const perceptronKernel_t (&K)[sizeKx * sizeKy
 #pragma design
 template<unsigned int sizeKx, unsigned int sizeKy>
 void Perceptron<sizeKx, sizeKy>::
-apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
+apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y, const perceptronKernel_t K[sizeKx * sizeKy],
+      const perceptronBias_t B[sizeKy])
 {
     memInStruct  bufferI = I.read();
     memOutStruct bufferY;

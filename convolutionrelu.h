@@ -14,24 +14,12 @@ public:
     typedef memInterface<sizeY * sizeX * sizeC> memInStruct;
     typedef memInterface<sizeY * sizeX * sizeL> memOutStruct;
 
-    ConvolutionReLU(const std::string name,
-                    const convKernel_t (&K)[sizeC * sizeL * 3 * 3], const convBias_t (&B)[sizeL]);
+    ConvolutionReLU(const std::string name);
 
-    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y);
+    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y, const convKernel_t K[],
+               const convBias_t B[]);
 
 private:
-    ///
-    /// \brief K is the convolution kernel.
-    /// Size : sizeC * sizeL * 3 * 3
-    ///
-    const convKernel_t K[sizeC * sizeL * 3 * 3];
-
-    ///
-    /// \brief B are the biases.
-    /// Size : sizeL
-    ///
-    const convBias_t B[sizeL];
-
     const std::string name;
 
     void calculateG(convKernel_t (&G)[16], const convKernel_t *);
@@ -46,9 +34,8 @@ private:
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
 ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-ConvolutionReLU(const std::string name,
-                const convKernel_t (&K)[sizeC * sizeL * 3 * 3], const convBias_t (&B)[sizeL]) :
-    K(K), B(B), name(name)
+ConvolutionReLU(const std::string name) :
+    name(name)
 {
 #ifdef __STAT__
     for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
@@ -66,8 +53,9 @@ ConvolutionReLU(const std::string name,
 
 #pragma design
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply(ac_channel<memInStruct> &I,
-        ac_channel<memOutStruct> &Y)
+void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply
+(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
+ const convKernel_t K[sizeC * sizeL * 3 * 3], const convBias_t B[sizeL])
 {
     memInStruct  bufferI = I.read();
     memOutStruct bufferY;

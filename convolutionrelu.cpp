@@ -1,4 +1,6 @@
 #include "convolutionrelu.h"
+#include "kernels.h"
+#include "biases.h"
 
 #pragma design
 void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y)
@@ -10,15 +12,6 @@ void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y)
 
     conv1_In_t  bufferI = I.read();
     conv1_Out_t bufferY;
-
-    const convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
-        {
-#include "kernel_conv1.h"
-        };
-    const convBias_t B[sizeL] =
-        {
-#include "bias_conv1.h"
-        };
 
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -48,7 +41,7 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:
@@ -86,8 +79,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
@@ -131,15 +124,6 @@ void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y)
     conv2_In_t  bufferI = I.read();
     conv2_Out_t bufferY;
 
-    const convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
-        {
-#include "kernel_conv2.h"
-        };
-    const convBias_t B[sizeL] =
-        {
-#include "bias_conv2.h"
-        };
-
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
@@ -168,7 +152,7 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateG(G, convKernel2 + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:
@@ -206,8 +190,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias2[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias2[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
@@ -251,15 +235,6 @@ void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y)
     conv3_In_t  bufferI = I.read();
     conv3_Out_t bufferY;
 
-    const convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
-        {
-#include "kernel_conv3.h"
-        };
-    const convBias_t B[sizeL] =
-        {
-#include "bias_conv3.h"
-        };
-
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
@@ -288,7 +263,7 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateG(G, convKernel3 + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:
@@ -326,8 +301,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias3[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias3[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;

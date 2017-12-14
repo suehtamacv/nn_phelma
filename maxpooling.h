@@ -38,21 +38,19 @@ loopY:
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
-                const bool xBorder = xI + poolSize >= sizeX;
-                const bool yBorder = yI + poolSize >= sizeY;
-
-                const unsigned int xLim = xBorder ? sizeX - xI : poolSize;
-                const unsigned int yLim = yBorder ? sizeY - yI : poolSize;
-
                 tempVal = T(0, 0);
                 tempMax = tempVal;
 loopYBlock:
-                for (unsigned int yO = 0; yO < yLim; ++yO)
+                for (unsigned int yO = 0; yO < poolSize; ++yO)
                     {
+                    const bool yBorder = yI + yO >= sizeY;
+
 loopXBlock:
-                    for (unsigned int xO = 0; xO < xLim; ++xO)
+                    for (unsigned int xO = 0; xO < poolSize; ++xO)
                         {
-                        tempVal = T(xO, yO);
+                        const bool xBorder = xI + xO >= sizeX;
+
+                        tempVal = (!yBorder && !xBorder) ? T(xO, yO) : tempVal;
                         tempMax = (tempMax < tempVal) ? tempVal : tempMax;
                         }
                     }

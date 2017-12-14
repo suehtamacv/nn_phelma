@@ -11,11 +11,11 @@ void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y)
     conv1_In_t  bufferI = I.read();
     conv1_Out_t bufferY;
 
-    convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
+    const convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
         {
 #include "kernel_conv1.h"
         };
-    convBias_t B[sizeL] =
+    const convBias_t B[sizeL] =
         {
 #include "bias_conv1.h"
         };
@@ -131,11 +131,11 @@ void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y)
     conv2_In_t  bufferI = I.read();
     conv2_Out_t bufferY;
 
-    convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
+    const convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
         {
 #include "kernel_conv2.h"
         };
-    convBias_t B[sizeL] =
+    const convBias_t B[sizeL] =
         {
 #include "bias_conv2.h"
         };
@@ -251,11 +251,11 @@ void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y)
     conv3_In_t  bufferI = I.read();
     conv3_Out_t bufferY;
 
-    convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
+    const convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
         {
 #include "kernel_conv3.h"
         };
-    convBias_t B[sizeL] =
+    const convBias_t B[sizeL] =
         {
 #include "bias_conv3.h"
         };

@@ -9,7 +9,9 @@ QMAKE_CXXFLAGS += -O1
 INCLUDEPATH += include/
 
 SOURCES += main.cpp \
-    top.cpp
+    top.cpp \
+    perceptron.cpp \
+    convolutionrelu.cpp
 
 HEADERS += \
     maxpooling.h \

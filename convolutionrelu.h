@@ -7,60 +7,69 @@
 #define overlap  2
 #define tileSize 4
 
-template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-class ConvolutionReLU
-{
-public:
-    typedef memInterface<sizeY * sizeX * sizeC> memInStruct;
-    typedef memInterface<sizeY * sizeX * sizeL> memOutStruct;
-    typedef convKernelInterface<sizeC * sizeL * 3 * 3> kernelStruct;
-    typedef convBiasInterface<sizeL> biasStruct;
-
-    ConvolutionReLU(const std::string name);
-
-    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
-               const kernelStruct &KS, const biasStruct &BS);
-
-private:
-    const std::string name;
-
-    void calculateG(convKernel_t (&G)[16], const convKernel_t *);
-    void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16]);
-    void getImageBlock(memInStruct &, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
-                       const unsigned int cI);
-};
-
-///
-/// IMPLEMENTATION
-///
+void calculateG(convKernel_t (&G)[16], const convKernel_t *K);
+void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16]);
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-ConvolutionReLU(const std::string name) :
-    name(name)
+void getImageBlock(memInterface<sizeY * sizeX * sizeC> &I, layerOut_t *Block, const unsigned int xI,
+                   const unsigned int yI, const unsigned int cI)
 {
-#ifdef __STAT__
-    for (unsigned int i = 0; i < sizeC * sizeL * 3 * 3; ++i)
-        {
-        std::cout << name << " K " << K[i] << std::endl;
-        }
+#define B(y, x) \
+    Block[y * tileSize + x]
 
-    for (unsigned int i = 0; i < sizeL; ++i)
-        {
-        std::cout << name << " B " << B[i] << std::endl;
-        }
+#ifdef __HWC__
+#define T(y, x) \
+    I.Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
+#else
+#define T(y, x) \
+    I.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
 #endif
 
+
+    const bool xBorderL = (xI == 0);
+    const bool xBorderR = (xI + tileSize > sizeX);
+    const bool yBorderT = (yI == 0);
+    const bool yBorderB = (yI + tileSize > sizeY);
+
+    const unsigned int yLimInf = yBorderT ? 1 : 0;
+    const unsigned int yLimSup = yBorderB ? 2 : 3;
+    const unsigned int xLimInf = xBorderL ? 1 : 0;
+    const unsigned int xLimSup = xBorderR ? 2 : 3;
+
+loopImageBlockY:
+    for (unsigned int j = 0; j < 4; ++j)
+        {
+loopImageBlockX:
+        for (unsigned int i = 0; i < 4; ++i)
+            {
+            B(j, i) = ((j >= yLimInf) && (j <= yLimSup) && (i >= xLimInf) && (i <= xLimSup)) ? T(j - 1, i - 1) : 0;
+            }
+        }
+
+#undef T
+#undef B
 }
 
+
 #pragma design
-template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::apply
-(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
- const kernelStruct &KS, const biasStruct &BS)
+void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y)
 {
-    memInStruct  bufferI = I.read();
-    memOutStruct bufferY;
+#define sizeX 24
+#define sizeY 24
+#define sizeC 3
+#define sizeL 64
+
+    conv1_In_t  bufferI = I.read();
+    conv1_Out_t bufferY;
+
+    convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
+        {
+#include "kernel_conv1.h"
+        };
+    convBias_t B[sizeL] =
+        {
+#include "bias_conv1.h"
+        };
 
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -87,10 +96,10 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock(bufferI, Block, xI, yI, cI);
+                    getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, KS.K + ((lI * sizeC + cI) * 9));
+                    calculateG(G, K + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:
@@ -128,8 +137,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + BS.B[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + BS.B[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
@@ -155,11 +164,254 @@ loopOutputBlock:
         }
 
     Y.write(bufferY);
+
+#undef sizeX
+#undef sizeY
+#undef sizeC
+#undef sizeL
 }
 
-template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-calculateG(convKernel_t (&G)[16], const convKernel_t *K)
+#pragma design
+void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y)
+{
+#define sizeX 12
+#define sizeY 12
+#define sizeC 64
+#define sizeL 32
+
+    conv2_In_t  bufferI = I.read();
+    conv2_Out_t bufferY;
+
+    convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
+        {
+#include "kernel_conv2.h"
+        };
+    convBias_t B[sizeL] =
+        {
+#include "bias_conv2.h"
+        };
+
+    convKernel_t G[tileSize * tileSize];
+    convD_t D[tileSize * tileSize];
+    convM_t M[tileSize * tileSize];
+    convTemp_t temp[2][4];
+    layerOut_t Block[tileSize * tileSize];
+    layerOut_t preReLU[2][2];
+
+    // X coordinate
+loopConvXi:
+    for (unsigned int xI = 0; xI < sizeX; xI += overlap)
+        {
+        // Y coordinate
+loopConvYi:
+        for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+            {
+
+            // Output channels
+loopConvOutChannel:
+            for (unsigned int lI = 0; lI < sizeL; lI++)
+                {
+
+                // Input channels
+loopConvInChannel:
+                for (unsigned int cI = 0; cI < sizeC; cI++)
+                    {
+                    getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
+
+                    // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
+                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateD(Block, D);
+
+loopTile:
+                    for (unsigned i = 0; i < tileSize * tileSize; ++i)
+                        {
+                        // If it is the first iteration, initialization of M
+                        if (cI == 0)
+                            {
+                            M[i] = D[i] * G[i];
+                            }
+                        else
+                            {
+                            M[i] += D[i] * G[i];
+                            }
+#ifdef __STAT__
+                        std::cout << name << " M " << M[i] << std::endl;
+#endif
+                        }
+                    }
+
+                // Transform to image space
+loopInverseTransform:
+                for (unsigned int i = 0; i < 4; ++i)
+                    {
+                    temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
+                    temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
+
+#ifdef __STAT__
+                    std::cout << name << " temp " << temp[0][i] << std::endl;
+                    std::cout << name << " temp " << temp[1][i] << std::endl;
+#endif
+                    }
+
+loopOutputBlock:
+                for (unsigned int j = 0; j < 2; ++j)
+                    {
+                    // Inverse transform
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+
+                    // Applies ReLU
+                    preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
+                    preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
+
+#ifdef __STAT__
+                    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
+                    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
+#endif
+
+#ifdef __HWC__
+                    bufferY.Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
+                    bufferY.Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][1];
+#else
+                    bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
+                    bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
+#endif
+                    }
+                // End transformation
+
+                }
+            }
+        }
+
+    Y.write(bufferY);
+
+#undef sizeX
+#undef sizeY
+#undef sizeC
+#undef sizeL
+}
+
+#pragma design
+void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y)
+{
+#define sizeX 6
+#define sizeY 6
+#define sizeC 32
+#define sizeL 20
+
+    conv3_In_t  bufferI = I.read();
+    conv3_Out_t bufferY;
+
+    convKernel_t K[sizeX * sizeY * sizeC * sizeL] =
+        {
+#include "kernel_conv3.h"
+        };
+    convBias_t B[sizeL] =
+        {
+#include "bias_conv3.h"
+        };
+
+    convKernel_t G[tileSize * tileSize];
+    convD_t D[tileSize * tileSize];
+    convM_t M[tileSize * tileSize];
+    convTemp_t temp[2][4];
+    layerOut_t Block[tileSize * tileSize];
+    layerOut_t preReLU[2][2];
+
+    // X coordinate
+loopConvXi:
+    for (unsigned int xI = 0; xI < sizeX; xI += overlap)
+        {
+        // Y coordinate
+loopConvYi:
+        for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+            {
+
+            // Output channels
+loopConvOutChannel:
+            for (unsigned int lI = 0; lI < sizeL; lI++)
+                {
+
+                // Input channels
+loopConvInChannel:
+                for (unsigned int cI = 0; cI < sizeC; cI++)
+                    {
+                    getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
+
+                    // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
+                    calculateG(G, K + ((lI * sizeC + cI) * 9));
+                    calculateD(Block, D);
+
+loopTile:
+                    for (unsigned i = 0; i < tileSize * tileSize; ++i)
+                        {
+                        // If it is the first iteration, initialization of M
+                        if (cI == 0)
+                            {
+                            M[i] = D[i] * G[i];
+                            }
+                        else
+                            {
+                            M[i] += D[i] * G[i];
+                            }
+#ifdef __STAT__
+                        std::cout << name << " M " << M[i] << std::endl;
+#endif
+                        }
+                    }
+
+                // Transform to image space
+loopInverseTransform:
+                for (unsigned int i = 0; i < 4; ++i)
+                    {
+                    temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
+                    temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
+
+#ifdef __STAT__
+                    std::cout << name << " temp " << temp[0][i] << std::endl;
+                    std::cout << name << " temp " << temp[1][i] << std::endl;
+#endif
+                    }
+
+loopOutputBlock:
+                for (unsigned int j = 0; j < 2; ++j)
+                    {
+                    // Inverse transform
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + B[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + B[lI];
+
+                    // Applies ReLU
+                    preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
+                    preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
+
+#ifdef __STAT__
+                    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
+                    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
+#endif
+
+#ifdef __HWC__
+                    bufferY.Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
+                    bufferY.Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][1];
+#else
+                    bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
+                    bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
+#endif
+                    }
+                // End transformation
+
+                }
+            }
+        }
+
+    Y.write(bufferY);
+
+#undef sizeX
+#undef sizeY
+#undef sizeC
+#undef sizeL
+}
+
+void calculateG(convKernel_t (&G)[16], const convKernel_t *K)
 {
     // Flipping convolution kernel
 #define K(y, x) K[y * 3 + x]
@@ -194,9 +446,7 @@ calculateG(convKernel_t (&G)[16], const convKernel_t *K)
 #undef K
 }
 
-template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
+void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
 {
 #define B(y, x) \
     Block[y * tileSize + x]
@@ -228,54 +478,6 @@ calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
         }
 #endif
 
-#undef B
-}
-
-template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void ConvolutionReLU<sizeX, sizeY, sizeC, sizeL>::
-getImageBlock(memInStruct &I, layerOut_t *Block, const unsigned int xI, const unsigned int yI,
-              const unsigned int cI)
-{
-#define B(y, x) \
-    Block[y * tileSize + x]
-
-#ifdef __HWC__
-#define T(y, x) \
-    I.Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
-#else
-#define T(y, x) \
-    I.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
-#endif
-
-
-    const bool xBorderL = (xI == 0);
-    const bool xBorderR = (xI + tileSize > sizeX);
-    const bool yBorderT = (yI == 0);
-    const bool yBorderB = (yI + tileSize > sizeY);
-
-    const unsigned int yLimInf = yBorderT ? 1 : 0;
-    const unsigned int yLimSup = yBorderB ? 2 : 3;
-    const unsigned int xLimInf = xBorderL ? 1 : 0;
-    const unsigned int xLimSup = xBorderR ? 2 : 3;
-
-loopImageBlockY:
-    for (unsigned int j = 0; j < 4; ++j)
-        {
-loopImageBlockX:
-        for (unsigned int i = 0; i < 4; ++i)
-            {
-            B(j, i) = ((j >= yLimInf) && (j <= yLimSup) && (i >= xLimInf) && (i <= xLimSup)) ? T(j - 1, i - 1) : 0;
-            }
-        }
-
-#ifdef __STAT__
-    for (unsigned int i = 0; i < 16; ++i)
-        {
-        std::cout << name << " B " << Block[i] << std::endl;
-        }
-#endif
-
-#undef T
 #undef B
 }
 

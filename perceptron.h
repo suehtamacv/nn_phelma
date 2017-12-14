@@ -4,65 +4,30 @@
 #include "fixedpointvariables.h"
 #include "meminterface.h"
 
-template<unsigned int sizeKx, unsigned int sizeKy>
-class Perceptron
-{
-public:
-    typedef memInterface<sizeKx> memInStruct;
-    typedef memInterface<sizeKy> memOutStruct;
-    typedef perceptronKernelInterface<sizeKx * sizeKy> kernelStruct;
-    typedef perceptronBiasInterface<sizeKy> biasStruct;
-
-    Perceptron(const std::string name);
-
-    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
-               const kernelStruct &KS, const biasStruct &BS);
-
-
-private:
-    const std::string name;
-};
-
-///
-/// IMPLEMENTATION
-///
-
-template<unsigned int sizeKx, unsigned int sizeKy>
-Perceptron<sizeKx, sizeKy>::
-Perceptron(const std::string name) :
-    name(name)
-{
-#ifdef __STAT__
-    for (unsigned int i = 0; i < sizeKy * sizeKx; ++i)
-        {
-        std::cout << name << " K " << K[i] << std::endl;
-        }
-
-    for (unsigned int i = 0; i < sizeKx; ++i)
-        {
-        std::cout << name << " B " << B[i] << std::endl;
-        }
-#endif
-}
-
 #pragma design
-template<unsigned int sizeKx, unsigned int sizeKy>
-void Perceptron<sizeKx, sizeKy>::
-apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y,
-      const kernelStruct &KS, const biasStruct &BS)
+void percep4_apply(ac_channel<percep4_In_t> &I, ac_channel<percep4_Out_t> &Y)
 {
-    memInStruct  bufferI = I.read();
-    memOutStruct bufferY;
+    percep4_In_t  bufferI = I.read();
+    percep4_Out_t bufferY;
+
+    const perceptronKernel_t K[180 * 10] =
+        {
+#include "kernel_percep4.h"
+        };
+    const perceptronBias_t B[10] =
+        {
+#include "bias_percep4.h"
+        };
 
 loopY:
-    for (unsigned int iKy = 0; iKy < sizeKy; ++iKy)
+    for (unsigned int iKy = 0; iKy < 10; ++iKy)
         {
-        bufferY.Y[iKy] = BS.B[iKy];
+        bufferY.Y[iKy] = B[iKy];
 
 loopX:
-        for (unsigned int iKx = 0; iKx < sizeKx; ++iKx)
+        for (unsigned int iKx = 0; iKx < 180; ++iKx)
             {
-            bufferY.Y[iKy] += KS.K[iKy * sizeKx + iKx] * bufferI.Y[iKx];
+            bufferY.Y[iKy] += K[iKy * 180 + iKx] * bufferI.Y[iKx];
             }
 
 #ifdef __STAT__

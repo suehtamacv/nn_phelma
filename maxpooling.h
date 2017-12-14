@@ -7,40 +7,13 @@
 #define newSizeX  (sizeX / stride)
 #define newSizeY  (sizeY / stride)
 
-template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-class MaxPooling
-{
-public:
-    typedef memInterface<sizeY * sizeX * sizeC> memInStruct;
-    typedef memInterface < (sizeY / stride) * (sizeX / stride) * sizeC > memOutStruct;
-
-    MaxPooling(const std::string name);
-
-    void apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y);
-
-private:
-    const std::string name;
-};
-
-///
-/// IMPLEMENTATION
-///
-
-template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-MaxPooling(const std::string name) :
-    name(name)
-{
-
-}
-
 #pragma design
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-apply(ac_channel<memInStruct> &I, ac_channel<memOutStruct> &Y)
+void maxPooling_apply(ac_channel<memInterface<sizeY * sizeX * sizeC> > &I,
+                      ac_channel < memInterface < newSizeX * newSizeY * sizeC > > &Y)
 {
-    memInStruct  bufferI = I.read();
-    memOutStruct bufferY;
+    memInterface<sizeY * sizeX * sizeC> bufferI = I.read();
+    memInterface < newSizeX * newSizeY * sizeC > bufferY;
 
 #ifdef __HWC__
 #define T(x, y) \

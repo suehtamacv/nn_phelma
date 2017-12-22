@@ -21,7 +21,7 @@ void maxPooling_apply(ac_channel<memInterface<sizeY * sizeX * sizeC> > &I,
 #else
 #define T(x, y) \
     bufferI.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
-#endif
+#endif  
 
     unsigned int nxI = 0, nyI = 0;
     layerOut_t tempMax = 0;
@@ -49,9 +49,15 @@ loopXBlock:
                     for (unsigned int xO = 0; xO < poolSize; ++xO)
                         {
                         const bool xBorder = xI + xO >= sizeX;
-
-                        tempVal = (!yBorder && !xBorder) ? T(xO, yO) : tempVal;
-                        tempMax = (tempMax < tempVal) ? tempVal : tempMax;
+                        
+                        if (!xBorder && !yBorder) 
+                            {
+                                tempVal = T(xO, yO);
+                                if (tempMax < tempVal) 
+                                {
+                                    tempMax = tempVal;   
+                                }
+                            }
                         }
                     }
 

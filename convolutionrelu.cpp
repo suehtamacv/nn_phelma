@@ -373,7 +373,7 @@ void calculateG(convKernel_t (&G)[16], const convKernel_t *K)
 
 void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
 {
-#define B(y, x) \
+#define B(x, y) \
     Block[y * tileSize + x]
 
     D[0] = B(0, 0) - B(0, 2) - B(2, 0) + B(2, 2);

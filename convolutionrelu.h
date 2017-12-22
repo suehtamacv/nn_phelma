@@ -18,7 +18,7 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 void getImageBlock(memInterface<sizeY * sizeX * sizeC> &I, layerOut_t *Block, const unsigned int xI,
                    const unsigned int yI, const unsigned int cI)
 {
-#define B(y, x) \
+#define B(x, y) \
     Block[y * tileSize + x]
 
 #ifdef __HWC__
@@ -46,7 +46,11 @@ loopImageBlockY:
 loopImageBlockX:
         for (unsigned int i = 0; i < 4; ++i)
             {
-            B(j, i) = ((j >= yLimInf) && (j <= yLimSup) && (i >= xLimInf) && (i <= xLimSup)) ? T(j - 1, i - 1) : 0;
+            B(j, i) = 0;
+            if ((j >= yLimInf) && (j <= yLimSup) && (i >= xLimInf) && (i <= xLimSup))
+                {
+                B(j, i) = T(j - 1, i - 1);
+                }
             }
         }
 

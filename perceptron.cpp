@@ -18,10 +18,6 @@ loopX:
             {
             bufferY.Y[iKy] += perceptronKernel4[iKy * 180 + iKx] * bufferI.Y[iKx];
             }
-
-#ifdef __STAT__
-        std::cout << name << " Y " << Y[iKy] << std::endl;
-#endif
         }
 
     Y.write(bufferY);

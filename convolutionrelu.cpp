@@ -56,9 +56,6 @@ loopTile:
                             {
                             M[i] += D[i] * G[i];
                             }
-#ifdef __STAT__
-                        std::cout << name << " M " << M[i] << std::endl;
-#endif
                         }
                     }
 
@@ -68,11 +65,6 @@ loopInverseTransform:
                     {
                     temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-
-#ifdef __STAT__
-                    std::cout << name << " temp " << temp[0][i] << std::endl;
-                    std::cout << name << " temp " << temp[1][i] << std::endl;
-#endif
                     }
 
 loopOutputBlock:
@@ -85,20 +77,11 @@ loopOutputBlock:
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
-
-#ifdef __STAT__
-                    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
-                    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
-#endif
-
-#ifdef __HWC__
-                    bufferY.Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
-                    bufferY.Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][1];
-#else
-                    bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
-                    bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
-#endif
                     }
+
+                /*bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
+                bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];*/
+
                 // End transformation
 
                 }
@@ -167,9 +150,6 @@ loopTile:
                             {
                             M[i] += D[i] * G[i];
                             }
-#ifdef __STAT__
-                        std::cout << name << " M " << M[i] << std::endl;
-#endif
                         }
                     }
 
@@ -179,11 +159,6 @@ loopInverseTransform:
                     {
                     temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-
-#ifdef __STAT__
-                    std::cout << name << " temp " << temp[0][i] << std::endl;
-                    std::cout << name << " temp " << temp[1][i] << std::endl;
-#endif
                     }
 
 loopOutputBlock:
@@ -197,18 +172,8 @@ loopOutputBlock:
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-#ifdef __STAT__
-                    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
-                    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
-#endif
-
-#ifdef __HWC__
-                    bufferY.Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
-                    bufferY.Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][1];
-#else
                     bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
                     bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
-#endif
                     }
                 // End transformation
 
@@ -278,9 +243,6 @@ loopTile:
                             {
                             M[i] += D[i] * G[i];
                             }
-#ifdef __STAT__
-                        std::cout << name << " M " << M[i] << std::endl;
-#endif
                         }
                     }
 
@@ -290,11 +252,6 @@ loopInverseTransform:
                     {
                     temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-
-#ifdef __STAT__
-                    std::cout << name << " temp " << temp[0][i] << std::endl;
-                    std::cout << name << " temp " << temp[1][i] << std::endl;
-#endif
                     }
 
 loopOutputBlock:
@@ -308,18 +265,8 @@ loopOutputBlock:
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-#ifdef __STAT__
-                    std::cout << name << " preReLU " << preReLU[j][0] << std::endl;
-                    std::cout << name << " preReLU " << preReLU[j][1] << std::endl;
-#endif
-
-#ifdef __HWC__
-                    bufferY.Y[yI * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][0];
-                    bufferY.Y[(yI + 1) * sizeX * sizeL + (xI + j) * sizeL + lI] = preReLU[j][1];
-#else
                     bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
                     bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
-#endif
                     }
                 // End transformation
 
@@ -361,19 +308,12 @@ void calculateG(convKernel_t (&G)[16], const convKernel_t *K)
     G[14] = (K(2, 0) - K(2, 1) + K(2, 2)) / 2;
     G[15] = K(2, 2);
 
-#ifdef __STAT__
-    for (unsigned int i = 0; i < 16; ++i)
-        {
-        std::cout << name << " G " << G[i] << std::endl;
-        }
-#endif
-
 #undef K
 }
 
 void calculateD(pixel_t (&Block)[16], convD_t (&D)[16])
 {
-#define B(x, y) \
+#define B(y, x) \
     Block[y * tileSize + x]
 
     D[0] = B(0, 0) - B(0, 2) - B(2, 0) + B(2, 2);
@@ -395,13 +335,6 @@ void calculateD(pixel_t (&Block)[16], convD_t (&D)[16])
     D[13] = B(1, 1) + B(1, 2) - B(3, 1) - B(3, 2);
     D[14] = -B(1, 1) + B(1, 2) + B(3, 1) - B(3, 2);
     D[15] = B(1, 1) - B(1, 3) - B(3, 1) + B(3, 3);
-
-#ifdef __STAT__
-    for (unsigned int i = 0; i < 16; ++i)
-        {
-        std::cout << name << " D " << D[i] << std::endl;
-        }
-#endif
 
 #undef B
 }

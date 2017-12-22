@@ -18,39 +18,25 @@ template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned in
 void getImageBlock(memBlockInterface<sizeY * sizeX * sizeC> &I, pixel_t (&Block)[16], const unsigned int xI,
                    const unsigned int yI, const unsigned int cI)
 {
-#define B(x, y) \
+#define B(y, x) \
     Block[y * tileSize + x]
 
-#ifdef __HWC__
 #define T(y, x) \
-    I.Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
-#else
-#define T(y, x) \
-    I.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
-#endif
-
-
-    const bool xBorderL = (xI == 0);
-    const bool xBorderR = (xI + tileSize > sizeX);
-    const bool yBorderT = (yI == 0);
-    const bool yBorderB = (yI + tileSize > sizeY);
-
-    const unsigned int yLimInf = yBorderT ? 1 : 0;
-    const unsigned int yLimSup = yBorderB ? 2 : 3;
-    const unsigned int xLimInf = xBorderL ? 1 : 0;
-    const unsigned int xLimSup = xBorderR ? 2 : 3;
+    I.Y[cI * (sizeY / 2) * (sizeX / 2) + (yI + (y)) * (sizeX / 2) + (xI + (x))]
 
 loopImageBlockY:
-    for (unsigned int j = 0; j < 4; ++j)
+    for (unsigned int j = 0; j < 1; ++j)
         {
 loopImageBlockX:
-        for (unsigned int i = 0; i < 4; ++i)
+        for (unsigned int i = 0; i < 1; ++i)
             {
-            B(j, i) = 0;
-            if ((j >= yLimInf) && (j <= yLimSup) && (i >= xLimInf) && (i <= xLimSup))
-                {
-                B(j, i) = T(j - 1, i - 1);
-                }
+            unsigned int index = 8 * j + 2 * i;
+            layerOut_t rawBlock = T(j, i);
+
+            Block[index + 0].set_slc(0, rawBlock.slc<12>(0));
+            Block[index + 1].set_slc(0, rawBlock.slc<12>(12));
+            Block[index + 4].set_slc(0, rawBlock.slc<12>(24));
+            Block[index + 5].set_slc(0, rawBlock.slc<12>(36));
             }
         }
 

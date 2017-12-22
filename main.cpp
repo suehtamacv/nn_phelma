@@ -140,17 +140,13 @@ int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int
                     {
                     for (unsigned int off_xI = 0; off_xI < 2; ++off_xI)
                         {
-                        pixel_t Y = (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 + (xI + off_xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                        pixel_t Y = (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 + (xI + off_xI + 4)] - Average) / std::max(
+                                        StdDev, minStdDev);
                         out <<= 12;
                         out += (uint12) Y.slc<12>(0);
                         }
                     }
-#ifdef __HWC__
-                Y.Y[(yI / 2) * 12 * 3 + (xI / 2) * 3 + cI] =
-#else
-                Y.Y[cI * 12 * 12 + (yI / 2) * 12 + (xI / 2)] =
-#endif
-                    out;
+                Y.Y[cI * 12 * 12 + (yI / 2) * 12 + (xI / 2)] = out;
                 }
             }
         }

@@ -15,13 +15,8 @@ void maxPooling_apply(ac_channel<memBlockInterface<sizeY * sizeX * sizeC> > &I,
     memBlockInterface<sizeY * sizeX * sizeC> bufferI = I.read();
     memBlockInterface < newSizeX * newSizeY * sizeC > bufferY;
 
-#ifdef __HWC__
-#define T(x, y) \
-    bufferI.Y[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
-#else
 #define T(x, y) \
     bufferI.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
-#endif
 
     unsigned int nxI = 0, nyI = 0;
     pixel_t tempMax = 0;
@@ -60,12 +55,7 @@ loopXBlock:
                             }
                         }
                     }
-
-#ifdef __HWC__
-                bufferY.Y[nyI * newSizeX * sizeC + nxI * sizeC + cI] = tempMax;
-#else
                 bufferY.Y[cI * newSizeY * newSizeX + nyI * newSizeX + nxI] = tempMax;
-#endif
                 }
 
             }

@@ -17,8 +17,8 @@ void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y)
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
-    layerOut_t Block[tileSize * tileSize];
-    layerOut_t preReLU[2][2];
+    pixel_t Block[tileSize * tileSize];
+    pixel_t preReLU[2][2];
 
     // X coordinate
 loopConvXi:
@@ -128,8 +128,8 @@ void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y)
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
-    layerOut_t Block[tileSize * tileSize];
-    layerOut_t preReLU[2][2];
+    pixel_t Block[tileSize * tileSize];
+    pixel_t preReLU[2][2];
 
     // X coordinate
 loopConvXi:
@@ -239,8 +239,8 @@ void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y)
     convD_t D[tileSize * tileSize];
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
-    layerOut_t Block[tileSize * tileSize];
-    layerOut_t preReLU[2][2];
+    pixel_t Block[tileSize * tileSize];
+    pixel_t preReLU[2][2];
 
     // X coordinate
 loopConvXi:
@@ -371,7 +371,7 @@ void calculateG(convKernel_t (&G)[16], const convKernel_t *K)
 #undef K
 }
 
-void calculateD(layerOut_t (&Block)[16], convD_t (&D)[16])
+void calculateD(pixel_t (&Block)[16], convD_t (&D)[16])
 {
 #define B(x, y) \
     Block[y * tileSize + x]

@@ -5,8 +5,11 @@
 
 #ifdef __SIMULATION__
 
-#define LAYER_OUTPUT_DYN   32
-#define LAYER_OUTPUT_PREC  32
+#define PIXEL_DYN          32
+#define PIXEL_PREC         32
+
+#define PIXEL_PER_BLOCK    4
+#define LAYER_OUTPUT_SIZE  (PIXEL_PER_BLOCK * (PIXEL_DYN + PIXEL_PREC))
 
 #define CONV_KERNEL_DYN    32
 #define CONV_KERNEL_PREC   32
@@ -28,8 +31,11 @@
 
 #else
 
-#define LAYER_OUTPUT_DYN   8 // -128 to 127
-#define LAYER_OUTPUT_PREC  4
+#define PIXEL_DYN   8 // -128 to 127
+#define PIXEL_PREC  4
+
+#define PIXEL_PER_BLOCK    4
+#define LAYER_OUTPUT_SIZE  (PIXEL_PER_BLOCK * (PIXEL_DYN + PIXEL_PREC))
 
 #define CONV_KERNEL_DYN    3 // -4 to 3
 #define CONV_KERNEL_PREC   9
@@ -57,6 +63,7 @@
 #ifdef __FLOATVERSION__
 
 // Layer output
+typedef double pixel_t;
 typedef double layerOut_t;
 
 // Convolution types
@@ -73,7 +80,8 @@ typedef double perceptronBias_t;
 #else
 
 // Layer output
-typedef ac_fixed < LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC, LAYER_OUTPUT_DYN, true > layerOut_t;
+typedef ac_fixed < PIXEL_DYN + PIXEL_PREC, PIXEL_DYN, true > pixel_t;
+typedef ac_fixed < LAYER_OUTPUT_SIZE, LAYER_OUTPUT_SIZE, true > layerOut_t;
 
 // Convolution types
 typedef ac_fixed < CONV_D_DYN + CONV_D_PREC, CONV_D_DYN, true > convD_t;

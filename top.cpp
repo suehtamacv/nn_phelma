@@ -5,15 +5,15 @@
 #include "nnarrays.h"
 
 #pragma hls_design top
-void applyComplete(ac_channel<memInterface<INPUT_SIZE> > &In,
+void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out)
 {
     static ac_channel<conv1_Out_t> Conv1_Out;
-    static ac_channel<memInterface<12 * 12 * 64> > MaxPool1_Out;
+    static ac_channel<memBlockInterface<12 * 12 * 64> > MaxPool1_Out;
     static ac_channel<conv2_Out_t> Conv2_Out;
-    static ac_channel<memInterface<6 * 6 * 32> > MaxPool2_Out;
+    static ac_channel<memBlockInterface<6 * 6 * 32> > MaxPool2_Out;
     static ac_channel<conv3_Out_t> Conv3_Out;
-    static ac_channel<memInterface<3 * 3 * 20> > MaxPool3_Out;
+    static ac_channel<memBlockInterface<3 * 3 * 20> > MaxPool3_Out;
 
     conv1_apply(In, Conv1_Out);
     maxPooling_apply<2, 3, 24, 24, 64>(Conv1_Out, MaxPool1_Out);

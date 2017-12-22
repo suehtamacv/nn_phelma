@@ -7,16 +7,16 @@
 #include "nnarrays.h"
 #include <mc_scverify.h>
 
-int readAndNormalize(FILE* image, memInterface<INPUT_SIZE> &Y, unsigned int i);
-void applyComplete(ac_channel<memInterface<INPUT_SIZE> > &In,
+int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int i);
+void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out);
 
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
-    ac_channel<memInterface<INPUT_SIZE> > networkInChannel;
+    ac_channel<memBlockInterface<INPUT_SIZE> > networkInChannel;
     ac_channel<memInterface<10> > networkOutChannel;
-    memInterface<INPUT_SIZE> networkIn;
+    memBlockInterface<INPUT_SIZE> networkIn;
     memInterface<10> networkOut;
 
 #ifdef __FLOATVERSION__
@@ -47,7 +47,7 @@ CCS_MAIN(int argc, char* argv)
         networkOut = networkOutChannel.read();
 
         int foundLabel = 0;
-        layerOut_t maxFoundLabel = networkOut.Y[0];
+        pixel_t maxFoundLabel = networkOut.Y[0];
 
         for (unsigned int j = 0; j < 10; ++j)
             {
@@ -91,7 +91,7 @@ CCS_MAIN(int argc, char* argv)
     CCS_RETURN(0);
 }
 
-int readAndNormalize(FILE* image, memInterface<INPUT_SIZE> &Y, unsigned int i)
+int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
     unsigned char ImageLabel;
@@ -130,16 +130,27 @@ int readAndNormalize(FILE* image, memInterface<INPUT_SIZE> &Y, unsigned int i)
 
     for (unsigned int cI = 0; cI < 3; ++cI)
         {
-        for (unsigned int yI = 0; yI < 24; ++yI)
+        for (unsigned int yI = 0; yI < 24; yI += 2)
             {
-            for (unsigned int xI = 0; xI < 24; ++xI)
+            for (unsigned int xI = 0; xI < 24; xI += 2)
                 {
+
+                layerOut_t out = 0;
+                for (unsigned int off_yI = 0; off_yI < 2; ++off_yI)
+                    {
+                    for (unsigned int off_xI = 0; off_xI < 2; ++off_xI)
+                        {
+                        pixel_t Y = (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 + (xI + off_xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                        out <<= 12;
+                        out += (uint12) Y.slc<12>(0);
+                        }
+                    }
 #ifdef __HWC__
-                Y.Y[yI * 24 * 3 + xI * 3 + cI] =
+                Y.Y[(yI / 2) * 12 * 3 + (xI / 2) * 3 + cI] =
 #else
-                Y.Y[cI * 24 * 24 + yI * 24 + xI] =
+                Y.Y[cI * 12 * 12 + (yI / 2) * 12 + (xI / 2)] =
 #endif
-                    (ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                    out;
                 }
             }
         }

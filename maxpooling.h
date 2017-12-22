@@ -9,11 +9,11 @@
 
 #pragma design
 template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-void maxPooling_apply(ac_channel<memInterface<sizeY * sizeX * sizeC> > &I,
-                      ac_channel < memInterface < newSizeX * newSizeY * sizeC > > &Y)
+void maxPooling_apply(ac_channel<memBlockInterface<sizeY * sizeX * sizeC> > &I,
+                      ac_channel < memBlockInterface < newSizeX * newSizeY * sizeC > > &Y)
 {
-    memInterface<sizeY * sizeX * sizeC> bufferI = I.read();
-    memInterface < newSizeX * newSizeY * sizeC > bufferY;
+    memBlockInterface<sizeY * sizeX * sizeC> bufferI = I.read();
+    memBlockInterface < newSizeX * newSizeY * sizeC > bufferY;
 
 #ifdef __HWC__
 #define T(x, y) \
@@ -21,11 +21,11 @@ void maxPooling_apply(ac_channel<memInterface<sizeY * sizeX * sizeC> > &I,
 #else
 #define T(x, y) \
     bufferI.Y[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
-#endif  
+#endif
 
     unsigned int nxI = 0, nyI = 0;
-    layerOut_t tempMax = 0;
-    layerOut_t tempVal = 0;
+    pixel_t tempMax = 0;
+    pixel_t tempVal = 0;
 
 loopChannels:
     for (unsigned int cI = 0; cI < sizeC; ++cI)
@@ -49,13 +49,13 @@ loopXBlock:
                     for (unsigned int xO = 0; xO < poolSize; ++xO)
                         {
                         const bool xBorder = xI + xO >= sizeX;
-                        
-                        if (!xBorder && !yBorder) 
+
+                        if (!xBorder && !yBorder)
                             {
-                                tempVal = T(xO, yO);
-                                if (tempMax < tempVal) 
+                            tempVal = T(xO, yO);
+                            if (tempMax < tempVal)
                                 {
-                                    tempMax = tempVal;   
+                                tempMax = tempVal;
                                 }
                             }
                         }

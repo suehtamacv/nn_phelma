@@ -5,6 +5,12 @@
 #include <ac_channel.h>
 
 template<unsigned int size>
+struct lineBlockInterface
+{
+    layerOut_t Y[size / BLOCK_HEIGHT];
+};
+
+template<unsigned int size>
 struct memBlockInterface
 {
     layerOut_t Y[size / PIXEL_PER_BLOCK];
@@ -39,6 +45,9 @@ struct perceptronBiasInterface
 {
     perceptronBias_t B[size];
 };
+
+typedef lineBlockInterface<24> conv1_line_In_t;
+typedef lineBlockInterface<24> conv1_line_Out_t;
 
 typedef memBlockInterface<24 * 24 * 3> conv1_In_t;
 typedef memBlockInterface<24 * 24 * 64> conv1_Out_t;

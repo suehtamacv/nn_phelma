@@ -7,16 +7,15 @@
 #include "nnarrays.h"
 #include <mc_scverify.h>
 
-int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int i);
-void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
+int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
+void applyComplete(ac_channel<lineBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out);
 
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
-    ac_channel<memBlockInterface<INPUT_SIZE> > networkInChannel;
+    ac_channel<lineBlockInterface<24> > networkInChannel;
     ac_channel<memInterface<10> > networkOutChannel;
-    memBlockInterface<INPUT_SIZE> networkIn;
     memInterface<10> networkOut;
 
 #ifdef __FLOATVERSION__
@@ -34,13 +33,12 @@ CCS_MAIN(int argc, char* argv)
     for (unsigned int i = 0; i < limit; ++i)
         {
         // Reads RAW
-        int realLabel = readAndNormalize(image, networkIn, i);
+        int realLabel = readAndNormalize(image, networkInChannel, i);
 
 #ifndef __FLOATVERSION__
         // Reads golden version data
         Ref >> goldenLabel;
 #endif
-        networkInChannel.write(networkIn);
 
         CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel);
 
@@ -91,7 +89,7 @@ CCS_MAIN(int argc, char* argv)
     CCS_RETURN(0);
 }
 
-int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int i)
+int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
     unsigned char ImageLabel;
@@ -132,6 +130,8 @@ int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int
         {
         for (unsigned int yI = 0; yI < 24; yI += 2)
             {
+            lineBlockInterface<24> line;
+
             for (unsigned int xI = 0; xI < 24; xI += 2)
                 {
 
@@ -146,8 +146,10 @@ int readAndNormalize(FILE* image, memBlockInterface<INPUT_SIZE> &Y, unsigned int
                         out += (uint12) Y.slc<12>(0);
                         }
                     }
-                Y.Y[cI * 12 * 12 + (yI / 2) * 12 + (xI / 2)] = out;
+                line.Y[xI / 2] = out;
                 }
+
+            Y.write(line);
             }
         }
 

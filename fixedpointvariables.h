@@ -34,7 +34,9 @@
 #define PIXEL_DYN   8 // -128 to 127
 #define PIXEL_PREC  4
 
-#define PIXEL_PER_BLOCK    4
+#define BLOCK_HEIGHT       2
+#define BLOCK_WIDTH        2
+#define PIXEL_PER_BLOCK    (BLOCK_HEIGHT * BLOCK_WIDTH)
 #define LAYER_OUTPUT_SIZE  (PIXEL_PER_BLOCK * (PIXEL_DYN + PIXEL_PREC))
 
 #define CONV_KERNEL_DYN    3 // -4 to 3

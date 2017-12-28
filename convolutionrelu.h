@@ -10,12 +10,12 @@
 void calculateG(convKernel_t (&G)[16], const convKernel_t *K);
 void calculateD(pixel_t (&Block)[16], convD_t (&D)[16]);
 
-void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y);
+void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y);
 void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y);
 void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y);
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void getImageBlock(memBlockInterface<sizeY * sizeX * sizeC> &I, pixel_t (&Block)[16], const unsigned int xI,
+void getImageBlock(lineBlockInterface<sizeX * sizeC> &I, pixel_t (&Block)[16], const unsigned int xI,
                    const unsigned int yI, const unsigned int cI)
 {
 #define B(y, x) \
@@ -43,6 +43,5 @@ loopImageBlockX:
 #undef T
 #undef B
 }
-
 
 #endif // CONVOLUTION_H

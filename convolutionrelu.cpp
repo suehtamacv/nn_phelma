@@ -3,15 +3,15 @@
 #include "biases.h"
 
 #pragma design
-void conv1_apply(ac_channel<conv1_In_t> &I, ac_channel<conv1_Out_t> &Y)
+void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y)
 {
 #define sizeX 24
 #define sizeY 24
 #define sizeC 3
 #define sizeL 64
 
-    conv1_In_t  bufferI = I.read();
-    conv1_Out_t bufferY;
+    conv1_line_In_t  bufferI = I.read();
+    conv1_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -38,7 +38,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
+                    //getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
@@ -132,7 +132,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
+                    //getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel2 + ((lI * sizeC + cI) * 9));
@@ -225,7 +225,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
+                    //getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel3 + ((lI * sizeC + cI) * 9));

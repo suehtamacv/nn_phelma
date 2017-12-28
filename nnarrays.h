@@ -11,8 +11,6 @@
 #define HEIGHT 24
 #endif
 
-#define INPUT_SIZE    HEIGHT * WIDTH * 3
-
-static layerOut_t ImageIn[INPUT_SIZE] = {0};
+#define INPUT_SIZE    WIDTH
 
 #endif // NNARRAYS_H

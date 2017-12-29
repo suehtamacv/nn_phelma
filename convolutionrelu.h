@@ -11,8 +11,8 @@ void calculateG(convKernel_t (&G)[16], const convKernel_t *K);
 void calculateD(pixel_t (&Block)[16], convD_t (&D)[16]);
 
 void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y);
-void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y);
-void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y);
+void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y);
+void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y);
 
 template<unsigned int sizeX, unsigned int sizeC>
 void getImageBlock(lineBlockInterface<sizeX * sizeC> &Old, lineBlockInterface<sizeX * sizeC> &New,

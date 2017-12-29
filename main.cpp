@@ -14,7 +14,7 @@ void applyComplete(ac_channel<lineBlockInterface<INPUT_SIZE> > &In,
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
-    ac_channel<lineBlockInterface<24> > networkInChannel;
+    ac_channel<lineBlockInterface<INPUT_SIZE> > networkInChannel;
     ac_channel<memInterface<10> > networkOutChannel;
     memInterface<10> networkOut;
 
@@ -126,31 +126,29 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
         }
     StdDev = sqrt(StdDev / (24 * 24 * 3));
 
-    for (unsigned int cI = 0; cI < 3; ++cI)
+    for (unsigned int yI = 0; yI < 24; yI += 2)
         {
-        for (unsigned int yI = 0; yI < 24; yI += 2)
-            {
-            lineBlockInterface<24> line;
+        lineBlockInterface<INPUT_SIZE> line;
 
+        for (unsigned int cI = 0; cI < 3; ++cI)
+            {
             for (unsigned int xI = 0; xI < 24; xI += 2)
                 {
 
-                layerOut_t out = 0;
+                layerOutBlock_t out;
                 for (unsigned int off_yI = 0; off_yI < 2; ++off_yI)
                     {
                     for (unsigned int off_xI = 0; off_xI < 2; ++off_xI)
                         {
-                        pixel_t Y = (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 + (xI + off_xI + 4)] - Average) / std::max(
-                                        StdDev, minStdDev);
-                        out <<= 12;
-                        out += (uint12) Y.slc<12>(0);
+                        out.P[off_yI * 2 + off_xI] = (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 +
+                                                                (xI + off_xI + 4)] - Average) / std::max(StdDev, minStdDev);
                         }
                     }
-                line.Y[xI / 2] = out;
+                line.Y[cI * 12 + xI / 2] = out;
                 }
-
-            Y.write(line);
             }
+
+        Y.write(line);
         }
 
     return ImageLabel;

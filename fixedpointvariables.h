@@ -83,7 +83,14 @@ typedef double perceptronBias_t;
 
 // Layer output
 typedef ac_fixed < PIXEL_DYN + PIXEL_PREC, PIXEL_DYN, true > pixel_t;
-typedef ac_fixed < LAYER_OUTPUT_SIZE, LAYER_OUTPUT_SIZE, true > layerOut_t;
+
+struct layerOutBlock_t
+{
+    pixel_t P[BLOCK_HEIGHT * BLOCK_WIDTH] = {0};
+    uint2 biggerBlock = 0;
+    uint1 biggerV = 0;
+    uint1 biggerH = 0;
+};
 
 // Convolution types
 typedef ac_fixed < CONV_D_DYN + CONV_D_PREC, CONV_D_DYN, true > convD_t;

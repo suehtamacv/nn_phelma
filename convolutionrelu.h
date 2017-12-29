@@ -14,33 +14,30 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
 void conv2_apply(ac_channel<conv2_In_t> &I, ac_channel<conv2_Out_t> &Y);
 void conv3_apply(ac_channel<conv3_In_t> &I, ac_channel<conv3_Out_t> &Y);
 
-template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC, unsigned int sizeL>
-void getImageBlock(lineBlockInterface<sizeX * sizeC> &I, pixel_t (&Block)[16], const unsigned int xI,
-                   const unsigned int yI, const unsigned int cI)
+template<unsigned int sizeX, unsigned int sizeC>
+void getImageBlock(lineBlockInterface<sizeX * sizeC> &Old, lineBlockInterface<sizeX * sizeC> &New,
+                   pixel_t (&Block)[16], const unsigned int xI, const unsigned int cI)
 {
 #define B(y, x) \
     Block[y * tileSize + x]
 
-#define T(y, x) \
-    I.Y[cI * (sizeY / 2) * (sizeX / 2) + (yI + (y)) * (sizeX / 2) + (xI + (x))]
-
-loopImageBlockY:
-    for (unsigned int j = 0; j < 1; ++j)
-        {
 loopImageBlockX:
-        for (unsigned int i = 0; i < 1; ++i)
-            {
-            unsigned int index = 8 * j + 2 * i;
-            layerOut_t rawBlock = T(j, i);
+    for (unsigned int i = 0; i < 1; ++i)
+        {
+        layerOutBlock_t rawBlock_Old = Old.Y[cI * sizeC + xI / BLOCK_HEIGHT];
+        layerOutBlock_t rawBlock_New = New.Y[cI * sizeC + xI / BLOCK_HEIGHT];
 
-            Block[index + 0].set_slc(0, rawBlock.slc<12>(0));
-            Block[index + 1].set_slc(0, rawBlock.slc<12>(12));
-            Block[index + 4].set_slc(0, rawBlock.slc<12>(24));
-            Block[index + 5].set_slc(0, rawBlock.slc<12>(36));
-            }
+        Block[2 * i + 0] = rawBlock_Old.P[0];
+        Block[2 * i + 1] = rawBlock_Old.P[1];
+        Block[2 * i + 4] = rawBlock_Old.P[2];
+        Block[2 * i + 5] = rawBlock_Old.P[3];
+
+        Block[2 * i + 8] = rawBlock_New.P[0];
+        Block[2 * i + 9] = rawBlock_New.P[1];
+        Block[2 * i + 12] = rawBlock_New.P[2];
+        Block[2 * i + 13] = rawBlock_New.P[3];
         }
 
-#undef T
 #undef B
 }
 

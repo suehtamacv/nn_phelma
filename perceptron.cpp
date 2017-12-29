@@ -16,7 +16,7 @@ loopY:
 loopX:
         for (unsigned int iKx = 0; iKx < 180; ++iKx)
             {
-            bufferY.Y[iKy] += perceptronKernel4[iKy * 180 + iKx] * bufferI.Y[iKx];
+            //bufferY.Y[iKy] += perceptronKernel4[iKy * 180 + iKx] * bufferI.Y[iKx];
             }
         }
 

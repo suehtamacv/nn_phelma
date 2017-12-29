@@ -10,7 +10,9 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
 #define sizeC 3
 #define sizeL 64
 
-    conv1_line_In_t  bufferI = I.read();
+    conv1_line_In_t  bufferI_New;
+    conv1_line_In_t  bufferI_Old;
+    conv1_line_In_t  bufferI_Zero;
     conv1_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -20,25 +22,35 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    // X coordinate
-loopConvXi:
-    for (unsigned int xI = 0; xI < sizeX; xI += overlap)
-        {
-        // Y coordinate
+    // Y coordinate
 loopConvYi:
-        for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+    for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+        {
+        bufferI_Old = bufferI_New;
+        if (yI == sizeY - overlap)
+            {
+            bufferI_New = bufferI_Zero;
+            }
+        else
+            {
+            bufferI_New = I.read();
+            }
+
+        // Output channels
+loopConvOutChannel:
+        for (unsigned int lI = 0; lI < sizeL; lI++)
             {
 
-            // Output channels
-loopConvOutChannel:
-            for (unsigned int lI = 0; lI < sizeL; lI++)
+            // X coordinate
+loopConvXi:
+            for (unsigned int xI = 0; xI < sizeX; xI += overlap)
                 {
 
                 // Input channels
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    //getImageBlock<sizeX, sizeY, sizeC, sizeL>(bufferI, Block, xI, yI, cI);
+                    getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
@@ -67,6 +79,10 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
+                layerOutBlock_t outBlock;
+                pixel_t maxBlock;
+                maxBlock.set_val<AC_VAL_MIN>();
+
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
@@ -77,18 +93,46 @@ loopOutputBlock:
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
+
+                    outBlock.P[2 * j] = preReLU[j][0];
+                    outBlock.P[2 * j + 1] = preReLU[j][1];
+
+                    if (maxBlock < outBlock.P[2 * j])
+                        {
+                        maxBlock = outBlock.P[2 * j];
+                        outBlock.biggerBlock = 2 * j;
+                        }
+                    if (maxBlock < outBlock.P[2 * j])
+                        {
+                        maxBlock = outBlock.P[2 * j + 1];
+                        outBlock.biggerBlock = 2 * j + 1;
+                        }
                     }
 
-                /*bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
-                bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];*/
+                if (outBlock.P[0] > outBlock.P[1])
+                    {
+                    outBlock.biggerH = 0;
+                    }
+                else
+                    {
+                    outBlock.biggerH = 1;
+                    }
 
+                if (outBlock.P[0] > outBlock.P[2])
+                    {
+                    outBlock.biggerV = 0;
+                    }
+                else
+                    {
+                    outBlock.biggerV = 1;
+                    }
+
+                bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
-
                 }
             }
+        Y.write(bufferY);
         }
-
-    Y.write(bufferY);
 
 #undef sizeX
 #undef sizeY
@@ -172,8 +216,8 @@ loopOutputBlock:
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-                    bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
-                    bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
+                    //bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
+                    //bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
                     }
                 // End transformation
 
@@ -265,8 +309,8 @@ loopOutputBlock:
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-                    bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
-                    bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
+                    //bufferY.Y[lI * sizeY * sizeX + yI * sizeX + (xI + j)] = preReLU[j][0];
+                    //bufferY.Y[lI * sizeY * sizeX + (yI + 1) * sizeX + (xI + j)] = preReLU[j][1];
                     }
                 // End transformation
 

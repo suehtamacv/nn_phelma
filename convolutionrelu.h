@@ -22,7 +22,7 @@ void getImageBlock(lineBlockInterface<sizeX * sizeC> &Old, lineBlockInterface<si
     Block[y * tileSize + x]
 
 loopImageBlockX:
-    for (unsigned int i = 0; i < 1; ++i)
+    for (unsigned int i = 0; i < 2; ++i)
         {
         layerOutBlock_t rawBlock_Old = Old.Y[cI * (sizeX / BLOCK_HEIGHT) + xI / BLOCK_HEIGHT];
         layerOutBlock_t rawBlock_New = New.Y[cI * (sizeX / BLOCK_HEIGHT) + xI / BLOCK_HEIGHT];

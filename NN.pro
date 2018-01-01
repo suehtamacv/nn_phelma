@@ -11,7 +11,8 @@ INCLUDEPATH += include/
 SOURCES += main.cpp \
     top.cpp \
     perceptron.cpp \
-    convolutionrelu.cpp
+    convolutionrelu.cpp \
+    maxpooling.cpp
 
 HEADERS += \
     maxpooling.h \

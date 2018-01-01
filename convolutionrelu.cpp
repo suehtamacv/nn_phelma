@@ -191,7 +191,7 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
+                    calculateG(G, convKernel2 + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:
@@ -329,7 +329,7 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
+                    calculateG(G, convKernel3 + ((lI * sizeC + cI) * 9));
                     calculateD(Block, D);
 
 loopTile:

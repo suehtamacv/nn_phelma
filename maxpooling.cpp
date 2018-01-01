@@ -49,21 +49,17 @@ loopX:
                 Pix[2] = B[2].P[B[0].biggerH];
                 Pix[3] = B[3].P[0];
 
-                // Finds max and stores into Pix[0]
-                if (Pix[0] < Pix[1])
+                pixel_t maxPixel = Pix[0];
+loopFindMax:
+                for (unsigned int i = 1; i < 4; ++i)
                     {
-                    Pix[0] = Pix[1];
-                    }
-                if (Pix[0] < Pix[2])
-                    {
-                    Pix[0] = Pix[2];
-                    }
-                if (Pix[0] < Pix[3])
-                    {
-                    Pix[0] = Pix[3];
+                    if (maxPixel < Pix[i])
+                        {
+                        maxPixel = Pix[i];
+                        }
                     }
 
-                bufferY.Y[cI * newSizeX + nxI].P[nyI * 2 + (nxI % 2)] = Pix[0];
+                bufferY.Y[cI * newSizeX + nxI].P[nyI * 2 + (nxI % 2)] = maxPixel;
                 }
             }
 
@@ -129,21 +125,17 @@ loopX:
                 Pix[2] = B[2].P[B[0].biggerH];
                 Pix[3] = B[3].P[0];
 
-                // Finds max and stores into Pix[0]
-                if (Pix[0] < Pix[1])
+                pixel_t maxPixel = Pix[0];
+loopFindMax:
+                for (unsigned int i = 1; i < 4; ++i)
                     {
-                    Pix[0] = Pix[1];
-                    }
-                if (Pix[0] < Pix[2])
-                    {
-                    Pix[0] = Pix[2];
-                    }
-                if (Pix[0] < Pix[3])
-                    {
-                    Pix[0] = Pix[3];
+                    if (maxPixel < Pix[i])
+                        {
+                        maxPixel = Pix[i];
+                        }
                     }
 
-                bufferY.Y[cI * newSizeX + nxI].P[nyI * 2 + (nxI % 2)] = Pix[0];
+                bufferY.Y[cI * newSizeX + nxI].P[nyI * 2 + (nxI % 2)] = maxPixel;
                 }
             }
 
@@ -209,21 +201,17 @@ loopX:
                 Pix[2] = B[2].P[B[0].biggerH];
                 Pix[3] = B[3].P[0];
 
-                // Finds max and stores into Pix[0]
-                if (Pix[0] < Pix[1])
+                pixel_t maxPixel = Pix[0];
+loopFindMax:
+                for (unsigned int i = 1; i < 4; ++i)
                     {
-                    Pix[0] = Pix[1];
-                    }
-                if (Pix[0] < Pix[2])
-                    {
-                    Pix[0] = Pix[2];
-                    }
-                if (Pix[0] < Pix[3])
-                    {
-                    Pix[0] = Pix[3];
+                    if (maxPixel < Pix[i])
+                        {
+                        maxPixel = Pix[i];
+                        }
                     }
 
-                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] = Pix[0];
+                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] = maxPixel;
                 }
             }
         }

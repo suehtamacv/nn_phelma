@@ -46,18 +46,24 @@ struct perceptronBiasInterface
     perceptronBias_t B[size];
 };
 
-typedef lineBlockInterface<24 * 3> conv1_line_In_t;
+typedef lineBlockInterface<26 * 3> conv1_line_In_t;
 typedef lineBlockInterface<24 * 64> conv1_line_Out_t;
-typedef conv1_line_Out_t maxPool1_line_In_t;
-typedef lineBlockInterface<12 * 64> maxPool1_line_Out_t;
-typedef maxPool1_line_Out_t conv2_line_In_t;
+
+typedef lineBlockInterface<24 * 64> maxPool1_line_In_t;
+typedef lineBlockInterface<14 * 64> maxPool1_line_Out_t;
+
+typedef lineBlockInterface<14 * 64> conv2_line_In_t;
 typedef lineBlockInterface<12 * 32> conv2_line_Out_t;
-typedef conv2_line_Out_t maxPool2_line_In_t;
-typedef lineBlockInterface<6 * 32> maxPool2_line_Out_t;
-typedef maxPool2_line_Out_t conv3_line_In_t;
+
+typedef lineBlockInterface<12 * 32> maxPool2_line_In_t;
+typedef lineBlockInterface<8 * 32> maxPool2_line_Out_t;
+
+typedef lineBlockInterface<8 * 32> conv3_line_In_t;
 typedef lineBlockInterface<6 * 20> conv3_line_Out_t;
-typedef conv3_line_Out_t maxPool3_line_In_t;
+
+typedef lineBlockInterface<6 * 20> maxPool3_line_In_t;
 typedef memInterface<3 * 3 * 20> maxPool3_line_Out_t;
+
 typedef maxPool3_line_Out_t percep4_In_t;
 typedef memInterface<10> percep4_Out_t;
 

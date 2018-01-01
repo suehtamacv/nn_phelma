@@ -5,14 +5,13 @@
 #pragma design
 void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y)
 {
-#define sizeX 24
-#define sizeY 24
+#define sizeX 26
+#define sizeY 26
 #define sizeC 3
 #define sizeL 64
 
     conv1_line_In_t  bufferI_New;
     conv1_line_In_t  bufferI_Old;
-    conv1_line_In_t  bufferI_Zero;
     conv1_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -27,14 +26,7 @@ loopConvYi:
     for (unsigned int yI = 0; yI < sizeY; yI += overlap)
         {
         bufferI_Old = bufferI_New;
-        if (yI == sizeY - overlap)
-            {
-            bufferI_New = bufferI_Zero;
-            }
-        else
-            {
-            bufferI_New = I.read();
-            }
+        bufferI_New = I.read();
 
         // Output channels
 loopConvOutChannel:
@@ -128,14 +120,13 @@ loopOutputBlock:
 #pragma design
 void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y)
 {
-#define sizeX 12
-#define sizeY 12
+#define sizeX 14
+#define sizeY 14
 #define sizeC 64
 #define sizeL 32
 
     conv2_line_In_t  bufferI_New;
     conv2_line_In_t  bufferI_Old;
-    conv2_line_In_t  bufferI_Zero;
     conv2_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -150,14 +141,7 @@ loopConvYi:
     for (unsigned int yI = 0; yI < sizeY; yI += overlap)
         {
         bufferI_Old = bufferI_New;
-        if (yI == sizeY - overlap)
-            {
-            bufferI_New = bufferI_Zero;
-            }
-        else
-            {
-            bufferI_New = I.read();
-            }
+        bufferI_New = I.read();
 
         // Output channels
 loopConvOutChannel:
@@ -251,14 +235,13 @@ loopOutputBlock:
 #pragma design
 void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y)
 {
-#define sizeX 6
-#define sizeY 6
+#define sizeX 8
+#define sizeY 8
 #define sizeC 32
 #define sizeL 20
 
     conv3_line_In_t  bufferI_New;
     conv3_line_In_t  bufferI_Old;
-    conv3_line_In_t  bufferI_Zero;
     conv3_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -273,14 +256,7 @@ loopConvYi:
     for (unsigned int yI = 0; yI < sizeY; yI += overlap)
         {
         bufferI_Old = bufferI_New;
-        if (yI == sizeY - overlap)
-            {
-            bufferI_New = bufferI_Zero;
-            }
-        else
-            {
-            bufferI_New = I.read();
-            }
+        bufferI_New = I.read();
 
         // Output channels
 loopConvOutChannel:

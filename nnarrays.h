@@ -4,7 +4,7 @@
 #include "fixedpointvariables.h"
 
 #ifndef WIDTH
-#define WIDTH  24
+#define WIDTH  26
 #endif
 
 #ifndef HEIGHT

@@ -109,23 +109,8 @@ loopOutputBlock:
                         }
                     }
 
-                if (outBlock.P[0] > outBlock.P[1])
-                    {
-                    outBlock.biggerH = 0;
-                    }
-                else
-                    {
-                    outBlock.biggerH = 1;
-                    }
-
-                if (outBlock.P[0] > outBlock.P[2])
-                    {
-                    outBlock.biggerV = 0;
-                    }
-                else
-                    {
-                    outBlock.biggerV = 1;
-                    }
+                outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
+                outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
 
                 bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
@@ -247,23 +232,8 @@ loopOutputBlock:
                         }
                     }
 
-                if (outBlock.P[0] > outBlock.P[1])
-                    {
-                    outBlock.biggerH = 0;
-                    }
-                else
-                    {
-                    outBlock.biggerH = 1;
-                    }
-
-                if (outBlock.P[0] > outBlock.P[2])
-                    {
-                    outBlock.biggerV = 0;
-                    }
-                else
-                    {
-                    outBlock.biggerV = 1;
-                    }
+                outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
+                outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
 
                 bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
@@ -385,23 +355,8 @@ loopOutputBlock:
                         }
                     }
 
-                if (outBlock.P[0] > outBlock.P[1])
-                    {
-                    outBlock.biggerH = 0;
-                    }
-                else
-                    {
-                    outBlock.biggerH = 1;
-                    }
-
-                if (outBlock.P[0] > outBlock.P[2])
-                    {
-                    outBlock.biggerV = 0;
-                    }
-                else
-                    {
-                    outBlock.biggerV = 1;
-                    }
+                outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
+                outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
 
                 bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation

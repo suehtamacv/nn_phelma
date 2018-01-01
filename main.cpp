@@ -92,6 +92,7 @@ CCS_MAIN(int argc, char* argv)
 int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
+    pixel_t ImageTreated[HEIGHT * WIDTH * 3];
     unsigned char ImageLabel;
 
     double Average = 0;
@@ -126,25 +127,53 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
         }
     StdDev = sqrt(StdDev / (24 * 24 * 3));
 
-    for (unsigned int yI = 0; yI < 24; yI += 2)
+    for (unsigned int cI = 0; cI < 3; ++cI)
+        {
+        for (unsigned int yI = 0; yI < 24; ++yI)
+            {
+            for (unsigned int xI = 0; xI < 24; ++xI)
+                {
+                ImageTreated[cI * HEIGHT * WIDTH + (yI + 1) * WIDTH + (xI + 1)] =
+                    (ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                }
+            }
+        }
+
+    for (unsigned int cI = 0; cI < 3; ++cI)
+        {
+        for (unsigned int yI = 0; yI < HEIGHT; ++yI)
+            {
+            for (unsigned int xI = 0; xI < WIDTH; ++xI)
+                {
+                if (yI == 0 || yI == HEIGHT - 1)
+                    {
+                    ImageTreated[cI * HEIGHT * WIDTH + yI * WIDTH + xI] = 0;
+                    }
+                else if (xI == 0 || xI == WIDTH - 1)
+                    {
+                    ImageTreated[cI * HEIGHT * WIDTH + yI * WIDTH + xI] = 0;
+                    }
+                }
+            }
+        }
+
+    for (unsigned int yI = 0; yI < HEIGHT; yI += 2)
         {
         lineBlockInterface<INPUT_SIZE> line;
 
         for (unsigned int cI = 0; cI < 3; ++cI)
             {
-            for (unsigned int xI = 0; xI < 24; xI += 2)
+            for (unsigned int xI = 0; xI < WIDTH; xI += 2)
                 {
-
                 layerOutBlock_t out;
                 for (unsigned int off_yI = 0; off_yI < 2; ++off_yI)
                     {
                     for (unsigned int off_xI = 0; off_xI < 2; ++off_xI)
                         {
-                        out.P[off_yI * 2 + off_xI] = (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 +
-                                                                (xI + off_xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                        out.P[off_yI * 2 + off_xI] = ImageTreated[cI * HEIGHT * WIDTH + (yI + off_yI) * WIDTH + (xI + off_xI)];
                         }
                     }
-                line.Y[cI * 12 + xI / 2] = out;
+                line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)] = out;
                 }
             }
 

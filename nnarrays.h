@@ -8,7 +8,7 @@
 #endif
 
 #ifndef HEIGHT
-#define HEIGHT 24
+#define HEIGHT 26
 #endif
 
 #define INPUT_SIZE    WIDTH * 3

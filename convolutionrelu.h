@@ -38,6 +38,17 @@ loopImageBlockX:
         Block[2 * i + 13] = rawBlock_New.P[3];
         }
 
+
+    for (unsigned int yI = 0; yI < 4; ++yI)
+        {
+        for (unsigned int xI = 0; xI < 4; ++xI)
+            {
+            std::cout << Block[yI * 4 + xI].to_double() << "\t";
+            }
+        std::cout << std::endl;
+        }
+    std::cout << std::endl;
+
 #undef B
 }
 

@@ -23,7 +23,7 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
 
     // Y coordinate
 loopConvYi:
-    for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+    for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
         bufferI_Old = bufferI_New;
         bufferI_New = I.read();
@@ -35,7 +35,7 @@ loopConvOutChannel:
 
             // X coordinate
 loopConvXi:
-            for (unsigned int xI = 0; xI < sizeX; xI += overlap)
+            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
                 {
 
                 // Input channels
@@ -138,7 +138,7 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
 
     // Y coordinate
 loopConvYi:
-    for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+    for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
         bufferI_Old = bufferI_New;
         bufferI_New = I.read();
@@ -150,7 +150,7 @@ loopConvOutChannel:
 
             // X coordinate
 loopConvXi:
-            for (unsigned int xI = 0; xI < sizeX; xI += overlap)
+            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
                 {
 
                 // Input channels
@@ -253,7 +253,7 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
 
     // Y coordinate
 loopConvYi:
-    for (unsigned int yI = 0; yI < sizeY; yI += overlap)
+    for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
         bufferI_Old = bufferI_New;
         bufferI_New = I.read();
@@ -265,7 +265,7 @@ loopConvOutChannel:
 
             // X coordinate
 loopConvXi:
-            for (unsigned int xI = 0; xI < sizeX; xI += overlap)
+            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
                 {
 
                 // Input channels

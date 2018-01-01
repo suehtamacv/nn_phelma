@@ -46,7 +46,7 @@ loopX:
 
                 Pix[0] = B[0].P[B[0].biggerBlock];
                 Pix[1] = B[1].P[((uint2) B[1].biggerV) * 2];
-                Pix[2] = B[2].P[B[0].biggerH];
+                Pix[2] = B[2].P[B[2].biggerH];
                 Pix[3] = B[3].P[0];
 
                 pixel_t maxPixel = Pix[0];
@@ -122,7 +122,7 @@ loopX:
 
                 Pix[0] = B[0].P[B[0].biggerBlock];
                 Pix[1] = B[1].P[((uint2) B[1].biggerV) * 2];
-                Pix[2] = B[2].P[B[0].biggerH];
+                Pix[2] = B[2].P[B[2].biggerH];
                 Pix[3] = B[3].P[0];
 
                 pixel_t maxPixel = Pix[0];
@@ -198,7 +198,7 @@ loopX:
 
                 Pix[0] = B[0].P[B[0].biggerBlock];
                 Pix[1] = B[1].P[((uint2) B[1].biggerV) * 2];
-                Pix[2] = B[2].P[B[0].biggerH];
+                Pix[2] = B[2].P[B[2].biggerH];
                 Pix[3] = B[3].P[0];
 
                 pixel_t maxPixel = Pix[0];

@@ -71,7 +71,6 @@
 
 // Layer output
 typedef double pixel_t;
-typedef double layerOut_t;
 
 // Convolution types
 typedef double convD_t;
@@ -89,14 +88,6 @@ typedef double perceptronBias_t;
 // Layer output
 typedef ac_fixed < PIXEL_DYN + PIXEL_PREC, PIXEL_DYN, true > pixel_t;
 
-struct layerOutBlock_t
-{
-    pixel_t P[BLOCK_HEIGHT * BLOCK_WIDTH] = {0};
-    uint2 biggerBlock = 0;
-    uint1 biggerV = 0;
-    uint1 biggerH = 0;
-};
-
 // Convolution types
 typedef ac_fixed < CONV_D_DYN + CONV_D_PREC, CONV_D_DYN, true > convD_t;
 typedef ac_fixed < CONV_M_DYN + CONV_M_PREC, CONV_M_DYN, true > convM_t;
@@ -109,5 +100,13 @@ typedef ac_fixed < PERCEP_KERNEL_DYN + PERCEP_KERNEL_PREC, PERCEP_KERNEL_DYN, tr
 typedef ac_fixed < PERCEP_BIAS_DYN + PERCEP_BIAS_PREC, PERCEP_BIAS_DYN, true > perceptronBias_t;
 
 #endif
+
+struct layerOutBlock_t
+{
+    pixel_t P[BLOCK_HEIGHT * BLOCK_WIDTH] = {0};
+    uint2 biggerBlock = 0;
+    uint1 biggerV = 0;
+    uint1 biggerH = 0;
+};
 
 #endif // FIXEDPOINTVARIABLES_H

@@ -157,20 +157,21 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
             }
         }
 
-    for (unsigned int yI = 0; yI < HEIGHT; yI += 2)
+    for (unsigned int yI = 0; yI < HEIGHT; yI += BLOCK_HEIGHT)
         {
         lineBlockInterface<INPUT_SIZE> line;
 
         for (unsigned int cI = 0; cI < 3; ++cI)
             {
-            for (unsigned int xI = 0; xI < WIDTH; xI += 2)
+            for (unsigned int xI = 0; xI < WIDTH; xI += BLOCK_WIDTH)
                 {
                 layerOutBlock_t out;
-                for (unsigned int off_yI = 0; off_yI < 2; ++off_yI)
+                for (unsigned int off_yI = 0; off_yI < BLOCK_HEIGHT; ++off_yI)
                     {
-                    for (unsigned int off_xI = 0; off_xI < 2; ++off_xI)
+                    for (unsigned int off_xI = 0; off_xI < BLOCK_WIDTH; ++off_xI)
                         {
-                        out.P[off_yI * 2 + off_xI] = ImageTreated[cI * HEIGHT * WIDTH + (yI + off_yI) * WIDTH + (xI + off_xI)];
+                        out.P[off_yI * BLOCK_WIDTH + off_xI] =
+                            ImageTreated[cI * HEIGHT * WIDTH + (yI + off_yI) * WIDTH + (xI + off_xI)];
                         }
                     }
                 line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)] = out;

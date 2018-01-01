@@ -28,6 +28,15 @@ loopY:
             bufferI_New = I.read();
             }
 
+loopInit:
+        for (unsigned int i = 0; i < sizeC * (newSizeX + 2); ++i)
+            {
+            bufferY.Y[i].P[0] = 0;
+            bufferY.Y[i].P[1] = 0;
+            bufferY.Y[i].P[2] = 0;
+            bufferY.Y[i].P[3] = 0;
+            }
+
 loopChannels:
         for (unsigned int cI = 0; cI < sizeC; ++cI)
             {
@@ -59,12 +68,12 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * newSizeX + nxI].P[nyI * 2 + (nxI % 2)] = maxPixel;
+                bufferY.Y[cI * (newSizeX + 2) + (nxI + 1)].P[nyI * 2 + (nxI % 2)] = maxPixel;
                 }
             }
 
         // Writes after each two lines
-        if (nyI % 2 == 0 && yI != 0)
+        if (nyI % 2 == 1)
             {
             Y.write(bufferY);
             }
@@ -104,6 +113,15 @@ loopY:
             bufferI_New = I.read();
             }
 
+loopInit:
+        for (unsigned int i = 0; i < sizeC * (newSizeX + 2); ++i)
+            {
+            bufferY.Y[i].P[0] = 0;
+            bufferY.Y[i].P[1] = 0;
+            bufferY.Y[i].P[2] = 0;
+            bufferY.Y[i].P[3] = 0;
+            }
+
 loopChannels:
         for (unsigned int cI = 0; cI < sizeC; ++cI)
             {
@@ -135,12 +153,12 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * newSizeX + nxI].P[nyI * 2 + (nxI % 2)] = maxPixel;
+                bufferY.Y[cI * (newSizeX + 2) + (nxI + 1)].P[nyI * 2 + (nxI % 2)] = maxPixel;
                 }
             }
 
         // Writes after each two lines
-        if (nyI % 2 == 0 && yI != 0)
+        if (nyI % 2 == 1)
             {
             Y.write(bufferY);
             }

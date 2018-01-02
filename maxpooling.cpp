@@ -1,4 +1,6 @@
 #include "maxpooling.h"
+#include "fixedpointvariables.h"
+#include "meminterface.h"
 
 #pragma design
 void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
@@ -54,7 +56,7 @@ loopX:
                 pixel_t Pix[4];
 
                 Pix[0] = B[0].P[B[0].biggerBlock];
-                Pix[1] = B[1].P[((uint2) B[1].biggerV) * 2];
+                Pix[1] = B[1].P[((unsigned int) B[1].biggerV) * 2];
                 Pix[2] = B[2].P[B[2].biggerH];
                 Pix[3] = B[3].P[0];
 
@@ -68,12 +70,12 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * (newSizeX + 2) + (nxI + 1)].P[nyI * 2 + (nxI % 2)] = maxPixel;
+                bufferY.Y[cI * (newSizeX + 2) + nxI].P[((nyI + 1) * 2 + (nxI % 2) + 1) % 4] = maxPixel;
                 }
             }
 
         // Writes after each two lines
-        if (nyI % 2 == 1)
+        if (nyI % 2 == 0)
             {
             Y.write(bufferY);
             }
@@ -139,7 +141,7 @@ loopX:
                 pixel_t Pix[4];
 
                 Pix[0] = B[0].P[B[0].biggerBlock];
-                Pix[1] = B[1].P[((uint2) B[1].biggerV) * 2];
+                Pix[1] = B[1].P[((unsigned int) B[1].biggerV) * 2];
                 Pix[2] = B[2].P[B[2].biggerH];
                 Pix[3] = B[3].P[0];
 
@@ -153,12 +155,12 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * (newSizeX + 2) + (nxI + 1)].P[nyI * 2 + (nxI % 2)] = maxPixel;
+                bufferY.Y[cI * (newSizeX + 2) + (nxI + 1)].P[((nyI + 1) * 2 + (nxI % 2) + 1) % 4] = maxPixel;
                 }
             }
 
         // Writes after each two lines
-        if (nyI % 2 == 1)
+        if (nyI % 2 == 0)
             {
             Y.write(bufferY);
             }
@@ -215,7 +217,7 @@ loopX:
                 pixel_t Pix[4];
 
                 Pix[0] = B[0].P[B[0].biggerBlock];
-                Pix[1] = B[1].P[((uint2) B[1].biggerV) * 2];
+                Pix[1] = B[1].P[((unsigned int) B[1].biggerV) * 2];
                 Pix[2] = B[2].P[B[2].biggerH];
                 Pix[3] = B[3].P[0];
 

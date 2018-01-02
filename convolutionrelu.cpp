@@ -98,7 +98,7 @@ loopOutputBlock:
                         maxBlock = outBlock.P[2 * j];
                         outBlock.biggerBlock = 2 * j;
                         }
-                    if (maxBlock < outBlock.P[2 * j])
+                    if (maxBlock < outBlock.P[2 * j + 1])
                         {
                         maxBlock = outBlock.P[2 * j + 1];
                         outBlock.biggerBlock = 2 * j + 1;
@@ -217,7 +217,7 @@ loopOutputBlock:
                         maxBlock = outBlock.P[2 * j];
                         outBlock.biggerBlock = 2 * j;
                         }
-                    if (maxBlock < outBlock.P[2 * j])
+                    if (maxBlock < outBlock.P[2 * j + 1])
                         {
                         maxBlock = outBlock.P[2 * j + 1];
                         outBlock.biggerBlock = 2 * j + 1;
@@ -336,7 +336,7 @@ loopOutputBlock:
                         maxBlock = outBlock.P[2 * j];
                         outBlock.biggerBlock = 2 * j;
                         }
-                    if (maxBlock < outBlock.P[2 * j])
+                    if (maxBlock < outBlock.P[2 * j + 1])
                         {
                         maxBlock = outBlock.P[2 * j + 1];
                         outBlock.biggerBlock = 2 * j + 1;

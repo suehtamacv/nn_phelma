@@ -10,7 +10,7 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
 #define sizeC 3
 #define sizeL 64
 
-    conv1_line_In_t  bufferI_New;
+    conv1_line_In_t  bufferI_New = I.read();
     conv1_line_In_t  bufferI_Old;
     conv1_line_Out_t bufferY;
 
@@ -125,7 +125,7 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
 #define sizeC 64
 #define sizeL 32
 
-    conv2_line_In_t  bufferI_New;
+    conv2_line_In_t  bufferI_New = I.read();
     conv2_line_In_t  bufferI_Old;
     conv2_line_Out_t bufferY;
 
@@ -240,7 +240,7 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
 #define sizeC 32
 #define sizeL 20
 
-    conv3_line_In_t  bufferI_New;
+    conv3_line_In_t  bufferI_New = I.read();
     conv3_line_In_t  bufferI_Old;
     conv3_line_Out_t bufferY;
 

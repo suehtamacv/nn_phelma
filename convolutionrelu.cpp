@@ -72,12 +72,7 @@ loopInverseTransform:
                     }
 
                 layerOutBlock_t outBlock;
-                pixel_t maxBlock;
-#ifndef __FLOATVERSION__
-                maxBlock.set_val<AC_VAL_MIN>();
-#else
-                maxBlock = - std::numeric_limits<pixel_t>::max();
-#endif
+                pixel_t maxBlock = 0;
 
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
@@ -191,12 +186,7 @@ loopInverseTransform:
                     }
 
                 layerOutBlock_t outBlock;
-                pixel_t maxBlock;
-#ifndef __FLOATVERSION__
-                maxBlock.set_val<AC_VAL_MIN>();
-#else
-                maxBlock = - std::numeric_limits<pixel_t>::max();
-#endif
+                pixel_t maxBlock = 0;
 
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
@@ -310,12 +300,7 @@ loopInverseTransform:
                     }
 
                 layerOutBlock_t outBlock;
-                pixel_t maxBlock;
-#ifndef __FLOATVERSION__
-                maxBlock.set_val<AC_VAL_MIN>();
-#else
-                maxBlock = - std::numeric_limits<pixel_t>::max();
-#endif
+                pixel_t maxBlock = 0;
 
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)

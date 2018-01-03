@@ -19,8 +19,13 @@ void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
     pixel_t Pix[4];
 
     layerOutBlock_t B_Zero;
-    B_Zero.P[0] = B_Zero.P[1] = B_Zero.P[2] = B_Zero.P[3]
-                                = B_Zero.biggerBlock = B_Zero.biggerH = B_Zero.biggerV = 0;
+    B_Zero.P[0] = 0;
+    B_Zero.P[1] = 0;
+    B_Zero.P[2] = 0;
+    B_Zero.P[3] = 0;
+    B_Zero.biggerBlock = 0;
+    B_Zero.biggerH = 0;
+    B_Zero.biggerV = 0;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
@@ -85,7 +90,8 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * (newSizeX + 2) + ((nxI + 1) / 2)].P[3 - (int) (nyI * 2 + (nxI % 2))] = maxPixel;
+                bufferY.Y[cI * ((newSizeX + 2) / BLOCK_WIDTH) + ((nxI + 1) / BLOCK_WIDTH)].
+                P[3 - (int) ((nyI % 2) * 2 + (nxI % 2))] = maxPixel;
                 }
             }
 
@@ -119,8 +125,13 @@ void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I,
     pixel_t Pix[4];
 
     layerOutBlock_t B_Zero;
-    B_Zero.P[0] = B_Zero.P[1] = B_Zero.P[2] = B_Zero.P[3]
-                                = B_Zero.biggerBlock = B_Zero.biggerH = B_Zero.biggerV = 0;
+    B_Zero.P[0] = 0;
+    B_Zero.P[1] = 0;
+    B_Zero.P[2] = 0;
+    B_Zero.P[3] = 0;
+    B_Zero.biggerBlock = 0;
+    B_Zero.biggerH = 0;
+    B_Zero.biggerV = 0;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
@@ -185,7 +196,8 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * (newSizeX + 2) + ((nxI + 1) / 2)].P[3 - (int) (nyI * 2 + (nxI % 2))] = maxPixel;
+                bufferY.Y[cI * ((newSizeX + 2) / BLOCK_WIDTH) + ((nxI + 1) / BLOCK_WIDTH)].
+                P[3 - (int) ((nyI % 2) * 2 + (nxI % 2))] = maxPixel;
                 }
             }
 
@@ -219,8 +231,13 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
     pixel_t Pix[4];
 
     layerOutBlock_t B_Zero;
-    B_Zero.P[0] = B_Zero.P[1] = B_Zero.P[2] = B_Zero.P[3]
-                                = B_Zero.biggerBlock = B_Zero.biggerH = B_Zero.biggerV = 0;
+    B_Zero.P[0] = 0;
+    B_Zero.P[1] = 0;
+    B_Zero.P[2] = 0;
+    B_Zero.P[3] = 0;
+    B_Zero.biggerBlock = 0;
+    B_Zero.biggerH = 0;
+    B_Zero.biggerV = 0;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;

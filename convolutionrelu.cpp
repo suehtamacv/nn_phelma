@@ -108,7 +108,7 @@ loopOutputBlock:
                 outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
                 outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
 
-                bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
                 }
             }
@@ -227,7 +227,7 @@ loopOutputBlock:
                 outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
                 outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
 
-                bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
                 }
             }
@@ -346,7 +346,7 @@ loopOutputBlock:
                 outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
                 outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
 
-                bufferY.Y[lI * (sizeX / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
                 }
             }

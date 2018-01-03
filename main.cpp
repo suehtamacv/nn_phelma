@@ -150,7 +150,7 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
                         else
                             {
                             out.P[off_yI * BLOCK_WIDTH + off_xI] =
-                                (ImageData[cI * 32 * 32 + (yI + off_yI + 4) * 32 + (xI + off_xI + 4)] - Average)
+                                (ImageData[cI * 32 * 32 + (yI + off_yI + 3) * 32 + (xI + off_xI + 3)] - Average)
                                 / std::max(StdDev, minStdDev);
                             }
                         }

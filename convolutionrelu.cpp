@@ -202,8 +202,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias2[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias2[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
@@ -321,8 +321,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias3[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias3[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;

@@ -17,14 +17,8 @@ void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
 
     pixel_t Pix[4];
 
-    layerOutBlock_t B_Zero;
-    B_Zero[0] = 0;
-    B_Zero[1] = 0;
-    B_Zero[2] = 0;
-    B_Zero[3] = 0;
-
-    unsigned int nxI = 0;
-    unsigned int nyI = 0;
+    unsigned int nxI = 1;
+    unsigned int nyI = 1;
 
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
@@ -51,7 +45,7 @@ loopInit:
 loopChannels:
         for (unsigned int cI = 0; cI < sizeC; ++cI)
             {
-            nxI = 0;
+            nxI = 1;
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
@@ -78,13 +72,13 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * ((newSizeX + 2) / BLOCK_WIDTH) + ((nxI + 1) / BLOCK_WIDTH)]
-                [3 - (int) ((nyI % 2) * 2 + (nxI % 2))] = maxPixel;
+                bufferY.Y[cI * ((newSizeX + 2) / BLOCK_WIDTH) + nxI / BLOCK_WIDTH]
+                [(nyI % 2) * 2 + (nxI % 2)] = maxPixel;
                 }
             }
 
         // Writes after each two lines
-        if (nyI % 2 == 0)
+        if (nyI % 2 == 1)
             {
             Y.write(bufferY);
             }
@@ -111,14 +105,8 @@ void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I,
 
     pixel_t Pix[4];
 
-    layerOutBlock_t B_Zero;
-    B_Zero[0] = 0;
-    B_Zero[1] = 0;
-    B_Zero[2] = 0;
-    B_Zero[3] = 0;
-
-    unsigned int nxI = 0;
-    unsigned int nyI = 0;
+    unsigned int nxI = 1;
+    unsigned int nyI = 1;
 
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
@@ -145,7 +133,7 @@ loopInit:
 loopChannels:
         for (unsigned int cI = 0; cI < sizeC; ++cI)
             {
-            nxI = 0;
+            nxI = 1;
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
@@ -172,13 +160,13 @@ loopFindMax:
                         }
                     }
 
-                bufferY.Y[cI * ((newSizeX + 2) / BLOCK_WIDTH) + ((nxI + 1) / BLOCK_WIDTH)]
-                [3 - (int) ((nyI % 2) * 2 + (nxI % 2))] = maxPixel;
+                bufferY.Y[cI * ((newSizeX + 2) / BLOCK_WIDTH) + nxI / BLOCK_WIDTH]
+                [(nyI % 2) * 2 + (nxI % 2)] = maxPixel;
                 }
             }
 
         // Writes after each two lines
-        if (nyI % 2 == 0)
+        if (nyI % 2 == 1)
             {
             Y.write(bufferY);
             }

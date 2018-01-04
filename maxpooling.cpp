@@ -212,7 +212,7 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
 #define sizeC 20
 
     maxPool3_line_In_t  bufferI_Old;
-    maxPool3_line_In_t  bufferI_New;
+    maxPool3_line_In_t  bufferI_New = I.read();
     maxPool3_line_Out_t bufferY;
 
     pixel_t Pix[4];
@@ -223,7 +223,7 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
         {
-        bool yLimit = yI == sizeY + BLOCK_HEIGHT - stride;
+        bool yLimit = yI == sizeY - stride;
         bufferI_Old = bufferI_New;
         if (!yLimit)
             {
@@ -237,7 +237,7 @@ loopChannels:
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
-                bool xLimit = xI == sizeX + BLOCK_WIDTH - stride;
+                bool xLimit = xI == sizeX - stride;
 
                 Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0];
 
@@ -268,9 +268,9 @@ loopX:
                     Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3];
                     }
 
-                pixel_t maxPixel = Pix[0];
+                pixel_t maxPixel = 0;
 loopFindMax:
-                for (unsigned int i = 1; i < 4; ++i)
+                for (unsigned int i = 0; i < 4; ++i)
                     {
                     if (maxPixel < Pix[i])
                         {

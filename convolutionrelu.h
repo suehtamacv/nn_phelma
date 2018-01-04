@@ -18,9 +18,6 @@ template<unsigned int sizeX, unsigned int sizeC>
 void getImageBlock(lineBlockInterface<sizeX * sizeC> &Old, lineBlockInterface<sizeX * sizeC> &New,
                    pixel_t (&Block)[16], const unsigned int xI, const unsigned int cI)
 {
-#define B(y, x) \
-    Block[y * tileSize + x]
-
 loopImageBlockX:
     for (unsigned int i = 0; i < 2; ++i)
         {

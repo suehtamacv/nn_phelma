@@ -104,15 +104,6 @@ typedef ac_fixed < PERCEP_BIAS_DYN + PERCEP_BIAS_PREC, PERCEP_BIAS_DYN, true > p
 struct layerOutBlock_t
 {
     pixel_t P[BLOCK_HEIGHT * BLOCK_WIDTH] = {0};
-#ifndef __FLOATVERSION__
-    uint2 biggerBlock = 0;
-    uint1 biggerV = 0;
-    uint1 biggerH = 0;
-#else
-    unsigned int biggerBlock = 0;
-    bool biggerV = 0;
-    bool biggerH = 0;
-#endif
 };
 
 #endif // FIXEDPOINTVARIABLES_H

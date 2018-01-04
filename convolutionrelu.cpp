@@ -2,6 +2,8 @@
 #include "kernels.h"
 #include "biases.h"
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
 #pragma design
 void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y)
 {
@@ -71,6 +73,7 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
+                layerOutBlock_t tempOutBlock;
                 layerOutBlock_t outBlock;
                 pixel_t maxBlock = 0;
 
@@ -85,23 +88,23 @@ loopOutputBlock:
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-                    outBlock.P[2 * j] = preReLU[j][0];
-                    outBlock.P[2 * j + 1] = preReLU[j][1];
+                    if (maxBlock < preReLU[j][0])
+                        {
+                        maxBlock = preReLU[j][0];
+                        }
+                    if (maxBlock < preReLU[j][1])
+                        {
+                        maxBlock = preReLU[j][1];
+                        }
 
-                    if (maxBlock < outBlock.P[2 * j])
-                        {
-                        maxBlock = outBlock.P[2 * j];
-                        outBlock.biggerBlock = 2 * j;
-                        }
-                    if (maxBlock < outBlock.P[2 * j + 1])
-                        {
-                        maxBlock = outBlock.P[2 * j + 1];
-                        outBlock.biggerBlock = 2 * j + 1;
-                        }
+                    tempOutBlock.P[2 * j] = preReLU[j][0];
+                    tempOutBlock.P[2 * j + 1] = preReLU[j][1];
                     }
 
-                outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
-                outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
+                outBlock.P[0] = maxBlock;
+                outBlock.P[1] = max(tempOutBlock.P[0], tempOutBlock.P[2]);
+                outBlock.P[2] = max(tempOutBlock.P[0], tempOutBlock.P[1]);
+                outBlock.P[3] = tempOutBlock.P[0];
 
                 bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
@@ -185,6 +188,7 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
+                layerOutBlock_t tempOutBlock;
                 layerOutBlock_t outBlock;
                 pixel_t maxBlock = 0;
 
@@ -192,30 +196,30 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias2[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias2[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-                    outBlock.P[2 * j] = preReLU[j][0];
-                    outBlock.P[2 * j + 1] = preReLU[j][1];
+                    if (maxBlock < preReLU[j][0])
+                        {
+                        maxBlock = preReLU[j][0];
+                        }
+                    if (maxBlock < preReLU[j][1])
+                        {
+                        maxBlock = preReLU[j][1];
+                        }
 
-                    if (maxBlock < outBlock.P[2 * j])
-                        {
-                        maxBlock = outBlock.P[2 * j];
-                        outBlock.biggerBlock = 2 * j;
-                        }
-                    if (maxBlock < outBlock.P[2 * j + 1])
-                        {
-                        maxBlock = outBlock.P[2 * j + 1];
-                        outBlock.biggerBlock = 2 * j + 1;
-                        }
+                    tempOutBlock.P[2 * j] = preReLU[j][0];
+                    tempOutBlock.P[2 * j + 1] = preReLU[j][1];
                     }
 
-                outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
-                outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
+                outBlock.P[0] = maxBlock;
+                outBlock.P[1] = max(tempOutBlock.P[0], tempOutBlock.P[2]);
+                outBlock.P[2] = max(tempOutBlock.P[0], tempOutBlock.P[1]);
+                outBlock.P[3] = tempOutBlock.P[0];
 
                 bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation
@@ -299,6 +303,7 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
+                layerOutBlock_t tempOutBlock;
                 layerOutBlock_t outBlock;
                 pixel_t maxBlock = 0;
 
@@ -306,30 +311,30 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias3[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias3[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
                     preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
 
-                    outBlock.P[2 * j] = preReLU[j][0];
-                    outBlock.P[2 * j + 1] = preReLU[j][1];
+                    if (maxBlock < preReLU[j][0])
+                        {
+                        maxBlock = preReLU[j][0];
+                        }
+                    if (maxBlock < preReLU[j][1])
+                        {
+                        maxBlock = preReLU[j][1];
+                        }
 
-                    if (maxBlock < outBlock.P[2 * j])
-                        {
-                        maxBlock = outBlock.P[2 * j];
-                        outBlock.biggerBlock = 2 * j;
-                        }
-                    if (maxBlock < outBlock.P[2 * j + 1])
-                        {
-                        maxBlock = outBlock.P[2 * j + 1];
-                        outBlock.biggerBlock = 2 * j + 1;
-                        }
+                    tempOutBlock.P[2 * j] = preReLU[j][0];
+                    tempOutBlock.P[2 * j + 1] = preReLU[j][1];
                     }
 
-                outBlock.biggerH = outBlock.P[0] <= outBlock.P[1];
-                outBlock.biggerV = outBlock.P[0] <= outBlock.P[2];
+                outBlock.P[0] = maxBlock;
+                outBlock.P[1] = max(tempOutBlock.P[0], tempOutBlock.P[2]);
+                outBlock.P[2] = max(tempOutBlock.P[0], tempOutBlock.P[1]);
+                outBlock.P[3] = tempOutBlock.P[0];
 
                 bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)] = outBlock;
                 // End transformation

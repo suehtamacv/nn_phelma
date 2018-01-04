@@ -23,9 +23,6 @@ void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
     B_Zero.P[1] = 0;
     B_Zero.P[2] = 0;
     B_Zero.P[3] = 0;
-    B_Zero.biggerBlock = 0;
-    B_Zero.biggerH = 0;
-    B_Zero.biggerV = 0;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
@@ -50,9 +47,6 @@ loopInit:
             bufferY.Y[i].P[1] = 0;
             bufferY.Y[i].P[2] = 0;
             bufferY.Y[i].P[3] = 0;
-            bufferY.Y[i].biggerBlock = 0;
-            bufferY.Y[i].biggerH = 0;
-            bufferY.Y[i].biggerV = 0;
             }
 
 loopChannels:
@@ -75,10 +69,10 @@ loopX:
                     B[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
                     }
 
-                Pix[0] = B[0].P[B[0].biggerBlock];
-                Pix[1] = B[1].P[B[1].biggerV * 2];
-                Pix[2] = B[2].P[B[2].biggerH];
-                Pix[3] = B[3].P[0];
+                for (unsigned int i = 0; i < 4; ++i)
+                    {
+                    Pix[i] = B[i].P[i];
+                    }
 
                 pixel_t maxPixel = Pix[0];
 loopFindMax:
@@ -129,9 +123,6 @@ void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I,
     B_Zero.P[1] = 0;
     B_Zero.P[2] = 0;
     B_Zero.P[3] = 0;
-    B_Zero.biggerBlock = 0;
-    B_Zero.biggerH = 0;
-    B_Zero.biggerV = 0;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
@@ -156,9 +147,6 @@ loopInit:
             bufferY.Y[i].P[1] = 0;
             bufferY.Y[i].P[2] = 0;
             bufferY.Y[i].P[3] = 0;
-            bufferY.Y[i].biggerBlock = 0;
-            bufferY.Y[i].biggerH = 0;
-            bufferY.Y[i].biggerV = 0;
             }
 
 loopChannels:
@@ -181,10 +169,10 @@ loopX:
                     B[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
                     }
 
-                Pix[0] = B[0].P[B[0].biggerBlock];
-                Pix[1] = B[1].P[B[1].biggerV * 2];
-                Pix[2] = B[2].P[B[2].biggerH];
-                Pix[3] = B[3].P[0];
+                for (unsigned int i = 0; i < 4; ++i)
+                    {
+                    Pix[i] = B[i].P[i];
+                    }
 
                 pixel_t maxPixel = Pix[0];
 loopFindMax:
@@ -235,9 +223,6 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
     B_Zero.P[1] = 0;
     B_Zero.P[2] = 0;
     B_Zero.P[3] = 0;
-    B_Zero.biggerBlock = 0;
-    B_Zero.biggerH = 0;
-    B_Zero.biggerV = 0;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
@@ -275,10 +260,10 @@ loopX:
                     B[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
                     }
 
-                Pix[0] = B[0].P[B[0].biggerBlock];
-                Pix[1] = B[1].P[B[1].biggerV * 2];
-                Pix[2] = B[2].P[B[2].biggerH];
-                Pix[3] = B[3].P[0];
+                for (unsigned int i = 0; i < 4; ++i)
+                    {
+                    Pix[i] = B[i].P[i];
+                    }
 
                 pixel_t maxPixel = Pix[0];
 loopFindMax:

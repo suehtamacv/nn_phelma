@@ -27,7 +27,7 @@ CCS_MAIN(int argc, char* argv)
 
     double CorrectFound = 0;
     double CorrectFoundGolden = 0;
-    unsigned int limit = 200;
+    unsigned int limit = 1000;
     int goldenLabel;
 
     for (unsigned int i = 0; i < limit; ++i)

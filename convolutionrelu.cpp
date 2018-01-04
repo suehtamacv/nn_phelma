@@ -4,9 +4,6 @@
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-#define setArray(dest, orig, size) \
-    for (unsigned int i = 0; i < size; ++i) { dest[i] = orig[i]; }
-
 #pragma design
 void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y)
 {
@@ -77,7 +74,6 @@ loopInverseTransform:
                     }
 
                 layerOutBlock_t tempOutBlock;
-                layerOutBlock_t outBlock;
                 pixel_t maxBlock = 0;
 
 loopOutputBlock:
@@ -104,13 +100,12 @@ loopOutputBlock:
                     tempOutBlock[2 * j + 1] = preReLU[j][1];
                     }
 
-                outBlock[0] = maxBlock;
-                outBlock[1] = max(tempOutBlock[0], tempOutBlock[2]);
-                outBlock[2] = max(tempOutBlock[0], tempOutBlock[1]);
-                outBlock[3] = tempOutBlock[0];
-
-                setArray(bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)], outBlock,
-                         BLOCK_HEIGHT * BLOCK_WIDTH);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][0] = maxBlock;
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][1] = max(tempOutBlock[0],
+                        tempOutBlock[2]);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][2] = max(tempOutBlock[0],
+                        tempOutBlock[1]);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][3] = tempOutBlock[0];
                 // End transformation
                 }
             }
@@ -193,7 +188,6 @@ loopInverseTransform:
                     }
 
                 layerOutBlock_t tempOutBlock;
-                layerOutBlock_t outBlock;
                 pixel_t maxBlock = 0;
 
 loopOutputBlock:
@@ -220,13 +214,12 @@ loopOutputBlock:
                     tempOutBlock[2 * j + 1] = preReLU[j][1];
                     }
 
-                outBlock[0] = maxBlock;
-                outBlock[1] = max(tempOutBlock[0], tempOutBlock[2]);
-                outBlock[2] = max(tempOutBlock[0], tempOutBlock[1]);
-                outBlock[3] = tempOutBlock[0];
-
-                setArray(bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)], outBlock,
-                         BLOCK_HEIGHT * BLOCK_WIDTH);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][0] = maxBlock;
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][1] = max(tempOutBlock[0],
+                        tempOutBlock[2]);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][2] = max(tempOutBlock[0],
+                        tempOutBlock[1]);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][3] = tempOutBlock[0];
                 // End transformation
                 }
             }
@@ -309,7 +302,6 @@ loopInverseTransform:
                     }
 
                 layerOutBlock_t tempOutBlock;
-                layerOutBlock_t outBlock;
                 pixel_t maxBlock = 0;
 
 loopOutputBlock:
@@ -336,13 +328,12 @@ loopOutputBlock:
                     tempOutBlock[2 * j + 1] = preReLU[j][1];
                     }
 
-                outBlock[0] = maxBlock;
-                outBlock[1] = max(tempOutBlock[0], tempOutBlock[2]);
-                outBlock[2] = max(tempOutBlock[0], tempOutBlock[1]);
-                outBlock[3] = tempOutBlock[0];
-
-                setArray(bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)], outBlock,
-                         BLOCK_HEIGHT * BLOCK_WIDTH);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][0] = maxBlock;
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][1] = max(tempOutBlock[0],
+                        tempOutBlock[2]);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][2] = max(tempOutBlock[0],
+                        tempOutBlock[1]);
+                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][3] = tempOutBlock[0];
                 // End transformation
                 }
             }

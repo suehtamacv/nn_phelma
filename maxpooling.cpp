@@ -184,19 +184,19 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
 #define sizeC 20
 
     maxPool3_line_In_t  bufferI_1;
-    maxPool3_line_In_t  bufferI_2 = I.read();
+    maxPool3_line_In_t  bufferI_2;
     maxPool3_line_Out_t bufferY;
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
 
-    bool toggleMemory = false;
+    bool toggleMemory = true;
 
 loopY:
-    for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
+    for (unsigned int yI = 0; yI < sizeY + BLOCK_HEIGHT; yI += stride, ++nyI)
         {
         toggleMemory = !toggleMemory;
-        bool yLimit = yI == sizeY - stride;
+        bool yLimit = yI == sizeY + BLOCK_HEIGHT - stride;
         if (!yLimit)
             {
             if (toggleMemory)
@@ -213,31 +213,38 @@ loopChannels:
         for (unsigned int cI = 0; cI < sizeC; ++cI)
             {
             nxI = 0;
+
 loopX:
-            for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
+            for (unsigned int xI = 0; xI < sizeX + BLOCK_WIDTH; xI += stride, ++nxI)
                 {
-                bool xLimit = xI == sizeX - stride;
+                pixel_t maxPixel = 0;
 
-                pixel_t maxPixel;
-
-                if (!toggleMemory)
+                if (nyI != 0 && nyI != newSizeY + 1)
                     {
-                    maxPixel = getMaxPixel(bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                           bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
-                                           bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                           bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
-                                           xLimit, yLimit);
-                    }
-                else
-                    {
-                    maxPixel = getMaxPixel(bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                           bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
-                                           bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                           bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
-                                           xLimit, yLimit);
-                    }
+                    bool xLimit = xI == sizeX + BLOCK_WIDTH  - stride;
 
-                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] = maxPixel;
+                    if (nxI != 0 && nxI != newSizeX + 1)
+                        {
+                        if (!toggleMemory)
+                            {
+                            maxPixel = getMaxPixel(bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   xLimit, yLimit);
+                            }
+                        else
+                            {
+                            maxPixel = getMaxPixel(bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   xLimit, yLimit);
+                            }
+
+                        bufferY.Y[cI * newSizeY * newSizeX + (nyI - 1) * newSizeX + nxI - 1] = maxPixel;
+                        }
+                    }
                 }
             }
         }

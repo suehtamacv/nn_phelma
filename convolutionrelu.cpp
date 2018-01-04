@@ -12,8 +12,8 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
 #define sizeC 3
 #define sizeL 64
 
-    conv1_line_In_t  bufferI_New = I.read();
-    conv1_line_In_t  bufferI_Old;
+    conv1_line_In_t  bufferI_1 = I.read();
+    conv1_line_In_t  bufferI_2;
     conv1_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -23,42 +23,43 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    bool oldNew = false;
+    bool toggleMemory = true;
 
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        if (oldNew)
+        toggleMemory = !toggleMemory;
+        if (toggleMemory)
             {
-            bufferI_New = I.read();
+            bufferI_1 = I.read();
             }
         else
             {
-            bufferI_Old = I.read();
+            bufferI_2 = I.read();
             }
 
-        // Output channels
-loopConvOutChannel:
-        for (unsigned int lI = 0; lI < sizeL; lI++)
+        // X coordinate
+loopConvXi:
+        for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
             {
 
-            // X coordinate
-loopConvXi:
-            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
+            // Output channels
+loopConvOutChannel:
+            for (unsigned int lI = 0; lI < sizeL; lI++)
                 {
 
                 // Input channels
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    if (oldNew)
+                    if (toggleMemory)
                         {
-                        getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                        getImageBlock<sizeX, sizeC>(bufferI_2, bufferI_1, Block, xI, cI);
                         }
                     else
                         {
-                        getImageBlock<sizeX, sizeC>(bufferI_New, bufferI_Old, Block, xI, cI);
+                        getImageBlock<sizeX, sizeC>(bufferI_1, bufferI_2, Block, xI, cI);
                         }
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
@@ -125,8 +126,6 @@ loopOutputBlock:
                 }
             }
         Y.write(bufferY);
-
-        oldNew = !oldNew;
         }
 
 #undef sizeX
@@ -143,8 +142,8 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
 #define sizeC 64
 #define sizeL 32
 
-    conv2_line_In_t  bufferI_New = I.read();
-    conv2_line_In_t  bufferI_Old;
+    conv2_line_In_t  bufferI_1 = I.read();
+    conv2_line_In_t  bufferI_2;
     conv2_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -154,42 +153,43 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    bool oldNew = false;
+    bool toggleMemory = true;
 
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        if (oldNew)
+        toggleMemory = !toggleMemory;
+        if (toggleMemory)
             {
-            bufferI_New = I.read();
+            bufferI_1 = I.read();
             }
         else
             {
-            bufferI_Old = I.read();
+            bufferI_2 = I.read();
             }
 
-        // Output channels
-loopConvOutChannel:
-        for (unsigned int lI = 0; lI < sizeL; lI++)
+        // X coordinate
+loopConvXi:
+        for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
             {
 
-            // X coordinate
-loopConvXi:
-            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
+            // Output channels
+loopConvOutChannel:
+            for (unsigned int lI = 0; lI < sizeL; lI++)
                 {
 
                 // Input channels
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    if (oldNew)
+                    if (toggleMemory)
                         {
-                        getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                        getImageBlock<sizeX, sizeC>(bufferI_2, bufferI_1, Block, xI, cI);
                         }
                     else
                         {
-                        getImageBlock<sizeX, sizeC>(bufferI_New, bufferI_Old, Block, xI, cI);
+                        getImageBlock<sizeX, sizeC>(bufferI_1, bufferI_2, Block, xI, cI);
                         }
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
@@ -226,8 +226,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias2[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias2[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
@@ -256,7 +256,6 @@ loopOutputBlock:
                 }
             }
         Y.write(bufferY);
-        oldNew = !oldNew;
         }
 
 #undef sizeX
@@ -273,8 +272,8 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
 #define sizeC 32
 #define sizeL 20
 
-    conv3_line_In_t  bufferI_New = I.read();
-    conv3_line_In_t  bufferI_Old;
+    conv3_line_In_t  bufferI_1 = I.read();
+    conv3_line_In_t  bufferI_2;
     conv3_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -284,42 +283,43 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    bool oldNew = false;
+    bool toggleMemory = true;
 
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        if (oldNew)
+        toggleMemory = !toggleMemory;
+        if (toggleMemory)
             {
-            bufferI_New = I.read();
+            bufferI_1 = I.read();
             }
         else
             {
-            bufferI_Old = I.read();
+            bufferI_2 = I.read();
             }
 
-        // Output channels
-loopConvOutChannel:
-        for (unsigned int lI = 0; lI < sizeL; lI++)
+        // X coordinate
+loopConvXi:
+        for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
             {
 
-            // X coordinate
-loopConvXi:
-            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
+            // Output channels
+loopConvOutChannel:
+            for (unsigned int lI = 0; lI < sizeL; lI++)
                 {
 
                 // Input channels
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    if (oldNew)
+                    if (toggleMemory)
                         {
-                        getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                        getImageBlock<sizeX, sizeC>(bufferI_2, bufferI_1, Block, xI, cI);
                         }
                     else
                         {
-                        getImageBlock<sizeX, sizeC>(bufferI_New, bufferI_Old, Block, xI, cI);
+                        getImageBlock<sizeX, sizeC>(bufferI_1, bufferI_2, Block, xI, cI);
                         }
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
@@ -356,8 +356,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
+                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias3[lI];
+                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias3[lI];
 
                     // Applies ReLU
                     preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
@@ -386,7 +386,6 @@ loopOutputBlock:
                 }
             }
         Y.write(bufferY);
-        oldNew = !oldNew;
         }
 
 #undef sizeX

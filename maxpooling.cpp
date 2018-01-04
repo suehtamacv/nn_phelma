@@ -10,23 +10,30 @@ void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
 #define sizeY 24
 #define sizeC 64
 
-    maxPool1_line_In_t  bufferI_Old;
-    maxPool1_line_In_t  bufferI_New;
+    maxPool1_line_In_t  bufferI_1;
+    maxPool1_line_In_t  bufferI_2;
     maxPool1_line_Out_t bufferY;
-
-    pixel_t Pix[4];
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
 
+    bool toggleMemory = true;
+
 loopY:
     for (unsigned int yI = 0; yI < sizeY + BLOCK_HEIGHT; yI += stride, ++nyI)
         {
+        toggleMemory = !toggleMemory;
         bool yLimit = yI == sizeY + BLOCK_HEIGHT - stride;
-        bufferI_Old = bufferI_New;
         if (!yLimit)
             {
-            bufferI_New = I.read();
+            if (toggleMemory)
+                {
+                bufferI_1 = I.read();
+                }
+            else
+                {
+                bufferI_2 = I.read();
+                }
             }
 
 loopChannels:
@@ -44,11 +51,22 @@ loopX:
 
                     if (nxI != 0 && nxI != newSizeX + 1)
                         {
-                        maxPixel = getMaxPixel(bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
-                                               bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
-                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                               xLimit, yLimit);
+                        if (!toggleMemory)
+                            {
+                            maxPixel = getMaxPixel(bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   xLimit, yLimit);
+                            }
+                        else
+                            {
+                            maxPixel = getMaxPixel(bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   xLimit, yLimit);
+                            }
                         }
                     }
 
@@ -78,23 +96,30 @@ void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I,
 #define sizeY 12
 #define sizeC 32
 
-    maxPool2_line_In_t  bufferI_Old;
-    maxPool2_line_In_t  bufferI_New;
+    maxPool2_line_In_t  bufferI_1;
+    maxPool2_line_In_t  bufferI_2;
     maxPool2_line_Out_t bufferY;
-
-    pixel_t Pix[4];
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
 
+    bool toggleMemory = true;
+
 loopY:
     for (unsigned int yI = 0; yI < sizeY + BLOCK_HEIGHT; yI += stride, ++nyI)
         {
+        toggleMemory = !toggleMemory;
         bool yLimit = yI == sizeY + BLOCK_HEIGHT - stride;
-        bufferI_Old = bufferI_New;
         if (!yLimit)
             {
-            bufferI_New = I.read();
+            if (toggleMemory)
+                {
+                bufferI_1 = I.read();
+                }
+            else
+                {
+                bufferI_2 = I.read();
+                }
             }
 
 loopChannels:
@@ -113,11 +138,22 @@ loopX:
 
                     if (nxI != 0 && nxI != newSizeX + 1)
                         {
-                        maxPixel = getMaxPixel(bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
-                                               bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
-                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                               xLimit, yLimit);
+                        if (!toggleMemory)
+                            {
+                            maxPixel = getMaxPixel(bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   xLimit, yLimit);
+                            }
+                        else
+                            {
+                            maxPixel = getMaxPixel(bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                                   bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                                   xLimit, yLimit);
+                            }
                         }
                     }
 
@@ -147,23 +183,30 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
 #define sizeY 6
 #define sizeC 20
 
-    maxPool3_line_In_t  bufferI_Old;
-    maxPool3_line_In_t  bufferI_New = I.read();
+    maxPool3_line_In_t  bufferI_1;
+    maxPool3_line_In_t  bufferI_2 = I.read();
     maxPool3_line_Out_t bufferY;
-
-    pixel_t Pix[4];
 
     unsigned int nxI = 0;
     unsigned int nyI = 0;
 
+    bool toggleMemory = false;
+
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
         {
+        toggleMemory = !toggleMemory;
         bool yLimit = yI == sizeY - stride;
-        bufferI_Old = bufferI_New;
         if (!yLimit)
             {
-            bufferI_New = I.read();
+            if (toggleMemory)
+                {
+                bufferI_1 = I.read();
+                }
+            else
+                {
+                bufferI_2 = I.read();
+                }
             }
 
 loopChannels:
@@ -175,12 +218,26 @@ loopX:
                 {
                 bool xLimit = xI == sizeX - stride;
 
-                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] =
-                    getMaxPixel(bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
-                                bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
-                                bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
-                                xLimit, yLimit);
+                pixel_t maxPixel;
+
+                if (!toggleMemory)
+                    {
+                    maxPixel = getMaxPixel(bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                           bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
+                                           bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                           bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
+                                           xLimit, yLimit);
+                    }
+                else
+                    {
+                    maxPixel = getMaxPixel(bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                           bufferI_2.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
+                                           bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                           bufferI_1.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
+                                           xLimit, yLimit);
+                    }
+
+                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] = maxPixel;
                 }
             }
         }

@@ -44,43 +44,11 @@ loopX:
 
                     if (nxI != 0 && nxI != newSizeX + 1)
                         {
-                        Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1][0];
-
-                        if (xLimit)
-                            {
-                            Pix[1] = 0;
-                            }
-                        else
-                            {
-                            Pix[1] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][1];
-                            }
-
-                        if (yLimit)
-                            {
-                            Pix[2] = 0;
-                            }
-                        else
-                            {
-                            Pix[2] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1][2];
-                            }
-
-                        if (xLimit || yLimit)
-                            {
-                            Pix[3] = 0;
-                            }
-                        else
-                            {
-                            Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][3];
-                            }
-
-loopFindMax:
-                        for (unsigned int i = 0; i < 4; ++i)
-                            {
-                            if (maxPixel < Pix[i])
-                                {
-                                maxPixel = Pix[i];
-                                }
-                            }
+                        maxPixel = getMaxPixel(bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                               bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                               xLimit, yLimit);
                         }
                     }
 
@@ -145,43 +113,11 @@ loopX:
 
                     if (nxI != 0 && nxI != newSizeX + 1)
                         {
-                        Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1][0];
-
-                        if (xLimit)
-                            {
-                            Pix[1] = 0;
-                            }
-                        else
-                            {
-                            Pix[1] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][1];
-                            }
-
-                        if (yLimit)
-                            {
-                            Pix[2] = 0;
-                            }
-                        else
-                            {
-                            Pix[2] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1][2];
-                            }
-
-                        if (xLimit || yLimit)
-                            {
-                            Pix[3] = 0;
-                            }
-                        else
-                            {
-                            Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][3];
-                            }
-
-loopFindMax:
-                        for (unsigned int i = 0; i < 4; ++i)
-                            {
-                            if (maxPixel < Pix[i])
-                                {
-                                maxPixel = Pix[i];
-                                }
-                            }
+                        maxPixel = getMaxPixel(bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                               bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) - 1],
+                                               bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                               xLimit, yLimit);
                         }
                     }
 
@@ -239,46 +175,12 @@ loopX:
                 {
                 bool xLimit = xI == sizeX - stride;
 
-                Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0];
-
-                if (xLimit)
-                    {
-                    Pix[1] = 0;
-                    }
-                else
-                    {
-                    Pix[1] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][1];
-                    }
-
-                if (yLimit)
-                    {
-                    Pix[2] = 0;
-                    }
-                else
-                    {
-                    Pix[2] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][2];
-                    }
-
-                if (xLimit)
-                    {
-                    Pix[3] = 0;
-                    }
-                else
-                    {
-                    Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3];
-                    }
-
-                pixel_t maxPixel = 0;
-loopFindMax:
-                for (unsigned int i = 0; i < 4; ++i)
-                    {
-                    if (maxPixel < Pix[i])
-                        {
-                        maxPixel = Pix[i];
-                        }
-                    }
-
-                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] = maxPixel;
+                bufferY.Y[cI * newSizeX * newSizeY + nyI * newSizeX + nxI] =
+                    getMaxPixel(bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
+                                bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)],
+                                bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1],
+                                xLimit, yLimit);
                 }
             }
         }
@@ -287,4 +189,29 @@ loopFindMax:
 #undef sizeX
 #undef sizeY
 #undef sizeC
+}
+
+pixel_t getMaxPixel(layerOutBlock_t &B0, layerOutBlock_t &B1, layerOutBlock_t &B2, layerOutBlock_t &B3,
+                    bool xLim, bool yLim)
+{
+    pixel_t maxPixel = 0;
+
+    if (maxPixel < B0[0])
+        {
+        maxPixel = B0[0];
+        }
+    if (!xLim && maxPixel < B1[1])
+        {
+        maxPixel = B1[1];
+        }
+    if (!yLim && maxPixel < B2[2])
+        {
+        maxPixel = B2[2];
+        }
+    if (!xLim & !yLim && maxPixel < B3[3])
+        {
+        maxPixel = B3[3];
+        }
+
+    return maxPixel;
 }

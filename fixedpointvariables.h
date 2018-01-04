@@ -101,9 +101,6 @@ typedef ac_fixed < PERCEP_BIAS_DYN + PERCEP_BIAS_PREC, PERCEP_BIAS_DYN, true > p
 
 #endif
 
-struct layerOutBlock_t
-{
-    pixel_t P[BLOCK_HEIGHT * BLOCK_WIDTH] = {0};
-};
+typedef pixel_t layerOutBlock_t[BLOCK_HEIGHT * BLOCK_WIDTH];
 
 #endif // FIXEDPOINTVARIABLES_H

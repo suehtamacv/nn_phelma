@@ -21,18 +21,18 @@ void getImageBlock(lineBlockInterface<sizeX * sizeC> &Old, lineBlockInterface<si
 loopImageBlockX:
     for (unsigned int i = 0; i < 2; ++i)
         {
-        layerOutBlock_t rawBlock_Old = Old.Y[cI * (sizeX / BLOCK_HEIGHT) + xI / BLOCK_HEIGHT + i];
-        layerOutBlock_t rawBlock_New = New.Y[cI * (sizeX / BLOCK_HEIGHT) + xI / BLOCK_HEIGHT + i];
+        layerOutBlock_t& rawBlock_Old = Old.Y[cI * (sizeX / BLOCK_HEIGHT) + xI / BLOCK_HEIGHT + i];
+        layerOutBlock_t& rawBlock_New = New.Y[cI * (sizeX / BLOCK_HEIGHT) + xI / BLOCK_HEIGHT + i];
 
-        Block[2 * i + 0] = rawBlock_Old.P[0];
-        Block[2 * i + 1] = rawBlock_Old.P[1];
-        Block[2 * i + 4] = rawBlock_Old.P[2];
-        Block[2 * i + 5] = rawBlock_Old.P[3];
+        Block[2 * i + 0] = rawBlock_Old[0];
+        Block[2 * i + 1] = rawBlock_Old[1];
+        Block[2 * i + 4] = rawBlock_Old[2];
+        Block[2 * i + 5] = rawBlock_Old[3];
 
-        Block[2 * i + 8] = rawBlock_New.P[0];
-        Block[2 * i + 9] = rawBlock_New.P[1];
-        Block[2 * i + 12] = rawBlock_New.P[2];
-        Block[2 * i + 13] = rawBlock_New.P[3];
+        Block[2 * i + 8] = rawBlock_New[0];
+        Block[2 * i + 9] = rawBlock_New[1];
+        Block[2 * i + 12] = rawBlock_New[2];
+        Block[2 * i + 13] = rawBlock_New[3];
         }
 
 #undef B

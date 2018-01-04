@@ -7,6 +7,9 @@
 #include "nnarrays.h"
 #include <mc_scverify.h>
 
+#define setArray(dest, orig, size) \
+    for (unsigned int i = 0; i < size; ++i) { dest[i] = orig[i]; }
+
 int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
 void applyComplete(ac_channel<lineBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out);
@@ -27,7 +30,7 @@ CCS_MAIN(int argc, char* argv)
 
     double CorrectFound = 0;
     double CorrectFoundGolden = 0;
-    unsigned int limit = 5000;
+    unsigned int limit = 200;
     int goldenLabel;
 
     for (unsigned int i = 0; i < limit; ++i)
@@ -141,21 +144,21 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
                         {
                         if ((yI + off_yI == 0) || (yI + off_yI == HEIGHT - 1))
                             {
-                            out.P[off_yI * BLOCK_WIDTH + off_xI] = 0;
+                            out[off_yI * BLOCK_WIDTH + off_xI] = 0;
                             }
                         else if ((xI + off_xI == 0) || (xI + off_xI == WIDTH - 1))
                             {
-                            out.P[off_yI * BLOCK_WIDTH + off_xI] = 0;
+                            out[off_yI * BLOCK_WIDTH + off_xI] = 0;
                             }
                         else
                             {
-                            out.P[off_yI * BLOCK_WIDTH + off_xI] =
+                            out[off_yI * BLOCK_WIDTH + off_xI] =
                                 (ImageData[cI * 32 * 32 + (yI + off_yI + 3) * 32 + (xI + off_xI + 3)] - Average)
                                 / std::max(StdDev, minStdDev);
                             }
                         }
                     }
-                line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)] = out;
+                setArray(line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)], out, BLOCK_HEIGHT * BLOCK_WIDTH);
                 }
             }
 

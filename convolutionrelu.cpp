@@ -23,12 +23,20 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
+    bool oldNew = false;
+
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        bufferI_Old = bufferI_New;
-        bufferI_New = I.read();
+        if (oldNew)
+            {
+            bufferI_New = I.read();
+            }
+        else
+            {
+            bufferI_Old = I.read();
+            }
 
         // Output channels
 loopConvOutChannel:
@@ -44,7 +52,14 @@ loopConvXi:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                    if (oldNew)
+                        {
+                        getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                        }
+                    else
+                        {
+                        getImageBlock<sizeX, sizeC>(bufferI_New, bufferI_Old, Block, xI, cI);
+                        }
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
@@ -110,6 +125,8 @@ loopOutputBlock:
                 }
             }
         Y.write(bufferY);
+
+        oldNew = !oldNew;
         }
 
 #undef sizeX
@@ -137,12 +154,20 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
+    bool oldNew = false;
+
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        bufferI_Old = bufferI_New;
-        bufferI_New = I.read();
+        if (oldNew)
+            {
+            bufferI_New = I.read();
+            }
+        else
+            {
+            bufferI_Old = I.read();
+            }
 
         // Output channels
 loopConvOutChannel:
@@ -158,7 +183,14 @@ loopConvXi:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                    if (oldNew)
+                        {
+                        getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                        }
+                    else
+                        {
+                        getImageBlock<sizeX, sizeC>(bufferI_New, bufferI_Old, Block, xI, cI);
+                        }
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel2 + ((lI * sizeC + cI) * 9));
@@ -224,6 +256,7 @@ loopOutputBlock:
                 }
             }
         Y.write(bufferY);
+        oldNew = !oldNew;
         }
 
 #undef sizeX
@@ -251,12 +284,20 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
+    bool oldNew = false;
+
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        bufferI_Old = bufferI_New;
-        bufferI_New = I.read();
+        if (oldNew)
+            {
+            bufferI_New = I.read();
+            }
+        else
+            {
+            bufferI_Old = I.read();
+            }
 
         // Output channels
 loopConvOutChannel:
@@ -272,7 +313,14 @@ loopConvXi:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                    if (oldNew)
+                        {
+                        getImageBlock<sizeX, sizeC>(bufferI_Old, bufferI_New, Block, xI, cI);
+                        }
+                    else
+                        {
+                        getImageBlock<sizeX, sizeC>(bufferI_New, bufferI_Old, Block, xI, cI);
+                        }
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel3 + ((lI * sizeC + cI) * 9));
@@ -338,6 +386,7 @@ loopOutputBlock:
                 }
             }
         Y.write(bufferY);
+        oldNew = !oldNew;
         }
 
 #undef sizeX

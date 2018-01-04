@@ -15,7 +15,6 @@ void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
     maxPool1_line_In_t  bufferI_Zero;
     maxPool1_line_Out_t bufferY;
 
-    layerOutBlock_t* B[4];
     pixel_t Pix[4];
 
     layerOutBlock_t B_Zero;
@@ -56,22 +55,17 @@ loopChannels:
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
-                B[0] = &bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)];
-                B[2] = &bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)];
+                Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0];
+                Pix[2] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][2];
                 if (xI == sizeX - stride)
                     {
-                    B[1] = &B_Zero;
-                    B[3] = &B_Zero;
+                    Pix[1] = 0;
+                    Pix[3] = 0;
                     }
                 else
                     {
-                    B[1] = &bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
-                    B[3] = &bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
-                    }
-
-                for (unsigned int i = 0; i < 4; ++i)
-                    {
-                    Pix[i] = (*B)[i][i];
+                    Pix[1] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][1];
+                    Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3];
                     }
 
                 pixel_t maxPixel = Pix[0];
@@ -115,7 +109,6 @@ void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I,
     maxPool2_line_In_t  bufferI_Zero;
     maxPool2_line_Out_t bufferY;
 
-    layerOutBlock_t* B[4];
     pixel_t Pix[4];
 
     layerOutBlock_t B_Zero;
@@ -156,22 +149,17 @@ loopChannels:
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
-                B[0] = &bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)];
-                B[2] = &bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)];
+                Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0];
+                Pix[2] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][2];
                 if (xI == sizeX - stride)
                     {
-                    B[1] = &B_Zero;
-                    B[3] = &B_Zero;
+                    Pix[1] = 0;
+                    Pix[3] = 0;
                     }
                 else
                     {
-                    B[1] = &bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
-                    B[3] = &bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
-                    }
-
-                for (unsigned int i = 0; i < 4; ++i)
-                    {
-                    Pix[i] = (*B)[i][i];
+                    Pix[1] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][1];
+                    Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3];
                     }
 
                 pixel_t maxPixel = Pix[0];
@@ -215,7 +203,6 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
     maxPool3_line_In_t  bufferI_Zero;
     maxPool3_line_Out_t bufferY;
 
-    layerOutBlock_t* B[4];
     pixel_t Pix[4];
 
     layerOutBlock_t B_Zero;
@@ -247,22 +234,17 @@ loopChannels:
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
                 {
-                B[0] = &bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)];
-                B[2] = &bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)];
+                Pix[0] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0];
+                Pix[2] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][2];
                 if (xI == sizeX - stride)
                     {
-                    B[1] = &B_Zero;
-                    B[3] = &B_Zero;
+                    Pix[1] = 0;
+                    Pix[3] = 0;
                     }
                 else
                     {
-                    B[1] = &bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
-                    B[3] = &bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1];
-                    }
-
-                for (unsigned int i = 0; i < 4; ++i)
-                    {
-                    Pix[i] = (*B)[i][i];
+                    Pix[1] = bufferI_Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][1];
+                    Pix[3] = bufferI_New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3];
                     }
 
                 pixel_t maxPixel = Pix[0];

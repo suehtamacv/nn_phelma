@@ -11,6 +11,6 @@
 #define HEIGHT 26
 #endif
 
-#define INPUT_SIZE    WIDTH * 3
+#define INPUT_SIZE    HEIGHT * WIDTH * 3
 
 #endif // NNARRAYS_H

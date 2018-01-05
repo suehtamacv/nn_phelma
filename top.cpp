@@ -5,7 +5,7 @@
 #include "nnarrays.h"
 
 #pragma hls_design top
-void applyComplete(ac_channel<lineBlockInterface<INPUT_SIZE> > &In,
+void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out)
 {
     static ac_channel<conv1_line_Out_t> Conv1_Out;

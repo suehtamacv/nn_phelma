@@ -12,8 +12,7 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
 #define sizeC 3
 #define sizeL 64
 
-    conv1_line_In_t  bufferI_1 = I.read();
-    conv1_line_In_t  bufferI_2;
+    conv1_line_In_t  bufferI = I.read();
     conv1_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -23,21 +22,10 @@ void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    bool toggleMemory = true;
-
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        toggleMemory = !toggleMemory;
-        if (toggleMemory)
-            {
-            bufferI_1 = I.read();
-            }
-        else
-            {
-            bufferI_2 = I.read();
-            }
 
         // X coordinate
 loopConvXi:
@@ -53,14 +41,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    if (toggleMemory)
-                        {
-                        getImageBlock<sizeX, sizeC>(bufferI_2, bufferI_1, Block, xI, cI);
-                        }
-                    else
-                        {
-                        getImageBlock<sizeX, sizeC>(bufferI_1, bufferI_2, Block, xI, cI);
-                        }
+                    getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));

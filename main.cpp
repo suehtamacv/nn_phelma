@@ -7,14 +7,14 @@
 #include "nnarrays.h"
 #include <mc_scverify.h>
 
-int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
-void applyComplete(ac_channel<lineBlockInterface<INPUT_SIZE> > &In,
+int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
+void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memInterface<10> > &Out);
 
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
-    ac_channel<lineBlockInterface<INPUT_SIZE> > networkInChannel;
+    ac_channel<memBlockInterface<INPUT_SIZE> > networkInChannel;
     ac_channel<memInterface<10> > networkOutChannel;
     memInterface<10> networkOut;
 
@@ -89,7 +89,7 @@ CCS_MAIN(int argc, char* argv)
     CCS_RETURN(0);
 }
 
-int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y, unsigned int i)
+int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
     unsigned char ImageLabel;
@@ -126,30 +126,31 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
         }
     StdDev = sqrt(StdDev / (24 * 24 * 3));
 
+    memBlockInterface<INPUT_SIZE> mem;
     for (unsigned int yI = 0; yI < HEIGHT; yI += BLOCK_HEIGHT)
         {
-        lineBlockInterface<INPUT_SIZE> line;
-
         for (unsigned int cI = 0; cI < 3; ++cI)
             {
             for (unsigned int xI = 0; xI < WIDTH; xI += BLOCK_WIDTH)
                 {
-                layerOutBlock_t out;
                 for (unsigned int off_yI = 0; off_yI < BLOCK_HEIGHT; ++off_yI)
                     {
                     for (unsigned int off_xI = 0; off_xI < BLOCK_WIDTH; ++off_xI)
                         {
+                        unsigned int bckIndex = (yI / BLOCK_HEIGHT) * 3 * (WIDTH / BLOCK_WIDTH) +
+                                                cI * (WIDTH / BLOCK_WIDTH) +
+                                                (xI / BLOCK_WIDTH);
                         if ((yI + off_yI == 0) || (yI + off_yI == HEIGHT - 1))
                             {
-                            line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][off_yI * BLOCK_WIDTH + off_xI] = 0;
+                            mem.Y[bckIndex][off_yI * BLOCK_WIDTH + off_xI] = 0;
                             }
                         else if ((xI + off_xI == 0) || (xI + off_xI == WIDTH - 1))
                             {
-                            line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][off_yI * BLOCK_WIDTH + off_xI] = 0;
+                            mem.Y[bckIndex][off_yI * BLOCK_WIDTH + off_xI] = 0;
                             }
                         else
                             {
-                            line.Y[cI * (WIDTH / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][off_yI * BLOCK_WIDTH + off_xI] =
+                            mem.Y[bckIndex][off_yI * BLOCK_WIDTH + off_xI] =
                                 (ImageData[cI * 32 * 32 + (yI + off_yI + 3) * 32 + (xI + off_xI + 3)] - Average)
                                 / std::max(StdDev, minStdDev);
                             }
@@ -157,9 +158,8 @@ int readAndNormalize(FILE* image, ac_channel<lineBlockInterface<INPUT_SIZE> > &Y
                     }
                 }
             }
-
-        Y.write(line);
         }
 
+    Y.write(mem);
     return ImageLabel;
 }

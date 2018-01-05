@@ -34,8 +34,28 @@ loopImageBlockX:
         Block[2 * i + 12] = rawBlock_New[2];
         Block[2 * i + 13] = rawBlock_New[3];
         }
-
-#undef B
 }
 
+template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
+void getImageBlock(memBlockInterface<sizeX * sizeY * sizeC> &Buf, pixel_t (&Block)[16],
+                   const unsigned int xI, const unsigned yI, const unsigned int cI)
+{
+    unsigned int bckIndex = (yI / BLOCK_HEIGHT) * 3 * (sizeX / BLOCK_WIDTH) +
+                            cI * (sizeX / BLOCK_WIDTH) +
+                            (xI / BLOCK_WIDTH);
+
+loopImageBlockX:
+    for (unsigned int i = 0; i < 2; ++i)
+        {
+        Block[2 * i + 0] = Buf.Y[bckIndex + i][0];
+        Block[2 * i + 1] = Buf.Y[bckIndex + i][1];
+        Block[2 * i + 4] = Buf.Y[bckIndex + i][2];
+        Block[2 * i + 5] = Buf.Y[bckIndex + i][3];
+
+        Block[2 * i + 8] = Buf.Y[bckIndex + 3 * (sizeX / BLOCK_WIDTH) + i][0];
+        Block[2 * i + 9] = Buf.Y[bckIndex + 3 * (sizeX / BLOCK_WIDTH) + i][1];
+        Block[2 * i + 12] = Buf.Y[bckIndex + 3 * (sizeX / BLOCK_WIDTH) + i][2];
+        Block[2 * i + 13] = Buf.Y[bckIndex + 3 * (sizeX / BLOCK_WIDTH) + i][3];
+        }
+}
 #endif // CONVOLUTION_H

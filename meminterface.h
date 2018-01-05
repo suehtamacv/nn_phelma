@@ -46,7 +46,7 @@ struct perceptronBiasInterface
     perceptronBias_t B[size];
 };
 
-typedef lineBlockInterface<26 * 3> conv1_line_In_t;
+typedef memBlockInterface<26  * 26 * 3> conv1_line_In_t;
 typedef lineBlockInterface<24 * 64> conv1_line_Out_t;
 
 typedef lineBlockInterface<24 * 64> maxPool1_line_In_t;

@@ -17,8 +17,7 @@ HEADERS += \
     nnarrays.h \
     convolutionrelu.h \
     meminterface.h \
-    kernels.h \
-    biases.h
+    kernels.h
 
 
 LIBS += -lpng

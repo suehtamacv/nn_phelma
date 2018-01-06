@@ -1,6 +1,5 @@
 #include "convolutionrelu.h"
 #include "kernels.h"
-#include "biases.h"
 #include "nnarrays.h"
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -20,7 +19,6 @@ void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, bool select
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
     pixel_t Block[tileSize * tileSize];
-    pixel_t preReLU[2][2];
 
     // Y coordinate
 loopConvYi:
@@ -77,41 +75,17 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
-                layerOutBlock_t tempOutBlock;
-                pixel_t maxBlock = 0;
+                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (xI / BLOCK_HEIGHT);
 
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias1[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias1[lI];
-
-                    // Applies ReLU
-                    preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
-                    preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
-
-                    if (maxBlock < preReLU[j][0])
-                        {
-                        maxBlock = preReLU[j][0];
-                        }
-                    if (maxBlock < preReLU[j][1])
-                        {
-                        maxBlock = preReLU[j][1];
-                        }
-
-                    tempOutBlock[2 * j] = preReLU[j][0];
-                    tempOutBlock[2 * j + 1] = preReLU[j][1];
+                    bufferY.Y[index][2 * j] = temp[j][0] + temp[j][1] + temp[j][2];
+                    bufferY.Y[index][2 * j + 1] = temp[j][1] - temp[j][2] - temp[j][3];
                     }
-
-                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (xI / BLOCK_HEIGHT);
-
-                bufferY.Y[index][0] = maxBlock;
-                bufferY.Y[index][1] = max(tempOutBlock[0], tempOutBlock[1]);
-                bufferY.Y[index][2] = max(tempOutBlock[0], tempOutBlock[2]);
-                bufferY.Y[index][3] = tempOutBlock[0];
                 // End transformation
                 }
             }

@@ -118,7 +118,7 @@ void writePNG(const char* file_name)
     png_write_end(png_ptr, NULL);
 
     // cleanup heap allocation
-    for (unsigned int y = 0; y < (HEIGHT - 2); y++)
+    for (unsigned int y = 0; y < (HEIGHT); y++)
         {
         delete[] row_pointers[y];
         }
@@ -145,9 +145,9 @@ void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &channelI)
             {
             for (unsigned int cI = 0; cI < 3; ++cI)
                 {
-                unsigned int indexBck = cI * ((HEIGHT - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                        + (yI / BLOCK_WIDTH) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                        + (xI / BLOCK_HEIGHT);
+                unsigned int indexBck = cI * (HEIGHT / BLOCK_HEIGHT) * (WIDTH / BLOCK_WIDTH)
+                                        + ((yI + 1) / BLOCK_WIDTH) * (WIDTH / BLOCK_WIDTH)
+                                        + ((xI + 1) / BLOCK_HEIGHT);
                 unsigned int index = ((yI + 1) % 2) * 2 + (xI + 1) % 2;
                 Img.Y[indexBck][index] = row_pointers[yI][xI * 3 + cI];
                 }
@@ -170,7 +170,7 @@ void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &Img)
                 unsigned int indexBck = cI * ((HEIGHT - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
                                         + (yI / BLOCK_WIDTH) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
                                         + (xI / BLOCK_HEIGHT);
-                unsigned int index = ((yI + 1) % 2) * 2 + (xI + 1) % 2;
+                unsigned int index = (yI % 2) * 2 + (xI % 2);
 
                 row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][index]).slc<8>(PIXEL_DYN + PIXEL_PREC - 8);
                 }

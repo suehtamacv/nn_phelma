@@ -97,17 +97,20 @@ loopOutputBlock:
                     tempOutBlock[2 * j + 1] = preReLU[j][1];
                     }
 
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][0] = maxBlock;
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][1] =
-                    max(tempOutBlock[0], tempOutBlock[1]);
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][2] =
-                    max(tempOutBlock[0], tempOutBlock[2]);
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][3] = tempOutBlock[0];
+                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (xI / BLOCK_HEIGHT);
+
+                bufferY.Y[index][0] = maxBlock;
+                bufferY.Y[index][1] = max(tempOutBlock[0], tempOutBlock[1]);
+                bufferY.Y[index][2] = max(tempOutBlock[0], tempOutBlock[2]);
+                bufferY.Y[index][3] = tempOutBlock[0];
                 // End transformation
                 }
             }
-        Y.write(bufferY);
         }
+
+    Y.write(bufferY);
 
 #undef sizeX
 #undef sizeY
@@ -123,8 +126,7 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
 #define sizeC 64
 #define sizeL 32
 
-    conv2_line_In_t  bufferI_1 = I.read();
-    conv2_line_In_t  bufferI_2;
+    conv2_line_In_t  bufferI = I.read();
     conv2_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -134,21 +136,10 @@ void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    bool toggleMemory = true;
-
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        toggleMemory = !toggleMemory;
-        if (toggleMemory)
-            {
-            bufferI_1 = I.read();
-            }
-        else
-            {
-            bufferI_2 = I.read();
-            }
 
         // X coordinate
 loopConvXi:
@@ -164,14 +155,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    if (toggleMemory)
-                        {
-                        getImageBlock<sizeX, sizeC>(bufferI_2, bufferI_1, Block, xI, cI);
-                        }
-                    else
-                        {
-                        getImageBlock<sizeX, sizeC>(bufferI_1, bufferI_2, Block, xI, cI);
-                        }
+                    getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel2 + ((lI * sizeC + cI) * 9));
@@ -227,17 +211,19 @@ loopOutputBlock:
                     tempOutBlock[2 * j + 1] = preReLU[j][1];
                     }
 
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][0] = maxBlock;
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][1] =
-                    max(tempOutBlock[0], tempOutBlock[1]);
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][2] =
-                    max(tempOutBlock[0], tempOutBlock[2]);
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][3] = tempOutBlock[0];
+                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (xI / BLOCK_HEIGHT);
+
+                bufferY.Y[index][0] = maxBlock;
+                bufferY.Y[index][1] = max(tempOutBlock[0], tempOutBlock[1]);
+                bufferY.Y[index][2] = max(tempOutBlock[0], tempOutBlock[2]);
+                bufferY.Y[index][3] = tempOutBlock[0];
                 // End transformation
                 }
             }
-        Y.write(bufferY);
         }
+    Y.write(bufferY);
 
 #undef sizeX
 #undef sizeY
@@ -253,8 +239,7 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
 #define sizeC 32
 #define sizeL 20
 
-    conv3_line_In_t  bufferI_1 = I.read();
-    conv3_line_In_t  bufferI_2;
+    conv3_line_In_t  bufferI = I.read();
     conv3_line_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
@@ -264,21 +249,10 @@ void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y
     pixel_t Block[tileSize * tileSize];
     pixel_t preReLU[2][2];
 
-    bool toggleMemory = true;
-
     // Y coordinate
 loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
-        toggleMemory = !toggleMemory;
-        if (toggleMemory)
-            {
-            bufferI_1 = I.read();
-            }
-        else
-            {
-            bufferI_2 = I.read();
-            }
 
         // X coordinate
 loopConvXi:
@@ -294,14 +268,7 @@ loopConvOutChannel:
 loopConvInChannel:
                 for (unsigned int cI = 0; cI < sizeC; cI++)
                     {
-                    if (toggleMemory)
-                        {
-                        getImageBlock<sizeX, sizeC>(bufferI_2, bufferI_1, Block, xI, cI);
-                        }
-                    else
-                        {
-                        getImageBlock<sizeX, sizeC>(bufferI_1, bufferI_2, Block, xI, cI);
-                        }
+                    getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
                     calculateG(G, convKernel3 + ((lI * sizeC + cI) * 9));
@@ -357,18 +324,19 @@ loopOutputBlock:
                     tempOutBlock[2 * j + 1] = preReLU[j][1];
                     }
 
+                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                     + (xI / BLOCK_HEIGHT);
 
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][0] = maxBlock;
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][1] =
-                    max(tempOutBlock[0], tempOutBlock[1]);
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][2] =
-                    max(tempOutBlock[0], tempOutBlock[2]);
-                bufferY.Y[lI * ((sizeX - BLOCK_WIDTH) / BLOCK_HEIGHT) + (xI / BLOCK_HEIGHT)][3] = tempOutBlock[0];
+                bufferY.Y[index][0] = maxBlock;
+                bufferY.Y[index][1] = max(tempOutBlock[0], tempOutBlock[1]);
+                bufferY.Y[index][2] = max(tempOutBlock[0], tempOutBlock[2]);
+                bufferY.Y[index][3] = tempOutBlock[0];
                 // End transformation
                 }
             }
-        Y.write(bufferY);
         }
+    Y.write(bufferY);
 
 #undef sizeX
 #undef sizeY

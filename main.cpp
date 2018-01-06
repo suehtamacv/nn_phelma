@@ -137,8 +137,8 @@ int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y,
                     {
                     for (unsigned int off_xI = 0; off_xI < BLOCK_WIDTH; ++off_xI)
                         {
-                        unsigned int bckIndex = (yI / BLOCK_HEIGHT) * 3 * (WIDTH / BLOCK_WIDTH) +
-                                                cI * (WIDTH / BLOCK_WIDTH) +
+                        unsigned int bckIndex = cI * (HEIGHT / BLOCK_HEIGHT) * (WIDTH / BLOCK_WIDTH) +
+                                                (yI / BLOCK_HEIGHT) * (WIDTH / BLOCK_WIDTH) +
                                                 (xI / BLOCK_WIDTH);
                         if ((yI + off_yI == 0) || (yI + off_yI == HEIGHT - 1))
                             {

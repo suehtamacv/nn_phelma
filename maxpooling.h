@@ -9,34 +9,38 @@
 #define newSizeX  (sizeX / stride)
 #define newSizeY  (sizeY / stride)
 
-template<unsigned int sizeX, typename T>
-pixel_t getMaxPixel(T& Old, T& New, unsigned int xI, unsigned int cI, bool xLim, bool yLim)
+template<unsigned int sizeX, unsigned int sizeY, typename T>
+pixel_t getMaxPixel(T& Buf, unsigned int xI, unsigned int yI, unsigned int cI, bool xLim, bool yLim)
 {
     pixel_t maxPixel = 0;
 
-    if (maxPixel < Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0])
+    unsigned int index = cI * (sizeY / BLOCK_HEIGHT) * (sizeX / BLOCK_WIDTH) +
+                         (yI / BLOCK_HEIGHT) * (sizeX / BLOCK_WIDTH) +
+                         (xI / BLOCK_WIDTH);
+
+    if (maxPixel < Buf.Y[index][0])
         {
-        maxPixel = Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][0];
+        maxPixel = Buf.Y[index][0];
         }
     if (!xLim)
         {
-        if (maxPixel < Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][1])
+        if (maxPixel < Buf.Y[index + 1][1])
             {
-            maxPixel = Old.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][1];
+            maxPixel = Buf.Y[index + 1][1];
             }
         }
     if (!yLim)
         {
-        if (maxPixel < New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][2])
+        if (maxPixel < Buf.Y[index + (sizeX / BLOCK_WIDTH)][2])
             {
-            maxPixel = New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH)][2];
+            maxPixel = Buf.Y[index + (sizeX / BLOCK_WIDTH)][2];
             }
         }
     if (!xLim && !yLim)
         {
-        if (maxPixel < New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3])
+        if (maxPixel < Buf.Y[index + (sizeX / BLOCK_WIDTH) + 1][3])
             {
-            maxPixel = New.Y[cI * (sizeX / BLOCK_WIDTH) + (xI / BLOCK_WIDTH) + 1][3];
+            maxPixel = Buf.Y[index + (sizeX / BLOCK_WIDTH) + 1][3];
             }
         }
 

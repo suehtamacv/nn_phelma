@@ -16,6 +16,15 @@ void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I,
     unsigned int nxI = 1;
     unsigned int nyI = 1;
 
+loopInit:
+    for (unsigned int i = 0; i < sizeC * ((newSizeY / BLOCK_HEIGHT) + 1) * ((newSizeX / BLOCK_WIDTH) + 1); ++i)
+        {
+        bufferY.Y[i][0] = 0;
+        bufferY.Y[i][1] = 0;
+        bufferY.Y[i][2] = 0;
+        bufferY.Y[i][3] = 0;
+        }
+
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
         {
@@ -35,10 +44,9 @@ loopX:
                 maxPixel = getMaxPixel<sizeX, sizeY>(bufferI, xI, yI, cI, xLimit, yLimit);
 
                 unsigned int index = cI * ((newSizeY / BLOCK_HEIGHT) + 1) * ((newSizeX / BLOCK_WIDTH) + 1)
-                                     + nyI / BLOCK_HEIGHT * ((newSizeX / BLOCK_WIDTH) + 1)
+                                     + (nyI / BLOCK_HEIGHT) * ((newSizeX / BLOCK_WIDTH) + 1)
                                      + nxI / BLOCK_WIDTH;
-                bufferY.Y[index]
-                [(nyI % 2) * 2 + (nxI % 2)] = maxPixel;
+                bufferY.Y[index][(nyI % 2) * 2 + (nxI % 2)] = maxPixel;
                 }
             }
         }
@@ -64,6 +72,15 @@ void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I,
     unsigned int nxI = 1;
     unsigned int nyI = 1;
 
+loopInit:
+    for (unsigned int i = 0; i < sizeC * ((newSizeY / BLOCK_HEIGHT) + 1) * ((newSizeX / BLOCK_WIDTH) + 1); ++i)
+        {
+        bufferY.Y[i][0] = 0;
+        bufferY.Y[i][1] = 0;
+        bufferY.Y[i][2] = 0;
+        bufferY.Y[i][3] = 0;
+        }
+
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
         {
@@ -83,10 +100,9 @@ loopX:
                 maxPixel = getMaxPixel<sizeX, sizeY>(bufferI, xI, yI, cI, xLimit, yLimit);
 
                 unsigned int index = cI * ((newSizeY / BLOCK_HEIGHT) + 1) * ((newSizeX / BLOCK_WIDTH) + 1)
-                                     + nyI / BLOCK_HEIGHT * ((newSizeX / BLOCK_WIDTH) + 1)
+                                     + (nyI / BLOCK_HEIGHT) * ((newSizeX / BLOCK_WIDTH) + 1)
                                      + nxI / BLOCK_WIDTH;
-                bufferY.Y[index]
-                [(nyI % 2) * 2 + (nxI % 2)] = maxPixel;
+                bufferY.Y[index][(nyI % 2) * 2 + (nxI % 2)] = maxPixel;
                 }
             }
         }

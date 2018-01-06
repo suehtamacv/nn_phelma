@@ -9,82 +9,27 @@
 
 int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
 void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
-                   ac_channel<memInterface<10> > &Out);
+                   ac_channel<memBlockInterface<OUTPUT_SIZE> > &Out,
+                   bool selectKernel);
 
 CCS_MAIN(int argc, char* argv)
 {
     FILE* image = fopen("test_batch.bin", "rb");
     ac_channel<memBlockInterface<INPUT_SIZE> > networkInChannel;
-    ac_channel<memInterface<10> > networkOutChannel;
-    memInterface<10> networkOut;
+    ac_channel<memBlockInterface<OUTPUT_SIZE> > networkOutChannel;
+    memBlockInterface<OUTPUT_SIZE> networkOut;
 
-#ifdef __FLOATVERSION__
-    std::ofstream Ref("GoldenReference");
-#else
-    std::ifstream Ref("GoldenReference");
-#endif
-    std::ofstream Out("OutputClasses");
-
-    double CorrectFound = 0;
-    double CorrectFoundGolden = 0;
-    unsigned int limit = 1000;
-    int goldenLabel;
+    unsigned int limit = 1;
 
     for (unsigned int i = 0; i < limit; ++i)
         {
         // Reads RAW
-        int realLabel = readAndNormalize(image, networkInChannel, i);
+        readAndNormalize(image, networkInChannel, i);
 
-#ifndef __FLOATVERSION__
-        // Reads golden version data
-        Ref >> goldenLabel;
-#endif
-
-        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel);
+        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, true);
 
         networkOut = networkOutChannel.read();
-
-        int foundLabel = 0;
-        pixel_t maxFoundLabel = networkOut.Y[0];
-
-        for (unsigned int j = 0; j < 10; ++j)
-            {
-            if (networkOut.Y[j] > maxFoundLabel)
-                {
-                maxFoundLabel = networkOut.Y[j];
-                foundLabel = j;
-                }
-            }
-#ifdef __FLOATVERSION__
-        Ref << foundLabel << std::endl;
-#endif
-        Out << foundLabel << std::endl;
-
-        if (realLabel == foundLabel)
-            {
-            std::cout << "Correctly classified " << realLabel << "!" << std::endl;
-            CorrectFound++;
-            }
-        else
-            {
-            std::cout << "Incorrectly classified " << realLabel << " as " << foundLabel << "." << std::endl;
-            }
-
-        if (realLabel == goldenLabel)
-            {
-            CorrectFoundGolden++;
-            }
-
         }
-
-    std::cout << std::endl;
-    std::cout << "Correct rate : " <<
-              100 * CorrectFound / (double) limit << "%" << std::endl;
-    std::cout << "Correct rate found by golden version : " <<
-              100 * CorrectFoundGolden / (double) limit << "%" << std::endl;
-
-    Ref.close();
-    Out.close();
 
     CCS_RETURN(0);
 }

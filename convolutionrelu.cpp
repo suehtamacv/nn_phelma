@@ -1,19 +1,19 @@
 #include "convolutionrelu.h"
 #include "kernels.h"
 #include "biases.h"
+#include "nnarrays.h"
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-#pragma design
-void conv1_apply(ac_channel<conv1_line_In_t> &I, ac_channel<conv1_line_Out_t> &Y)
+void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, bool selectKernel)
 {
-#define sizeX 26
-#define sizeY 26
+#define sizeX HEIGHT
+#define sizeY WIDTH
 #define sizeC 3
-#define sizeL 64
+#define sizeL 3
 
-    conv1_line_In_t  bufferI = I.read();
-    conv1_line_Out_t bufferY;
+    conv_In_t  bufferI = I.read();
+    conv_Out_t bufferY;
 
     convKernel_t G[tileSize * tileSize];
     convD_t D[tileSize * tileSize];
@@ -44,7 +44,14 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, convKernel1 + ((lI * sizeC + cI) * 9));
+                    if (selectKernel)
+                        {
+                        calculateG(G, kernelIdentity + ((lI * sizeC + cI) * 9));
+                        }
+                    else
+                        {
+                        calculateG(G, kernelGauss + ((lI * sizeC + cI) * 9));
+                        }
                     calculateD(Block, D);
 
 loopTile:
@@ -110,232 +117,6 @@ loopOutputBlock:
             }
         }
 
-    Y.write(bufferY);
-
-#undef sizeX
-#undef sizeY
-#undef sizeC
-#undef sizeL
-}
-
-#pragma design
-void conv2_apply(ac_channel<conv2_line_In_t> &I, ac_channel<conv2_line_Out_t> &Y)
-{
-#define sizeX 14
-#define sizeY 14
-#define sizeC 64
-#define sizeL 32
-
-    conv2_line_In_t  bufferI = I.read();
-    conv2_line_Out_t bufferY;
-
-    convKernel_t G[tileSize * tileSize];
-    convD_t D[tileSize * tileSize];
-    convM_t M[tileSize * tileSize];
-    convTemp_t temp[2][4];
-    pixel_t Block[tileSize * tileSize];
-    pixel_t preReLU[2][2];
-
-    // Y coordinate
-loopConvYi:
-    for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
-        {
-
-        // X coordinate
-loopConvXi:
-        for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
-            {
-
-            // Output channels
-loopConvOutChannel:
-            for (unsigned int lI = 0; lI < sizeL; lI++)
-                {
-
-                // Input channels
-loopConvInChannel:
-                for (unsigned int cI = 0; cI < sizeC; cI++)
-                    {
-                    getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
-
-                    // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, convKernel2 + ((lI * sizeC + cI) * 9));
-                    calculateD(Block, D);
-
-loopTile:
-                    for (unsigned i = 0; i < tileSize * tileSize; ++i)
-                        {
-                        // If it is the first iteration, initialization of M
-                        if (cI == 0)
-                            {
-                            M[i] = D[i] * G[i];
-                            }
-                        else
-                            {
-                            M[i] += D[i] * G[i];
-                            }
-                        }
-                    }
-
-                // Transform to image space
-loopInverseTransform:
-                for (unsigned int i = 0; i < 4; ++i)
-                    {
-                    temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
-                    temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-                    }
-
-                layerOutBlock_t tempOutBlock;
-                pixel_t maxBlock = 0;
-
-loopOutputBlock:
-                for (unsigned int j = 0; j < 2; ++j)
-                    {
-                    // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias2[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias2[lI];
-
-                    // Applies ReLU
-                    preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
-                    preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
-
-                    if (maxBlock < preReLU[j][0])
-                        {
-                        maxBlock = preReLU[j][0];
-                        }
-                    if (maxBlock < preReLU[j][1])
-                        {
-                        maxBlock = preReLU[j][1];
-                        }
-
-                    tempOutBlock[2 * j] = preReLU[j][0];
-                    tempOutBlock[2 * j + 1] = preReLU[j][1];
-                    }
-
-                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (xI / BLOCK_HEIGHT);
-
-                bufferY.Y[index][0] = maxBlock;
-                bufferY.Y[index][1] = max(tempOutBlock[0], tempOutBlock[1]);
-                bufferY.Y[index][2] = max(tempOutBlock[0], tempOutBlock[2]);
-                bufferY.Y[index][3] = tempOutBlock[0];
-                // End transformation
-                }
-            }
-        }
-    Y.write(bufferY);
-
-#undef sizeX
-#undef sizeY
-#undef sizeC
-#undef sizeL
-}
-
-#pragma design
-void conv3_apply(ac_channel<conv3_line_In_t> &I, ac_channel<conv3_line_Out_t> &Y)
-{
-#define sizeX 8
-#define sizeY 8
-#define sizeC 32
-#define sizeL 20
-
-    conv3_line_In_t  bufferI = I.read();
-    conv3_line_Out_t bufferY;
-
-    convKernel_t G[tileSize * tileSize];
-    convD_t D[tileSize * tileSize];
-    convM_t M[tileSize * tileSize];
-    convTemp_t temp[2][4];
-    pixel_t Block[tileSize * tileSize];
-    pixel_t preReLU[2][2];
-
-    // Y coordinate
-loopConvYi:
-    for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
-        {
-
-        // X coordinate
-loopConvXi:
-        for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
-            {
-
-            // Output channels
-loopConvOutChannel:
-            for (unsigned int lI = 0; lI < sizeL; lI++)
-                {
-
-                // Input channels
-loopConvInChannel:
-                for (unsigned int cI = 0; cI < sizeC; cI++)
-                    {
-                    getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
-
-                    // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    calculateG(G, convKernel3 + ((lI * sizeC + cI) * 9));
-                    calculateD(Block, D);
-
-loopTile:
-                    for (unsigned i = 0; i < tileSize * tileSize; ++i)
-                        {
-                        // If it is the first iteration, initialization of M
-                        if (cI == 0)
-                            {
-                            M[i] = D[i] * G[i];
-                            }
-                        else
-                            {
-                            M[i] += D[i] * G[i];
-                            }
-                        }
-                    }
-
-                // Transform to image space
-loopInverseTransform:
-                for (unsigned int i = 0; i < 4; ++i)
-                    {
-                    temp[0][i] = M[tileSize * i] + M[tileSize * i + 1] + M[tileSize * i + 2];
-                    temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
-                    }
-
-                layerOutBlock_t tempOutBlock;
-                pixel_t maxBlock = 0;
-
-loopOutputBlock:
-                for (unsigned int j = 0; j < 2; ++j)
-                    {
-                    // Inverse transform
-                    preReLU[j][0] = temp[j][0] + temp[j][1] + temp[j][2] + convBias3[lI];
-                    preReLU[j][1] = temp[j][1] - temp[j][2] - temp[j][3] + convBias3[lI];
-
-                    // Applies ReLU
-                    preReLU[j][0] = (preReLU[j][0] >= 0) ? preReLU[j][0] : 0;
-                    preReLU[j][1] = (preReLU[j][1] >= 0) ? preReLU[j][1] : 0;
-
-                    if (maxBlock < preReLU[j][0])
-                        {
-                        maxBlock = preReLU[j][0];
-                        }
-                    if (maxBlock < preReLU[j][1])
-                        {
-                        maxBlock = preReLU[j][1];
-                        }
-
-                    tempOutBlock[2 * j] = preReLU[j][0];
-                    tempOutBlock[2 * j + 1] = preReLU[j][1];
-                    }
-
-                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (xI / BLOCK_HEIGHT);
-
-                bufferY.Y[index][0] = maxBlock;
-                bufferY.Y[index][1] = max(tempOutBlock[0], tempOutBlock[1]);
-                bufferY.Y[index][2] = max(tempOutBlock[0], tempOutBlock[2]);
-                bufferY.Y[index][3] = tempOutBlock[0];
-                // End transformation
-                }
-            }
-        }
     Y.write(bufferY);
 
 #undef sizeX

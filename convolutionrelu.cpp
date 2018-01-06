@@ -83,8 +83,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    bufferY.Y[index][2 * j] = temp[j][0] + temp[j][1] + temp[j][2];
-                    bufferY.Y[index][2 * j + 1] = temp[j][1] - temp[j][2] - temp[j][3];
+                    bufferY.Y[index][j] = temp[j][0] + temp[j][1] + temp[j][2];
+                    bufferY.Y[index][2 + j] = temp[j][1] - temp[j][2] - temp[j][3];
                     }
                 // End transformation
                 }

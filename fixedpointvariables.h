@@ -36,8 +36,8 @@
 
 #else
 
-#define PIXEL_DYN   9 // -128 to 127
-#define PIXEL_PREC  7
+#define PIXEL_DYN   8 // -128 to 127
+#define PIXEL_PREC  4
 
 #define BLOCK_HEIGHT       2
 #define BLOCK_WIDTH        2
@@ -50,14 +50,14 @@
 #define CONV_BIAS_DYN      3 // -4 to 3
 #define CONV_BIAS_PREC     5
 
-#define CONV_M_DYN         7 // -64 to 63
-#define CONV_M_PREC        6
+#define CONV_M_DYN         12 // -64 to 63
+#define CONV_M_PREC        4
 
-#define CONV_D_DYN         7 // -64 to 63
-#define CONV_D_PREC        3
+#define CONV_D_DYN         12 // -64 to 63
+#define CONV_D_PREC        4
 
-#define CONV_TEMP_DYN      7 // -64 to 63
-#define CONV_TEMP_PREC     3
+#define CONV_TEMP_DYN      12 // -64 to 63
+#define CONV_TEMP_PREC     4
 
 #define PERCEP_KERNEL_DYN  0 // -.5 to .5
 #define PERCEP_KERNEL_PREC 4
@@ -86,7 +86,7 @@ typedef double perceptronBias_t;
 #else
 
 // Layer output
-typedef ac_fixed < PIXEL_DYN + PIXEL_PREC, PIXEL_DYN, true > pixel_t;
+typedef ac_fixed < PIXEL_DYN + PIXEL_PREC, PIXEL_DYN, false > pixel_t;
 
 // Convolution types
 typedef ac_fixed < CONV_D_DYN + CONV_D_PREC, CONV_D_DYN, true > convD_t;

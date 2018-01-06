@@ -1,4 +1,4 @@
-#include <png_utils.h>
+#include "png_utils.h"
 #include <stdlib.h>
 #include <iostream>
 
@@ -172,7 +172,11 @@ void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &Img)
                                         + (xI / BLOCK_HEIGHT);
                 unsigned int index = (yI % 2) * 2 + (xI % 2);
 
+#ifdef __FLOATVERSION__
+                row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][index]);
+#else
                 row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][index]).slc<8>(PIXEL_DYN + PIXEL_PREC - 8);
+#endif
                 }
             }
         }

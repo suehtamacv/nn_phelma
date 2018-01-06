@@ -2,10 +2,11 @@
 #include <fstream>
 #include <iomanip>
 #include <stdlib.h>
+#include <mc_scverify.h>
 
 #include "meminterface.h"
 #include "nnarrays.h"
-#include <mc_scverify.h>
+#include "png_utils.h"
 
 int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
 void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
@@ -24,11 +25,14 @@ CCS_MAIN(int argc, char* argv)
     for (unsigned int i = 0; i < limit; ++i)
         {
         // Reads RAW
-        readAndNormalize(image, networkInChannel, i);
+        readPNG("lena_32.png");
+        flattenPNG(networkInChannel);
 
         CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, true);
 
         networkOut = networkOutChannel.read();
+        unflattenPNG(networkOut);
+        writePNG("lenaResult.png");
         }
 
     CCS_RETURN(0);

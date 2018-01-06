@@ -10,14 +10,16 @@ INCLUDEPATH += include/
 
 SOURCES += main.cpp \
     top.cpp \
-    convolutionrelu.cpp
+    convolutionrelu.cpp \
+    png_utils.cpp
 
 HEADERS += \
     fixedpointvariables.h \
     nnarrays.h \
     convolutionrelu.h \
     meminterface.h \
-    kernels.h
+    kernels.h \
+    png_utils.h
 
 
 LIBS += -lpng

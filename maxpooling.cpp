@@ -125,8 +125,8 @@ void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I,
     maxPool3_line_In_t  bufferI = I.read();
     maxPool3_line_Out_t bufferY;
 
-    unsigned int nxI = 1;
-    unsigned int nyI = 1;
+    unsigned int nxI = 0;
+    unsigned int nyI = 0;
 
 loopY:
     for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
@@ -136,7 +136,7 @@ loopY:
 loopChannels:
         for (unsigned int cI = 0; cI < sizeC; ++cI)
             {
-            nxI = 1;
+            nxI = 0;
 
 loopX:
             for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)

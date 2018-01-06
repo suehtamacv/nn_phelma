@@ -3,8 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CFLAGS += -Og -D__FLOATVERSION__
-QMAKE_CXXFLAGS += -Og -D__FLOATVERSION__
+QMAKE_CFLAGS += -Og
+QMAKE_CXXFLAGS += -Og
 
 INCLUDEPATH += include/
 

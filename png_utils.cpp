@@ -93,7 +93,7 @@ void writePNG(const char* file_name)
         abort();
         }
 
-    png_set_IHDR(png_ptr, info_ptr, WIDTH, HEIGHT,
+    png_set_IHDR(png_ptr, info_ptr, (WIDTH - 2), (HEIGHT - 2),
                  bit_depth, color_type, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
@@ -118,7 +118,7 @@ void writePNG(const char* file_name)
     png_write_end(png_ptr, NULL);
 
     // cleanup heap allocation
-    for (unsigned int y = 0; y < HEIGHT; y++)
+    for (unsigned int y = 0; y < (HEIGHT - 2); y++)
         {
         delete[] row_pointers[y];
         }
@@ -127,32 +127,52 @@ void writePNG(const char* file_name)
 }
 
 
-void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &I)
+void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &channelI)
 {
-    for (unsigned int y = 0; y < HEIGHT; ++y)
+    memBlockInterface<INPUT_SIZE> Img;
+
+    for (unsigned int i = 0; i < (HEIGHT / BLOCK_HEIGHT) * (WIDTH / BLOCK_WIDTH) * 3; ++i)
         {
-        for (unsigned int x = 0; x < WIDTH; ++x)
+        Img.Y[i][0] = 0;
+        Img.Y[i][1] = 0;
+        Img.Y[i][2] = 0;
+        Img.Y[i][3] = 0;
+        }
+
+    for (unsigned int yI = 0; yI < (HEIGHT - BLOCK_HEIGHT); ++yI)
+        {
+        for (unsigned int xI = 0; xI < (WIDTH - BLOCK_WIDTH); ++xI)
             {
-            for (unsigned int c = 0; c < 3; ++c)
+            for (unsigned int cI = 0; cI < 3; ++cI)
                 {
-//                I[c * HEIGHT * WIDTH + y * WIDTH + x] = row_pointers[y][x * 3 + c];
+                unsigned int indexBck = cI * ((HEIGHT - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                        + (yI / BLOCK_WIDTH) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                        + (xI / BLOCK_HEIGHT);
+                unsigned int index = ((yI + 1) % 2) * 2 + (xI + 1) % 2;
+                Img.Y[indexBck][index] = row_pointers[yI][xI * 3 + cI];
                 }
             }
         }
+
+    channelI.write(Img);
 }
 
-void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &I)
+void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &Img)
 {
-    for (unsigned int y = 0; y < HEIGHT; ++y)
+    for (unsigned int yI = 0; yI < (HEIGHT - BLOCK_HEIGHT); ++yI)
         {
-        row_pointers[y] = new png_byte[WIDTH * 3];
+        row_pointers[yI] = new png_byte[(WIDTH - BLOCK_WIDTH) * 3];
 
-        for (unsigned int x = 0; x < WIDTH; ++x)
+        for (unsigned int xI = 0; xI < (WIDTH - BLOCK_WIDTH); ++xI)
             {
-            for (unsigned int c = 0; c < 3; ++c)
+            for (unsigned int cI = 0; cI < 3; ++cI)
                 {
-//                row_pointers[y][x * 3 + c] = (I[c * HEIGHT * WIDTH + y * WIDTH + x]).slc<INPUT_BITS_PER_PIXEL>
-//                                             (LAYER_OUTPUT_DYN + LAYER_OUTPUT_PREC - INPUT_BITS_PER_PIXEL);
+                unsigned int indexBck = cI * ((HEIGHT - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                        + (yI / BLOCK_WIDTH) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
+                                        + (xI / BLOCK_HEIGHT);
+                unsigned int index = ((yI + 1) % 2) * 2 + (xI + 1) % 2;
+
+                row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][index]).slc<8>(PIXEL_DYN + PIXEL_PREC - 8);
                 }
             }
         }

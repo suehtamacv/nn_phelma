@@ -16,7 +16,7 @@ static png_byte bit_depth;
 void readPNG(const char *filename);
 void writePNG(const char* filename);
 
-void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &);
-void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &I);
+void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &channelI);
+void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &Img);
 
 #endif // PNG_UTILS_H

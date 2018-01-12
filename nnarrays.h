@@ -4,11 +4,11 @@
 #include "fixedpointvariables.h"
 
 #ifndef WIDTH
-#define WIDTH  66
+#define WIDTH  162
 #endif
 
 #ifndef HEIGHT
-#define HEIGHT 66
+#define HEIGHT 122
 #endif
 
 #define INPUT_SIZE    HEIGHT * WIDTH * 3

@@ -6,8 +6,8 @@
 
 void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, bool selectKernel)
 {
-#define sizeX HEIGHT
-#define sizeY WIDTH
+#define sizeX WIDTH
+#define sizeY HEIGHT
 #define sizeC 3
 #define sizeL 3
 

@@ -23,7 +23,7 @@ CCS_MAIN(int argc, char* argv)
     for (unsigned int i = 0; i < limit; ++i)
         {
         // Reads RAW
-        readPNG("lena_64.png");
+        readPNG("lena_160120.png");
         flattenPNG(networkInChannel);
 
         CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, false);

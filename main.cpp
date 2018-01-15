@@ -26,7 +26,7 @@ CCS_MAIN(int argc, char* argv)
         readPNG("lena_160120.png");
         flattenPNG(networkInChannel);
 
-        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, 3);
+        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, 1);
 
         networkOut = networkOutChannel.read();
         unflattenPNG(networkOut);

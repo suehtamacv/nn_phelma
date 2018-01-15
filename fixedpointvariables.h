@@ -37,7 +37,7 @@
 #else
 
 #define PIXEL_DYN   8 // -128 to 127
-#define PIXEL_PREC  4
+#define PIXEL_PREC  0
 
 #define BLOCK_HEIGHT       2
 #define BLOCK_WIDTH        2

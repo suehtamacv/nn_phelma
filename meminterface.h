@@ -48,7 +48,7 @@ struct perceptronBiasInterface
 };
 
 typedef memBlockInterface<INPUT_SIZE> conv_In_t;
-typedef memBlockInterface<OUTPUT_SIZE> conv_Out_t;
+typedef memInterface<OUTPUT_SIZE> conv_Out_t;
 
 
 

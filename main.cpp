@@ -23,10 +23,10 @@ CCS_MAIN(int argc, char* argv)
     for (unsigned int i = 0; i < limit; ++i)
         {
         // Reads RAW
-        readPNG("lena_160120.png");
+        readPNG("/calcul/dearamat/lena_160120.png");
         flattenPNG(networkInChannel);
 
-        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, false);
+        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel, 0);
 
         networkOut = networkOutChannel.read();
         unflattenPNG(networkOut);

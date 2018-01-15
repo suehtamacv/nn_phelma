@@ -4,7 +4,7 @@
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, bool selectKernel)
+void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, uint2 selectKernel)
 {
 #define sizeX WIDTH
 #define sizeY HEIGHT
@@ -25,14 +25,14 @@ loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
 
-        // X coordinate
-loopConvXi:
-        for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
+	// Output channels
+loopConvOutChannel:
+        for (unsigned int lI = 0; lI < sizeL; lI++)
             {
 
-            // Output channels
-loopConvOutChannel:
-            for (unsigned int lI = 0; lI < sizeL; lI++)
+            // X coordinate
+loopConvXi:
+            for (unsigned int xI = 0; xI < sizeX - overlap; xI += overlap)
                 {
 
                 // Input channels
@@ -42,13 +42,23 @@ loopConvInChannel:
                     getImageBlock<sizeX, sizeY, sizeC>(bufferI, Block, xI, yI, cI);
 
                     // Sends pointer to K(:, :, l, c) at (l * sizeC + c) * 3 * 3
-                    if (selectKernel)
+                    switch (selectKernel)
                         {
-                        calculateG(G, kernelIdentity + ((lI * sizeC + cI) * 9));
-                        }
-                    else
-                        {
-                        calculateG(G, kernelGauss + ((lI * sizeC + cI) * 9));
+                        case 0:
+                            calculateG(G, kernelIdentity + ((lI * sizeC + cI) * 9));
+                            break;
+
+                        case 1:
+                            calculateG(G, kernelGauss + ((lI * sizeC + cI) * 9));
+                            break;
+
+                        case 2:
+                            calculateG(G, kernelSobelX + ((lI * sizeC + cI) * 9));
+                            break;
+
+                        case 3:
+                            calculateG(G, kernelSobelY + ((lI * sizeC + cI) * 9));
+                            break;
                         }
                     calculateD(Block, D);
 

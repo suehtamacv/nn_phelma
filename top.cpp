@@ -5,7 +5,7 @@
 #pragma hls_design top
 void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
                    ac_channel<memBlockInterface<OUTPUT_SIZE> > &Out,
-                   bool selectKernel)
+                   uint2 selectKernel)
 {
     conv_apply(In, Out, selectKernel);
 }

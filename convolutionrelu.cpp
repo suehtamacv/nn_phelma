@@ -19,6 +19,7 @@ void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, uint2 selec
     convM_t M[tileSize * tileSize];
     convTemp_t temp[2][4];
     pixel_t Block[tileSize * tileSize];
+    pixel_t afterRELU[4];
 
     // Y coordinate
 loopConvYi:
@@ -85,14 +86,21 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
+loopEvaluate:
+                for (unsigned int j = 0; j < 2; ++j)
+                    {
+                    afterRELU[j] = max(temp[j][0] + temp[j][1] + temp[j][2], 0);
+                    afterRELU[j + 2] = max(temp[j][1] - temp[j][2] - temp[j][3], 0);
+                    }
+
                 unsigned int index = yI * (sizeX - BLOCK_WIDTH) + xI;
 
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    bufferY.Y[index + j][lI] = max(temp[j][0] + temp[j][1] + temp[j][2], 0);
-                    bufferY.Y[index + (sizeX - BLOCK_WIDTH) + j][lI] = max(temp[j][1] - temp[j][2] - temp[j][3], 0);
+                    bufferY.Y[index + j][lI] = afterRELU[j];
+                    bufferY.Y[index + (sizeX - BLOCK_WIDTH) + j][lI] = afterRELU[j + 2];
                     }
                 // End transformation
                 }

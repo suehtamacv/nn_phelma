@@ -157,7 +157,7 @@ void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &channelI)
     channelI.write(Img);
 }
 
-void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &Img)
+void unflattenPNG(memHWCBlockInterface<OUTPUT_SIZE, 3> &Img)
 {
     for (unsigned int yI = 0; yI < (HEIGHT - BLOCK_HEIGHT); ++yI)
         {
@@ -167,15 +167,12 @@ void unflattenPNG(memBlockInterface<OUTPUT_SIZE> &Img)
             {
             for (unsigned int cI = 0; cI < 3; ++cI)
                 {
-                unsigned int indexBck = cI * ((HEIGHT - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                        + (yI / BLOCK_WIDTH) * ((WIDTH - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                        + (xI / BLOCK_HEIGHT);
-                unsigned int index = (yI % 2) * 2 + (xI % 2);
+                unsigned int indexBck = yI * (WIDTH - BLOCK_WIDTH) + xI;
 
 #ifdef __FLOATVERSION__
-                row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][index]);
+                row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][cI]);
 #else
-                row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][index]).slc<8>(PIXEL_DYN + PIXEL_PREC - 8);
+                row_pointers[yI][xI * 3 + cI] = (Img.Y[indexBck][cI]).slc<8>(PIXEL_DYN + PIXEL_PREC - 8);
 #endif
                 }
             }

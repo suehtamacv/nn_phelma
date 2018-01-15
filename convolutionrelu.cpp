@@ -25,7 +25,7 @@ loopConvYi:
     for (unsigned int yI = 0; yI < sizeY - overlap; yI += overlap)
         {
 
-	// Output channels
+        // Output channels
 loopConvOutChannel:
         for (unsigned int lI = 0; lI < sizeL; lI++)
             {
@@ -85,16 +85,14 @@ loopInverseTransform:
                     temp[1][i] = M[tileSize * i + 1] - M[tileSize * i + 2] - M[tileSize * i + 3];
                     }
 
-                unsigned int index = lI * ((sizeY - BLOCK_HEIGHT) / BLOCK_HEIGHT) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (yI / BLOCK_WIDTH) * ((sizeX - BLOCK_WIDTH) / BLOCK_WIDTH)
-                                     + (xI / BLOCK_HEIGHT);
+                unsigned int index = yI * (sizeX - BLOCK_WIDTH) + xI;
 
 loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    bufferY.Y[index][j] = temp[j][0] + temp[j][1] + temp[j][2];
-                    bufferY.Y[index][2 + j] = temp[j][1] - temp[j][2] - temp[j][3];
+                    bufferY.Y[index + j][lI] = max(temp[j][0] + temp[j][1] + temp[j][2], 0);
+                    bufferY.Y[index + (sizeX - BLOCK_WIDTH) + j][lI] = max(temp[j][1] - temp[j][2] - temp[j][3], 0);
                     }
                 // End transformation
                 }

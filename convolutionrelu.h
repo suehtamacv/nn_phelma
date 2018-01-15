@@ -10,7 +10,7 @@
 void calculateG(convKernel_t (&G)[16], const convKernel_t *K);
 void calculateD(pixel_t (&Block)[16], convD_t (&D)[16]);
 
-void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, bool selectKernel);
+void conv_apply(ac_channel<conv_In_t> &I, ac_channel<conv_Out_t> &Y, uint2 selectKernel);
 
 template<unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
 void getImageBlock(memBlockInterface<sizeX * sizeY * sizeC> &Buf, pixel_t (&Block)[16],

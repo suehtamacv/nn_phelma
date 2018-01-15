@@ -17,6 +17,12 @@ struct memBlockInterface
     layerOutBlock_t Y[size / PIXEL_PER_BLOCK];
 };
 
+template<unsigned int size, unsigned int nChannel>
+struct memHWCBlockInterface
+{
+    pixel_t Y[size / nChannel][nChannel];
+};
+
 template<unsigned int size>
 struct memInterface
 {
@@ -48,7 +54,7 @@ struct perceptronBiasInterface
 };
 
 typedef memBlockInterface<INPUT_SIZE> conv_In_t;
-typedef memInterface<OUTPUT_SIZE> conv_Out_t;
+typedef memHWCBlockInterface<OUTPUT_SIZE, 3> conv_Out_t;
 
 
 

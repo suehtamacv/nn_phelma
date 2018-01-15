@@ -17,6 +17,6 @@ void readPNG(const char *filename);
 void writePNG(const char* filename);
 
 void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &channelI);
-void unflattenPNG(memHWCBlockInterface<OUTPUT_SIZE, 3> &Img);
+void unflattenPNG(memHWCBlockInterface<OUTPUT_SIZE, 4> &Img);
 
 #endif // PNG_UTILS_H

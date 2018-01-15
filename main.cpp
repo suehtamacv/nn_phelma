@@ -9,14 +9,14 @@
 #include "png_utils.h"
 
 void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
-                   ac_channel<memHWCBlockInterface<OUTPUT_SIZE, 3> > &Out,
+                   ac_channel<memHWCBlockInterface<OUTPUT_SIZE, 4> > &Out,
                    uint2 selectKernel);
 
 CCS_MAIN(int argc, char* argv)
 {
     ac_channel<memBlockInterface<INPUT_SIZE> > networkInChannel;
-    ac_channel<memHWCBlockInterface<OUTPUT_SIZE, 3> > networkOutChannel;
-    memHWCBlockInterface<OUTPUT_SIZE, 3> networkOut;
+    ac_channel<memHWCBlockInterface<OUTPUT_SIZE, 4> > networkOutChannel;
+    memHWCBlockInterface<OUTPUT_SIZE, 4> networkOut;
 
     unsigned int limit = 1;
 

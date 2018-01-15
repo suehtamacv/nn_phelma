@@ -157,7 +157,7 @@ void flattenPNG(ac_channel<memBlockInterface<INPUT_SIZE> > &channelI)
     channelI.write(Img);
 }
 
-void unflattenPNG(memHWCBlockInterface<OUTPUT_SIZE, 3> &Img)
+void unflattenPNG(memHWCBlockInterface<OUTPUT_SIZE, 4> &Img)
 {
     for (unsigned int yI = 0; yI < (HEIGHT - BLOCK_HEIGHT); ++yI)
         {

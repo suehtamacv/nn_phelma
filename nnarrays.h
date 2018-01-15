@@ -12,6 +12,6 @@
 #endif
 
 #define INPUT_SIZE    HEIGHT * WIDTH * 3
-#define OUTPUT_SIZE   (HEIGHT - 2) * (WIDTH - 2) * 3
+#define OUTPUT_SIZE   (HEIGHT - 2) * (WIDTH - 2) * 4
 
 #endif // NNARRAYS_H

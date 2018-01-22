@@ -92,8 +92,8 @@ loopOutputBlock:
                 for (unsigned int j = 0; j < 2; ++j)
                     {
                     // Inverse transform
-                    bufferY.Y[index + j * (sizeX - BLOCK_WIDTH)][lI] = max(temp[j][0] + temp[j][1] + temp[j][2], 0);
-                    bufferY.Y[index + j * (sizeX - BLOCK_WIDTH) + 1][lI] = max(temp[j][1] - temp[j][2] - temp[j][3], 0);
+                    bufferY.Y[index + j][lI] = max(temp[j][0] + temp[j][1] + temp[j][2], 0);
+                    bufferY.Y[index + (sizeX - BLOCK_WIDTH) + j][lI] = max(temp[j][1] - temp[j][2] - temp[j][3], 0);
                     }
                 // End transformation
                 }

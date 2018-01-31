@@ -2,6 +2,7 @@
 #define KERNELS_H
 
 #include "fixedpointvariables.h"
+#include "meminterface.h"
 
 static const convKernel_t convKernel1[3 * 3 * 3 * 64] =
 {

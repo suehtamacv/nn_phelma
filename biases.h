@@ -2,7 +2,7 @@
 #define BIASES_H
 
 #include "fixedpointvariables.h"
-
+#include "meminterface.h"
 static const convBias_t convBias1[64] =
 {
     -0.96178979, -0.23917986, -0.23212402, -0.2245342, -1.71852744, -0.25244606, -0.70807356, -2.07269645,

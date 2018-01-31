@@ -1,62 +1,95 @@
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <stdlib.h>
 
-#include "convolutionrelu.h"
-#include "maxpooling.h"
-#include "perceptron.h"
-#include "fixedpointvariables.h"
+#include "meminterface.h"
 #include "nnarrays.h"
+#include <mc_scverify.h>
 
-FILE* image;
+int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y, unsigned int i);
+void applyComplete(ac_channel<memBlockInterface<INPUT_SIZE> > &In,
+                   ac_channel<memInterface<10> > &Out);
 
-convKernel_t convKernel[] = {0, 0, 0, 0, 1, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 1, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 1, 0, 0, 0, 0
-                            };
-convBias_t   convBias[]   = {0, 0, 0};
-
-#pragma hls_design top
-void apply(layerOut_t In[256 * 256 * 3], layerOut_t Out[256 * 256 * 3])
+CCS_MAIN(int argc, char* argv)
 {
-    ConvolutionReLU<256, 256, 3, 3> Conv1("Conv1", convKernel, convBias, Out);
-    Conv1.apply(In);
+    FILE* image = fopen("test_batch.bin", "rb");
+    ac_channel<memBlockInterface<INPUT_SIZE> > networkInChannel;
+    ac_channel<memInterface<10> > networkOutChannel;
+    memInterface<10> networkOut;
+
+#ifdef __FLOATVERSION__
+    std::ofstream Ref("GoldenReference");
+#else
+    std::ifstream Ref("GoldenReference");
+#endif
+    std::ofstream Out("OutputClasses");
+
+    double CorrectFound = 0;
+    double CorrectFoundGolden = 0;
+    unsigned int limit = 1000;
+    int goldenLabel;
+
+    for (unsigned int i = 0; i < limit; ++i)
+        {
+        // Reads RAW
+        int realLabel = readAndNormalize(image, networkInChannel, i);
+
+#ifndef __FLOATVERSION__
+        // Reads golden version data
+        Ref >> goldenLabel;
+#endif
+
+        CCS_DESIGN(applyComplete)(networkInChannel, networkOutChannel);
+
+        networkOut = networkOutChannel.read();
+
+        int foundLabel = 0;
+        pixel_t maxFoundLabel = networkOut.Y[0];
+
+        for (unsigned int j = 0; j < 10; ++j)
+            {
+            if (networkOut.Y[j] > maxFoundLabel)
+                {
+                maxFoundLabel = networkOut.Y[j];
+                foundLabel = j;
+                }
+            }
+#ifdef __FLOATVERSION__
+        Ref << foundLabel << std::endl;
+#endif
+        Out << foundLabel << std::endl;
+
+        if (realLabel == foundLabel)
+            {
+            std::cout << "Correctly classified " << realLabel << "!" << std::endl;
+            CorrectFound++;
+            }
+        else
+            {
+            std::cout << "Incorrectly classified " << realLabel << " as " << foundLabel << "." << std::endl;
+            }
+
+        if (realLabel == goldenLabel)
+            {
+            CorrectFoundGolden++;
+            }
+
+        }
+
+    std::cout << std::endl;
+    std::cout << "Correct rate : " <<
+              100 * CorrectFound / (double) limit << "%" << std::endl;
+    std::cout << "Correct rate found by golden version : " <<
+              100 * CorrectFoundGolden / (double) limit << "%" << std::endl;
+
+    Ref.close();
+    Out.close();
+
+    CCS_RETURN(0);
 }
 
-#ifndef __SIMULATION__
-
-void applyComplete(layerOut_t In[24 * 24 * 3], layerOut_t Out[10])
-{
-    layerOut_t Conv1_Out[24 * 24 * 64];
-    layerOut_t MaxPool1_Out[12 * 12 * 64];
-    layerOut_t Conv2_Out[12 * 12 * 32];
-    layerOut_t MaxPool2_Out[6 * 6 * 32];
-    layerOut_t Conv3_Out[6 * 6 * 20];
-    layerOut_t MaxPool3_Out[3 * 3 * 20];
-
-    ConvolutionReLU<24, 24, 3, 64> Conv1("Conv1", convKernel1, convBias1, Conv1_Out);
-    MaxPooling<2, 3, 24, 24, 64> MaxPool1("MaxPool1", MaxPool1_Out);
-    ConvolutionReLU<12, 12, 64, 32> Conv2("Conv2", convKernel2, convBias2, Conv2_Out);
-    MaxPooling<2, 3, 12, 12, 32> MaxPool2("MaxPool2", MaxPool2_Out);
-    ConvolutionReLU<6, 6, 32, 20> Conv3("Conv3", convKernel3, convBias3, Conv3_Out);
-    MaxPooling<2, 3, 6, 6, 20> MaxPool3("MaxPool3", MaxPool3_Out);
-    Perceptron<180, 10> Percep4("Percep4", perceptronKernel4, perceptronBias4, Out);
-
-    Conv1.apply(In);
-    MaxPool1.apply(Conv1.Y);
-    Conv2.apply(MaxPool1.Y);
-    MaxPool2.apply(Conv2.Y);
-    Conv3.apply(MaxPool2.Y);
-    MaxPool3.apply(Conv3.Y);
-    Percep4.apply(MaxPool3.Y);
-}
-
-int readAndNormalize(unsigned int i)
+int readAndNormalize(FILE* image, ac_channel<memBlockInterface<INPUT_SIZE> > &Y, unsigned int i)
 {
     unsigned char ImageData[32 * 32 * 3];
     unsigned char ImageLabel;
@@ -93,70 +126,40 @@ int readAndNormalize(unsigned int i)
         }
     StdDev = sqrt(StdDev / (24 * 24 * 3));
 
-    for (unsigned int cI = 0; cI < 3; ++cI)
+    memBlockInterface<INPUT_SIZE> mem;
+    for (unsigned int yI = 0; yI < HEIGHT; yI += BLOCK_HEIGHT)
         {
-        for (unsigned int yI = 0; yI < 24; ++yI)
+        for (unsigned int cI = 0; cI < 3; ++cI)
             {
-            for (unsigned int xI = 0; xI < 24; ++xI)
+            for (unsigned int xI = 0; xI < WIDTH; xI += BLOCK_WIDTH)
                 {
-#ifdef __HWC__
-                ImageIn[yI * 24 * 3 + xI * 3 + cI] =
-#else
-                ImageIn[cI * 24 * 24 + yI * 24 + xI] =
-#endif
-                    (ImageData[cI * 32 * 32 + (yI + 4) * 32 + (xI + 4)] - Average) / std::max(StdDev, minStdDev);
+                for (unsigned int off_yI = 0; off_yI < BLOCK_HEIGHT; ++off_yI)
+                    {
+                    for (unsigned int off_xI = 0; off_xI < BLOCK_WIDTH; ++off_xI)
+                        {
+                        unsigned int bckIndex = cI * (HEIGHT / BLOCK_HEIGHT) * (WIDTH / BLOCK_WIDTH) +
+                                                (yI / BLOCK_HEIGHT) * (WIDTH / BLOCK_WIDTH) +
+                                                (xI / BLOCK_WIDTH);
+                        if ((yI + off_yI == 0) || (yI + off_yI == HEIGHT - 1))
+                            {
+                            mem.Y[bckIndex][off_yI * BLOCK_WIDTH + off_xI] = 0;
+                            }
+                        else if ((xI + off_xI == 0) || (xI + off_xI == WIDTH - 1))
+                            {
+                            mem.Y[bckIndex][off_yI * BLOCK_WIDTH + off_xI] = 0;
+                            }
+                        else
+                            {
+                            mem.Y[bckIndex][off_yI * BLOCK_WIDTH + off_xI] =
+                                (ImageData[cI * 32 * 32 + (yI + off_yI + 3) * 32 + (xI + off_xI + 3)] - Average)
+                                / std::max(StdDev, minStdDev);
+                            }
+                        }
+                    }
                 }
             }
         }
 
+    Y.write(mem);
     return ImageLabel;
 }
-
-int main()
-{
-    image = fopen("test_batch.bin", "rb");
-    layerOut_t completeOut[10];
-
-    double CorrectFound = 0;
-#ifdef __STAT__
-    unsigned int limit = 5;
-#else
-    unsigned int limit = 1000;
-#endif
-
-    for (unsigned int i = 0; i < limit; ++i)
-        {
-        // Reads RAW
-        int goldenLabel = readAndNormalize(i);
-
-        applyComplete(ImageIn, completeOut);
-        int foundLabel = 0;
-        layerOut_t maxFoundLabel = completeOut[0];
-
-        for (unsigned int i = 0; i < 10; ++i)
-            {
-            if (completeOut[i] > maxFoundLabel)
-                {
-                maxFoundLabel = completeOut[i];
-                foundLabel = i;
-                }
-            }
-
-        if (goldenLabel == foundLabel)
-            {
-            std::cout << "Correctly classified " << goldenLabel << "!" << std::endl;
-            CorrectFound++;
-            }
-        else
-            {
-            std::cout << "Incorrectly classified " << goldenLabel << " as " << foundLabel << "." << std::endl;
-            }
-
-        }
-
-    std::cout << "Correct rate : " << 100 * CorrectFound / (double) limit << "%" << std::endl;
-
-    return 0;
-}
-
-#endif

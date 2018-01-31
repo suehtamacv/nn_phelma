@@ -2,90 +2,53 @@
 #define MAXPOOLING_H
 
 #include "fixedpointvariables.h"
+#include "meminterface.h"
 
-template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-class MaxPooling
+#define stride    2
+#define poolSize  3
+#define newSizeX  (sizeX / stride)
+#define newSizeY  (sizeY / stride)
+
+template<unsigned int sizeX, unsigned int sizeY, typename T>
+pixel_t getMaxPixel(T& Buf, unsigned int xI, unsigned int yI, unsigned int cI, bool xLim, bool yLim)
 {
-public:
-    MaxPooling(const std::string name, layerOut_t*);
+    pixel_t maxPixel = 0;
 
-    void apply(layerOut_t *I);
+    unsigned int index = cI * (sizeY / BLOCK_HEIGHT) * (sizeX / BLOCK_WIDTH) +
+                         (yI / BLOCK_HEIGHT) * (sizeX / BLOCK_WIDTH) +
+                         (xI / BLOCK_WIDTH);
 
-    layerOut_t *Y;
-
-private:
-    const unsigned int newSizeX;
-    const unsigned int newSizeY;
-
-    const std::string name;
-};
-
-///
-/// IMPLEMENTATION
-///
-
-template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-MaxPooling(const std::string name, layerOut_t* pY) :
-    Y(pY),
-    newSizeX(sizeX / stride),
-    newSizeY(sizeY / stride),
-    name(name)
-{
-
-}
-
-template<unsigned int stride, unsigned int poolSize, unsigned int sizeX, unsigned int sizeY, unsigned int sizeC>
-void MaxPooling<stride, poolSize, sizeX, sizeY, sizeC>::
-apply(layerOut_t *I)
-{
-#ifdef __HWC__
-#define T(x, y) \
-    I[(yI + (y)) * sizeX * sizeC + (xI + (x)) * sizeC + cI]
-#else
-#define T(x, y) \
-    I[cI * sizeY * sizeX + (yI + (y)) * sizeX + (xI + (x))]
-#endif
-
-    unsigned int nxI = 0, nyI = 0;
-
-    for (unsigned int cI = 0; cI < sizeC; ++cI)
+    if (maxPixel < Buf.Y[index][0])
         {
-        nyI = 0;
-        for (unsigned int yI = 0; yI < sizeY; yI += stride, ++nyI)
+        maxPixel = Buf.Y[index][0];
+        }
+    if (!xLim)
+        {
+        if (maxPixel < Buf.Y[index + 1][1])
             {
-            nxI = 0;
-            for (unsigned int xI = 0; xI < sizeX; xI += stride, ++nxI)
-                {
-
-#ifdef __HWC__
-                const unsigned int offsetY = nyI * newSizeX * sizeC + nxI * sizeC + cI;
-#else
-                const unsigned int offsetY = cI * newSizeY * newSizeX + nyI * newSizeX + nxI;
-#endif
-
-                const bool xBorder = xI + poolSize >= sizeX;
-                const bool yBorder = yI + poolSize >= sizeY;
-
-                const unsigned int xLim = xBorder ? sizeX - xI : poolSize;
-                const unsigned int yLim = yBorder ? sizeY - yI : poolSize;
-
-                Y[offsetY] = T(0, 0);
-                for (unsigned int yO = 0; yO < yLim; ++yO)
-                    {
-                    for (unsigned int xO = 0; xO < xLim; ++xO)
-                        {
-                        if (Y[offsetY] < T(xO, yO))
-                            {
-                            Y[offsetY] = T(xO, yO);
-                            }
-                        }
-                    }
-                }
-
+            maxPixel = Buf.Y[index + 1][1];
             }
         }
-#undef T
+    if (!yLim)
+        {
+        if (maxPixel < Buf.Y[index + (sizeX / BLOCK_WIDTH)][2])
+            {
+            maxPixel = Buf.Y[index + (sizeX / BLOCK_WIDTH)][2];
+            }
+        }
+    if (!xLim && !yLim)
+        {
+        if (maxPixel < Buf.Y[index + (sizeX / BLOCK_WIDTH) + 1][3])
+            {
+            maxPixel = Buf.Y[index + (sizeX / BLOCK_WIDTH) + 1][3];
+            }
+        }
+
+    return maxPixel;
 }
+
+void maxPooling1_apply(ac_channel<maxPool1_line_In_t> &I, ac_channel<maxPool1_line_Out_t> &Y);
+void maxPooling2_apply(ac_channel<maxPool2_line_In_t> &I, ac_channel<maxPool2_line_Out_t> &Y);
+void maxPooling3_apply(ac_channel<maxPool3_line_In_t> &I, ac_channel<maxPool3_line_Out_t> &Y);
 
 #endif // MAXPOOLING_H
